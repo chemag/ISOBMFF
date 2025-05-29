@@ -25,8 +25,8 @@ TEST_F(ISOBMFFTYPTest, TestFTYPParser) {
       // // ftyp
       // 0x66, 0x74, 0x79, 0x70,
       // ftyp content
-      0x6d, 0x70, 0x34, 0x32, 
-      0x00, 0x00, 0x00, 0x00, 
+      0x6d, 0x70, 0x34, 0x32,
+      0x00, 0x00, 0x00, 0x00,
       0x69, 0x73, 0x6f, 0x6d,
       0x6d, 0x70, 0x34, 0x32
       };
@@ -47,7 +47,7 @@ TEST_F(ISOBMFFTYPTest, TestFTYPParser) {
   // Validate FTYP box
   auto ftyp = std::dynamic_pointer_cast<ISOBMFF::FTYP>(box);
   EXPECT_TRUE(ftyp != nullptr);
-  
+
   // Validate major brand
   EXPECT_EQ(ftyp->GetMajorBrand(), "mp42");
 
