@@ -29,19 +29,19 @@ TEST_F(ISOBMFFMDHDTest, TestMDHDParser) {
       0x00, 0x00, 0x00, 0x00, 0xe4, 0x00, 0xb3, 0x34,
       0xe4, 0x00, 0xb3, 0x34, 0x00, 0x01, 0x5f, 0x90,
       0x00, 0x01, 0xef, 0x13, 0x00, 0x00, 0x00, 0x00,
-    };
+  };
 
   // fuzzer::conv: begin
   ISOBMFF::BinaryDataStream stream(buffer);
   ISOBMFF::Parser parser;
   std::shared_ptr<ISOBMFF::Box> box = parser.CreateBox("mdhd");
 
-  try {
-    if (box != nullptr) {
-      box->ReadData(parser, stream);
-    }
-  } catch (std::exception &e) {
-    fprintf(stderr, "Caught exception: %s\n", e.what());
+  ISOBMFF::Error error;
+  if (box != nullptr) {
+    error = box->ReadData(parser, stream);
+  }
+  if (error) {
+    fprintf(stderr, "Parse error: %s\n", error.GetMessage().c_str());
   }
   // fuzzer::conv: end
 

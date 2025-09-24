@@ -31,19 +31,19 @@ public:
       0x00, 0x00, 0x00, 0x0c,
       0x75, 0x72, 0x6c, 0x20,
       0x00, 0x00, 0x00, 0x01
-    };
+  };
 
   // fuzzer::conv: begin
   ISOBMFF::BinaryDataStream stream(buffer);
   ISOBMFF::Parser parser;
   std::shared_ptr<ISOBMFF::Box> box = parser.CreateBox("dref");
 
-  try {
-    if (box != nullptr) {
-      box->ReadData(parser, stream);
-    }
-  } catch (std::exception &e) {
-    fprintf(stderr, "Caught exception: %s\n", e.what());
+  ISOBMFF::Error error;
+  if (box != nullptr) {
+    error = box->ReadData(parser, stream);
+  }
+  if (error) {
+    fprintf(stderr, "Parse error: %s\n", error.GetMessage().c_str());
   }
   // fuzzer::conv: end
 
@@ -64,9 +64,9 @@ public:
       ASSERT_NE(urlBox, nullptr) << "Failed to cast to URL box";
       EXPECT_EQ(urlBox->GetVersion(), 0) << "Unexpected URL box version";
       EXPECT_EQ(urlBox->GetFlags(), 1) << "Unexpected URL box flags";
-    } else {
+  } else {
       FAIL() << "Unexpected sub-box type: " << type;
-    }
+  }
   }
 }
 } // namespace

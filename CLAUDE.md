@@ -68,9 +68,13 @@ The library implements parsers for 60+ box types, including:
 ### 1. Extensible Box Registration
 The parser allows custom box types to be registered dynamically:
 ```cpp
-parser.RegisterBox("abcd", []() -> std::shared_ptr<CustomBox> {
+ISOBMFF::Error error = parser.RegisterBox("abcd", []() -> std::shared_ptr<CustomBox> {
     return std::make_shared<CustomBox>();
 });
+if (error) {
+  // Handle registration error
+  std::cerr << "Box registration failed: " << error.GetMessage() << std::endl;
+}
 ```
 
 ### 2. Type-Safe Box Retrieval
@@ -169,12 +173,11 @@ Command-line tool for analyzing ISO media files (`tools/main.cpp`):
 // Create parser
 ISOBMFF::Parser parser;
 
-// Parse file
-try {
-    parser.Parse("video.mp4");
-} catch(const std::runtime_error& e) {
-    std::cerr << e.what() << std::endl;
-    return -1;
+// Parse file (returns Error code)
+ISOBMFF::Error error = parser.Parse("video.mp4");
+if (error) {
+  std::cerr << "Parse error: " << error.GetMessage() << std::endl;
+  return -1;
 }
 
 // Get file object
@@ -206,6 +209,36 @@ Based on git history:
 3. **Type-safe casting** - Custom casting utilities (`Casts.hpp`)
 4. **Stream abstraction** - Unified interface for file and memory-based parsing
 5. **Displayable objects** - Consistent interface for debugging and inspection via `DisplayableObject` and `DisplayableObjectContainer`
+6. **Error Code Pattern** - All functions return `ISOBMFF::Error`, with output parameters passed by reference. It does not use exceptions
+
+## Error Handling Design
+
+The library has been refactored to use **error codes instead of exceptions**. Key changes:
+
+### API Pattern Changes:
+- **OLD**: `value = stream.ReadUInt8();` (throws on error)
+- **NEW**: `Error err = stream.ReadUInt8(value);` (returns error, value as output parameter)
+
+### Function Signatures:
+```cpp
+// BinaryStream read functions
+Error ReadUInt8(uint8_t& value);
+Error ReadBigEndianUInt16(uint16_t& value);
+Error Read(std::vector<uint8_t>& data, size_t size);
+
+// Parser functions
+Error Parse(const std::string& path);
+Error RegisterBox(const std::string& type, const std::function<std::shared_ptr<Box>()>& createBox);
+
+// Box ReadData functions
+Error ReadData(Parser& parser, BinaryStream& stream) override;
+```
+
+### Benefits:
+- **No exception handling required** - simpler error management
+- **Consistent error reporting** - all functions use the same pattern
+- **Better debugging** - explicit error checking at each step
+- **Performance** - no exception overhead
 
 ## Limitations
 

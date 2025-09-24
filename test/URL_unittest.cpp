@@ -27,19 +27,19 @@ TEST_F(ISOBMFFURLTest, TestURLParser) {
       // 0x75, 0x72, 0x6c, 0x20,
       // url  content:
       0x00, 0x00, 0x00, 0x01,
-    };
+  };
 
   // fuzzer::conv: begin
   ISOBMFF::BinaryDataStream stream(buffer);
   ISOBMFF::Parser parser;
   std::shared_ptr<ISOBMFF::Box> box = parser.CreateBox("url ");
 
-  try {
-    if (box != nullptr) {
-      box->ReadData(parser, stream);
-    }
-  } catch (std::exception &e) {
-    fprintf(stderr, "Caught exception: %s\n", e.what());
+  ISOBMFF::Error error;
+  if (box != nullptr) {
+    error = box->ReadData(parser, stream);
+  }
+  if (error) {
+    fprintf(stderr, "Parse error: %s\n", error.GetMessage().c_str());
   }
   // fuzzer::conv: end
 

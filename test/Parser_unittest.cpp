@@ -327,10 +327,9 @@ TEST_F(ISOBMFFParserTest, TestSampleVideo) {
   };
   // fuzzer::conv: begin
   ISOBMFF::Parser parser;
-  try {
-    parser.Parse(buffer);
-  } catch (std::exception &e) {
-    fprintf(stderr, "Caught exception: %s\n", e.what());
+  ISOBMFF::Error error = parser.Parse(buffer);
+  if (error) {
+    fprintf(stderr, "Parse error: %s\n", error.GetMessage().c_str());
   }
   // fuzzer::conv: end
 

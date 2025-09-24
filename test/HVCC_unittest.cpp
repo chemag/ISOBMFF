@@ -42,19 +42,19 @@ TEST_F(ISOBMFFHVCCTest, TestHVCCParser) {
       0xcd, 0x65, 0x00, 0x17, 0x68, 0x50, 0x94, 0xa2,
       0x00, 0x01, 0x00, 0x0b, 0x44, 0x01, 0xc0, 0xe3,
       0x0f, 0x09, 0xc1, 0x50, 0xaf, 0xb0, 0x84
-    };
+  };
 
   // fuzzer::conv: begin
   ISOBMFF::BinaryDataStream stream(buffer);
   ISOBMFF::Parser parser;
   std::shared_ptr<ISOBMFF::Box> box = parser.CreateBox("hvcC");
 
-  try {
-    if (box != nullptr) {
-      box->ReadData(parser, stream);
-    }
-  } catch (std::exception &e) {
-    fprintf(stderr, "Caught exception: %s\n", e.what());
+  ISOBMFF::Error error;
+  if (box != nullptr) {
+    error = box->ReadData(parser, stream);
+  }
+  if (error) {
+    fprintf(stderr, "Parse error: %s\n", error.GetMessage().c_str());
   }
   // fuzzer::conv: end
 

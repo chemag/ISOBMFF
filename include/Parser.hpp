@@ -128,15 +128,15 @@ class ISOBMFF_EXPORT Parser {
    *              the parser will invoke the lambda to create a new
    *              object of the correct type.
    */
-  void RegisterBox(const std::string& type,
-                   const std::function<std::shared_ptr<Box>()>& createBox);
+  Error RegisterBox(const std::string& type,
+                     const std::function<std::shared_ptr<Box>()>& createBox);
 
   /*!
    * @function    RegisterContainerBox
    * @abstract    Registers a custom box type as a container box.
    * @param       type    The custom box type (four character string).
    */
-  void RegisterContainerBox(const std::string& type);
+  Error RegisterContainerBox(const std::string& type);
 
   /*!
    * @function    CreateBox

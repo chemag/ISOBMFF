@@ -50,7 +50,12 @@ HVCC::Array::NALUnit::NALUnit(BinaryStream& stream)
   uint16_t size;
 
   Error err = stream.ReadBigEndianUInt16(size);
-  if (!err && size > 0) {
+  if (err) {
+    this->SetData(data);
+    return;
+  }
+
+  if (size > 0) {
     data = std::vector<uint8_t>(size);
     err = stream.Read(&(data[0]), size);
   }

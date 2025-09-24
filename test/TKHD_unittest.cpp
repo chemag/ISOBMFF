@@ -37,19 +37,19 @@ TEST_F(ISOBMFFTKHDTest, TestTKHDParser) {
       0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
       0x40, 0x00, 0x00, 0x00, 0x06, 0xc0, 0x00, 0x00,
       0x09, 0x00, 0x00, 0x00
-    };
+  };
 
   // fuzzer::conv: begin
   ISOBMFF::BinaryDataStream stream(buffer);
   ISOBMFF::Parser parser;
   std::shared_ptr<ISOBMFF::Box> box = parser.CreateBox("tkhd");
 
-  try {
-    if (box != nullptr) {
-      box->ReadData(parser, stream);
-    }
-  } catch (std::exception &e) {
-    fprintf(stderr, "Caught exception: %s\n", e.what());
+  ISOBMFF::Error error;
+  if (box != nullptr) {
+    error = box->ReadData(parser, stream);
+  }
+  if (error) {
+    fprintf(stderr, "Parse error: %s\n", error.GetMessage().c_str());
   }
   // fuzzer::conv: end
 

@@ -78,9 +78,9 @@ class Parser::IMPL {
   IMPL(const IMPL& o);
   ~IMPL();
 
-  void RegisterBox(const std::string& type,
-                   const std::function<std::shared_ptr<Box>()>& createBox);
-  void RegisterContainerBox(const std::string& type);
+  Error RegisterBox(const std::string& type,
+                    const std::function<std::shared_ptr<Box>()>& createBox);
+  Error RegisterContainerBox(const std::string& type);
   void RegisterDefaultBoxes();
 
   std::shared_ptr<File> _file;
@@ -126,14 +126,14 @@ void swap(Parser& o1, Parser& o2) {
   swap(o1.impl, o2.impl);
 }
 
-void Parser::RegisterContainerBox(const std::string& type) {
-  this->impl->RegisterContainerBox(type);
+Error Parser::RegisterContainerBox(const std::string& type) {
+  return this->impl->RegisterContainerBox(type);
 }
 
-void Parser::RegisterBox(
+Error Parser::RegisterBox(
     const std::string& type,
     const std::function<std::shared_ptr<Box>()>& createBox) {
-  this->impl->RegisterBox(type, createBox);
+  return this->impl->RegisterBox(type, createBox);
 }
 
 std::shared_ptr<Box> Parser::CreateBox(const std::string& type) const {
@@ -252,17 +252,18 @@ Parser::IMPL::IMPL(const IMPL& o)
 
 Parser::IMPL::~IMPL() {}
 
-void Parser::IMPL::RegisterBox(
+Error Parser::IMPL::RegisterBox(
     const std::string& type,
     const std::function<std::shared_ptr<Box>()>& createBox) {
   if (type.size() != 4) {
-    throw std::runtime_error("Box name should be 4 characters long");
+    return Error(ErrorCode::InvalidBoxData, "Box name should be 4 characters long");
   }
 
   this->_types[type] = createBox;
+  return Error();
 }
 
-void Parser::IMPL::RegisterContainerBox(const std::string& type) {
+Error Parser::IMPL::RegisterContainerBox(const std::string& type) {
   return this->RegisterBox(type, [=]() -> std::shared_ptr<Box> {
     return std::make_shared<ContainerBox>(type);
   });

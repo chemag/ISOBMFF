@@ -35,19 +35,19 @@ TEST_F(ISOBMFFMP4ATest, TestMP4AParser) {
       0x15, 0x00, 0x03, 0x00, 0x00, 0x01, 0xf4, 0x00,
       0x00, 0x01, 0xf4, 0x00, 0x05, 0x02, 0x11, 0x90,
       0x06, 0x01, 0x02
-    };
+  };
 
   // fuzzer::conv: begin
   ISOBMFF::BinaryDataStream stream(buffer);
   ISOBMFF::Parser parser;
   std::shared_ptr<ISOBMFF::Box> box = parser.CreateBox("mp4a");
 
-  try {
-    if (box != nullptr) {
-      box->ReadData(parser, stream);
-    }
-  } catch (std::exception &e) {
-    fprintf(stderr, "Caught exception: %s\n", e.what());
+  ISOBMFF::Error error;
+  if (box != nullptr) {
+    error = box->ReadData(parser, stream);
+  }
+  if (error) {
+    fprintf(stderr, "Parse error: %s\n", error.GetMessage().c_str());
   }
   // fuzzer::conv: end
 

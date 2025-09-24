@@ -77,24 +77,23 @@ Parsing is done with the `ISOBMFF::Parser` class:
 ```cpp
 ISOBMFF::Parser parser;
 
-try
-{
-    parser.Parse( "path/to/some/file" );
+ISOBMFF::Error error = parser.Parse("path/to/some/file");
+if (error) {
+  // Handle error
+  std::cerr << "Error: " << error.GetMessage() << std::endl;
 }
-catch( ... )
-{}
 ```
 
 When the parser is done, an instance of `ISOBMFF::File` can be retrieved:
 
 ```cpp
-std::shared_ptr< ISOBMFF::File > file = parser.GetFile();
+std::shared_ptr<ISOBMFF::File> file = parser.GetFile();
 ```
 
 Boxes can then be retrieved the following way, from the file:
 
 ```cpp
-std::shared_ptr< ISOBMFF::Box > box = file->GetBox( "ftyp" );
+std::shared_ptr<ISOBMFF::Box> box = file->GetBox("ftyp");
 ```
     
 If the box does not exist, it will return `nullptr`.
@@ -102,7 +101,7 @@ If the box does not exist, it will return `nullptr`.
 A typed box can be retrieved the following way:
 
 ```cpp
-std::shared_ptr< ISOBMFF::FTYP > ftyp = file->GetTypedBox< ISOBMFF::FTYP >( "ftyp" );
+std::shared_ptr<ISOBMFF::FTYP> ftyp = file->GetTypedBox<ISOBMFF::FTYP>("ftyp");
 ```
 
 Here, `nullptr` will be returned if the box does not exist, or is not of the correct type.
@@ -110,14 +109,18 @@ Here, `nullptr` will be returned if the box does not exist, or is not of the cor
 Container boxes acts just the same:
 
 ```cpp
-std::shared_ptr< ISOBMFF::ContainerBox > moov = file->GetTypedBox< ISOBMFF::ContainerBox >( "moov" );
-std::shared_ptr< ISOBMFF::MVHD         > mvhd = moov->GetTypedBox< ISOBMFF::MVHD         >( "mvhd" );
+std::shared_ptr<ISOBMFF::ContainerBox> moov = file->GetTypedBox<ISOBMFF::ContainerBox>("moov");
+std::shared_ptr<ISOBMFF::MVHD> mvhd = moov->GetTypedBox<ISOBMFF::MVHD>("mvhd");
 ```
 
 The parser also supports custom boxes:
 
 ```cpp
-parser.RegisterBox( "abcd", [ = ]() -> std::shared_ptr< CustomBox > { return std::make_shared< CustomBox >(); } );
+ISOBMFF::Error error = parser.RegisterBox("abcd", [ = ]() -> std::shared_ptr<CustomBox> { return std::make_shared<CustomBox>(); });
+if (error) {
+  // Handle registration error
+  std::cerr << "Box registration error: " << error.GetMessage() << std::endl;
+}
 ```
 
 It will then create an instance of `CustomBox` when encountering an `abcd` box somewhere in the file.
@@ -125,23 +128,20 @@ It will then create an instance of `CustomBox` when encountering an `abcd` box s
 The custom class needs at least to inherit from `Box`:
 
 ```cpp
-class CustomBox: public ISOBMFF::Box
-{
-    public:
+class CustomBox: public ISOBMFF::Box {
+public:
         
-        CustomBox(): Box( "abcd" )
-        {}
+  CustomBox(): Box("abcd") {}
         
-        void CustomBox::ReadData( Parser & parser, BinaryStream & stream )
-        {
-            /* Read box data here... */
-        }
+  ISOBMFF::Error ReadData(Parser & parser, BinaryStream & stream) override {
+    /* Read box data here and return Error() on success or actual error */
+    return ISOBMFF::Error();
+  }
         
-        std::vector< std::pair< std::string, std::string > > CustomBox::GetDisplayableProperties() const
-        {
-            /* Returns box properties, to support output... */
-            return {};
-        }
+  std::vector<std::pair<std::string, std::string>> CustomBox::GetDisplayableProperties() const {
+    /* Returns box properties, to support output... */
+    return {};
+  }
 };
 ```
 

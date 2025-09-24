@@ -49,7 +49,12 @@ AVCC::NALUnit::NALUnit(BinaryStream& stream) : impl(std::make_unique<IMPL>()) {
   uint16_t nal_unit_length;
 
   Error err = stream.ReadBigEndianUInt16(nal_unit_length);
-  if (!err && nal_unit_length > 0) {
+  if (err) {
+    this->SetData(data);
+    return;
+  }
+
+  if (nal_unit_length > 0) {
     data = std::vector<uint8_t>(nal_unit_length);
     err = stream.Read(&(data[0]), nal_unit_length);
   }

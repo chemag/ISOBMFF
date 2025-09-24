@@ -40,12 +40,12 @@ TEST_F(ISOBMFFMetaTest, TestMetaParser) {
   ISOBMFF::BinaryDataStream stream(buffer);
   ISOBMFF::Parser parser;
   std::shared_ptr<ISOBMFF::Box> box = parser.CreateBox("meta");
-  try {
-    if (box != nullptr) {
-      box->ReadData(parser, stream);
-    }
-  } catch (std::exception &e) {
-    fprintf(stderr, "Caught exception: %s\n", e.what());
+  ISOBMFF::Error error;
+  if (box != nullptr) {
+    error = box->ReadData(parser, stream);
+  }
+  if (error) {
+    fprintf(stderr, "Parse error: %s\n", error.GetMessage().c_str());
   }
   // fuzzer::conv: end
 
@@ -60,19 +60,19 @@ TEST_F(ISOBMFFMetaTest, TestMetaParser) {
     if (name.compare("hdlr") == 0) {
       auto HDLR = std::dynamic_pointer_cast<ISOBMFF::HDLR>(subbox);
       EXPECT_TRUE(HDLR != nullptr);
-    }
+  }
 
     if (name.compare("keys") == 0) {
       auto data = subbox->GetData();
       size_t length = data.size();
       EXPECT_EQ(length, 35);
-    }
+  }
 
     if (name.compare("ilst") == 0) {
       auto data = subbox->GetData();
       size_t length = data.size();
       EXPECT_EQ(length, 26);
-    }
+  }
   }
 }
 } // namespace ISOBMFF
