@@ -80,15 +80,18 @@ namespace ISOBMFF
         swap( o1.impl, o2.impl );
     }
 
-    void IROT::ReadData( Parser & parser, BinaryStream & stream )
+    Error IROT::ReadData( Parser & parser, BinaryStream & stream )
     {
+        Error err;
         uint8_t u8;
 
         ( void )parser;
 
-        u8 = stream.ReadUInt8();
+        err = stream.ReadUInt8( u8 );
+        if( err ) return err;
 
         this->SetAngle( u8 & 0x3 );
+        return Error();
     }
 
     std::vector< std::pair< std::string, std::string > > IROT::GetDisplayableProperties() const

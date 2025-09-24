@@ -50,7 +50,7 @@ namespace ISOBMFF
 
             MVHD & operator =( MVHD o );
 
-            void                                                 ReadData( Parser & parser, BinaryStream & stream ) override;
+            Error                                                 ReadData( Parser & parser, BinaryStream & stream ) override;
             std::vector< std::pair< std::string, std::string > > GetDisplayableProperties() const override;
 
             uint64_t GetCreationTime()     const;

@@ -89,44 +89,91 @@ namespace ISOBMFF
         swap( o1.impl, o2.impl );
     }
 
-    void HVC1::ReadData( Parser & parser, BinaryStream & stream )
+    Error HVC1::ReadData( Parser & parser, BinaryStream & stream )
     {
         ContainerBox container( "????" );
+        Error err;
 
-        // SampleEntry
-        // reserved[]
-        stream.ReadUInt8();
-        stream.ReadUInt8();
-        stream.ReadUInt8();
-        stream.ReadUInt8();
-        stream.ReadUInt8();
-        stream.ReadUInt8();
-        // data_reference_index
-        this->SetDataReferenceIndex( stream.ReadBigEndianUInt16() );
-        // VisualSampleEntry
-        // pre_defined1
-        stream.ReadBigEndianUInt16();
-        // reserved1
-        stream.ReadBigEndianUInt16();
-        // pre_defined2
-        stream.ReadBigEndianUInt32();
-        stream.ReadBigEndianUInt32();
-        stream.ReadBigEndianUInt32();
-        this->SetWidth( stream.ReadBigEndianUInt16() );
-        this->SetHeight( stream.ReadBigEndianUInt16() );
-        this->SetHorizResolution( stream.ReadBigEndianUInt32() );
-        this->SetVertResolution( stream.ReadBigEndianUInt32() );
-        // reserved2
-        stream.ReadBigEndianUInt32();
-        this->SetFrameCount( stream.ReadBigEndianUInt16() );
-        this->SetCompressorName( stream.ReadString(32) );
-        this->SetDepth( stream.ReadBigEndianUInt16() );
-        // pre_defined3
-        stream.ReadBigEndianUInt16();
+        uint8_t temp8;
+        err = stream.ReadUInt8( temp8 );
+        if( err ) return err;
+        err = stream.ReadUInt8( temp8 );
+        if( err ) return err;
+        err = stream.ReadUInt8( temp8 );
+        if( err ) return err;
+        err = stream.ReadUInt8( temp8 );
+        if( err ) return err;
+        err = stream.ReadUInt8( temp8 );
+        if( err ) return err;
+        err = stream.ReadUInt8( temp8 );
+        if( err ) return err;
 
-        container.ReadData( parser, stream );
+        uint16_t dataReferenceIndex;
+        err = stream.ReadBigEndianUInt16( dataReferenceIndex );
+        if( err ) return err;
+        this->SetDataReferenceIndex( dataReferenceIndex );
+
+        uint16_t temp16;
+        err = stream.ReadBigEndianUInt16( temp16 );
+        if( err ) return err;
+        err = stream.ReadBigEndianUInt16( temp16 );
+        if( err ) return err;
+
+        uint32_t temp32;
+        err = stream.ReadBigEndianUInt32( temp32 );
+        if( err ) return err;
+        err = stream.ReadBigEndianUInt32( temp32 );
+        if( err ) return err;
+        err = stream.ReadBigEndianUInt32( temp32 );
+        if( err ) return err;
+
+        uint16_t width;
+        err = stream.ReadBigEndianUInt16( width );
+        if( err ) return err;
+        this->SetWidth( width );
+
+        uint16_t height;
+        err = stream.ReadBigEndianUInt16( height );
+        if( err ) return err;
+        this->SetHeight( height );
+
+        uint32_t horizResolution;
+        err = stream.ReadBigEndianUInt32( horizResolution );
+        if( err ) return err;
+        this->SetHorizResolution( horizResolution );
+
+        uint32_t vertResolution;
+        err = stream.ReadBigEndianUInt32( vertResolution );
+        if( err ) return err;
+        this->SetVertResolution( vertResolution );
+
+        err = stream.ReadBigEndianUInt32( temp32 );
+        if( err ) return err;
+
+        uint16_t frameCount;
+        err = stream.ReadBigEndianUInt16( frameCount );
+        if( err ) return err;
+        this->SetFrameCount( frameCount );
+
+        std::string compressorName;
+        err = stream.ReadString( compressorName, 32 );
+        if( err ) return err;
+        this->SetCompressorName( compressorName );
+
+        uint16_t depth;
+        err = stream.ReadBigEndianUInt16( depth );
+        if( err ) return err;
+        this->SetDepth( depth );
+
+        err = stream.ReadBigEndianUInt16( temp16 );
+        if( err ) return err;
+
+        err = container.ReadData( parser, stream );
+        if( err ) return err;
 
         this->impl->_boxes = container.GetBoxes();
+
+        return Error();
     }
 
     std::vector< std::pair< std::string, std::string > > HVC1::GetDisplayableProperties() const

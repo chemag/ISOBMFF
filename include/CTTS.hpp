@@ -50,7 +50,7 @@ namespace ISOBMFF
 
             CTTS & operator =( CTTS o );
 
-            void                                                 ReadData( Parser & parser, BinaryStream & stream ) override;
+            Error                                                 ReadData( Parser & parser, BinaryStream & stream ) override;
             std::vector< std::pair< std::string, std::string > > GetDisplayableProperties() const override;
 
             size_t   GetEntryCount()                 const;

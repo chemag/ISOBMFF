@@ -79,19 +79,24 @@ namespace ISOBMFF
         swap( o1.impl, o2.impl );
     }
 
-    void IPMA::ReadData( Parser & parser, BinaryStream & stream )
+    Error IPMA::ReadData( Parser & parser, BinaryStream & stream )
     {
         uint32_t count;
         uint32_t i;
+        Error err;
 
-        FullBox::ReadData( parser, stream );
+        err = FullBox::ReadData( parser, stream );
+        if( err ) return err;
 
-        count = stream.ReadBigEndianUInt32();
+        err = stream.ReadBigEndianUInt32( count );
+        if( err ) return err;
 
         for( i = 0; i < count; i++ )
         {
             this->AddEntry( std::make_shared< Entry >( stream, *( this ) ) );
         }
+
+        return Error();
     }
 
     void IPMA::WriteDescription( std::ostream & os, std::size_t indentLevel ) const

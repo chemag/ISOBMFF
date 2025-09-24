@@ -56,14 +56,19 @@ namespace ISOBMFF
 
         if( ipma.GetVersion() < 1 )
         {
-            this->SetItemID( stream.ReadBigEndianUInt16() );
+            uint16_t temp;
+            Error err = stream.ReadBigEndianUInt16( temp );
+            if( !err ) this->SetItemID( temp );
         }
         else
         {
-            this->SetItemID( stream.ReadBigEndianUInt32() );
+            uint32_t temp;
+            Error err = stream.ReadBigEndianUInt32( temp );
+            if( !err ) this->SetItemID( temp );
         }
 
-        count = stream.ReadUInt8();
+        Error err = stream.ReadUInt8( count );
+        if( err ) count = 0;
 
         for( i = 0; i < count; i++ )
         {

@@ -52,7 +52,7 @@ namespace ISOBMFF
 
             ContainerBox & operator =( ContainerBox o );
 
-            void ReadData( Parser & parser, BinaryStream & stream ) override;
+            Error ReadData( Parser & parser, BinaryStream & stream ) override;
             void WriteDescription( std::ostream & os, std::size_t indentLevel ) const override;
 
             void                                  AddBox( std::shared_ptr< Box > box ) override;

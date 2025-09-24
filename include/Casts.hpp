@@ -1,18 +1,18 @@
 /*******************************************************************************
  * The MIT License (MIT)
- * 
+ *
  * Copyright (c) 2017 DigiDNA - www.digidna.net
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -33,7 +33,7 @@
 
 #include <type_traits>
 #include <limits>
-#include <stdexcept>
+#include <Error.hpp>
 
 namespace ISOBMFF
 {
@@ -50,16 +50,18 @@ namespace ISOBMFF
         >
         ::type * = nullptr
     >
-    T numeric_cast( U v )
+    Error numeric_cast( T & result, U v )
     {
         if( ( std::numeric_limits< T >::max )() < ( std::numeric_limits< U >::max )() && v > ( std::numeric_limits< T >::max )() )
         {
-            throw std::runtime_error( "Bad numeric cast" );
+            result = T();
+            return Error( ErrorCode::BadNumericCast, "Bad numeric cast - value too large" );
         }
-        
-        return static_cast< T >( v );
+
+        result = static_cast< T >( v );
+        return Error();
     }
-    
+
     template
     <
         typename T,
@@ -73,21 +75,24 @@ namespace ISOBMFF
         >
         ::type * = nullptr
     >
-    T numeric_cast( U v )
+    Error numeric_cast( T & result, U v )
     {
         if( ( std::numeric_limits< T >::max )() < ( std::numeric_limits< U >::max )() && v > ( std::numeric_limits< T >::max )() )
         {
-            throw std::runtime_error( "Bad numeric cast" );
+            result = T();
+            return Error( ErrorCode::BadNumericCast, "Bad numeric cast - value too large" );
         }
-        
+
         if( ( std::numeric_limits< T >::min )() > ( std::numeric_limits< U >::min )() && v < ( std::numeric_limits< T >::min )() )
         {
-            throw std::runtime_error( "Bad numeric cast" );
+            result = T();
+            return Error( ErrorCode::BadNumericCast, "Bad numeric cast - value too small" );
         }
-        
-        return static_cast< T >( v );
+
+        result = static_cast< T >( v );
+        return Error();
     }
-    
+
     template
     <
         typename T,
@@ -101,16 +106,18 @@ namespace ISOBMFF
         >
         ::type * = nullptr
     >
-    T numeric_cast( U v )
+    Error numeric_cast( T & result, U v )
     {
         if( static_cast< typename std::make_unsigned< T >::type >( ( std::numeric_limits< T >::max )() ) < ( std::numeric_limits< U >::max )() && v > static_cast< typename std::make_unsigned< T >::type >( ( std::numeric_limits< T >::max )() ) )
         {
-            throw std::runtime_error( "Bad numeric cast" );
+            result = T();
+            return Error( ErrorCode::BadNumericCast, "Bad numeric cast - value too large" );
         }
-        
-        return static_cast< T >( v );
+
+        result = static_cast< T >( v );
+        return Error();
     }
-    
+
     template
     <
         typename T,
@@ -124,21 +131,24 @@ namespace ISOBMFF
         >
         ::type * = nullptr
     >
-    T numeric_cast( U v )
+    Error numeric_cast( T & result, U v )
     {
         if( v < 0 )
         {
-            throw std::runtime_error( "Bad numeric cast" );
+            result = T();
+            return Error( ErrorCode::BadNumericCast, "Bad numeric cast - negative value" );
         }
-        
+
         if( ( std::numeric_limits< T >::max )() < static_cast< typename std::make_unsigned< U >::type >( ( std::numeric_limits< U >::max )() ) && static_cast< typename std::make_unsigned< U >::type >( v ) > ( std::numeric_limits< T >::max )() )
         {
-            throw std::runtime_error( "Bad numeric cast" );
+            result = T();
+            return Error( ErrorCode::BadNumericCast, "Bad numeric cast - value too large" );
         }
-        
-        return static_cast< T >( v );
+
+        result = static_cast< T >( v );
+        return Error();
     }
-    
+
     template
     <
         typename T,
@@ -151,21 +161,24 @@ namespace ISOBMFF
         >
         ::type * = nullptr
     >
-    T numeric_cast( U v )
+    Error numeric_cast( T & result, U v )
     {
         if( v < 0 )
         {
-            throw std::runtime_error( "Bad numeric cast" );
+            result = T();
+            return Error( ErrorCode::BadNumericCast, "Bad numeric cast - negative value" );
         }
-        
+
         if( v > ( std::numeric_limits< T >::max )() )
         {
-            throw std::runtime_error( "Bad numeric cast" );
+            result = T();
+            return Error( ErrorCode::BadNumericCast, "Bad numeric cast - value too large" );
         }
-        
-        return static_cast< T >( v );
+
+        result = static_cast< T >( v );
+        return Error();
     }
-    
+
     template
     <
         typename T,
@@ -178,21 +191,24 @@ namespace ISOBMFF
         >
         ::type * = nullptr
     >
-    T numeric_cast( U v )
+    Error numeric_cast( T & result, U v )
     {
         if( v > ( std::numeric_limits< T >::max )() )
         {
-            throw std::runtime_error( "Bad numeric cast" );
+            result = T();
+            return Error( ErrorCode::BadNumericCast, "Bad numeric cast - value too large" );
         }
-        
+
         if( v < ( std::numeric_limits< T >::min )() )
         {
-            throw std::runtime_error( "Bad numeric cast" );
+            result = T();
+            return Error( ErrorCode::BadNumericCast, "Bad numeric cast - value too small" );
         }
-        
-        return static_cast< T >( v );
+
+        result = static_cast< T >( v );
+        return Error();
     }
-    
+
     template
     <
         typename T,
@@ -204,9 +220,10 @@ namespace ISOBMFF
         >
         ::type * = nullptr
     >
-    T numeric_cast( U v )
+    Error numeric_cast( T & result, U v )
     {
-        return static_cast< T >( v );
+        result = static_cast< T >( v );
+        return Error();
     }
 }
 

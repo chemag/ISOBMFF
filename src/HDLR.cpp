@@ -85,17 +85,27 @@ namespace ISOBMFF
         swap( o1.impl, o2.impl );
     }
 
-    void HDLR::ReadData( Parser & parser, BinaryStream & stream )
+    Error HDLR::ReadData( Parser & parser, BinaryStream & stream )
     {
-        FullBox::ReadData( parser, stream );
+        Error err;
 
-        this->impl->_predefined = stream.ReadBigEndianUInt32();
+        err = FullBox::ReadData( parser, stream );
+        if( err ) return err;
 
-        this->SetHandlerType( stream.ReadFourCC() );
+        err = stream.ReadBigEndianUInt32( this->impl->_predefined );
+        if( err ) return err;
 
-        this->impl->_reserved[ 0 ] = stream.ReadBigEndianUInt32();
-        this->impl->_reserved[ 1 ] = stream.ReadBigEndianUInt32();
-        this->impl->_reserved[ 2 ] = stream.ReadBigEndianUInt32();
+        std::string tempStr;
+        err = stream.ReadFourCC( tempStr );
+        if( err ) return err;
+        this->SetHandlerType( tempStr );
+
+        err = stream.ReadBigEndianUInt32( this->impl->_reserved[ 0 ] );
+        if( err ) return err;
+        err = stream.ReadBigEndianUInt32( this->impl->_reserved[ 1 ] );
+        if( err ) return err;
+        err = stream.ReadBigEndianUInt32( this->impl->_reserved[ 2 ] );
+        if( err ) return err;
 
         if( stream.HasBytesAvailable() )
         {
@@ -106,17 +116,24 @@ namespace ISOBMFF
                 || this->impl->_reserved[ 0 ]      == 1634758764 /* appl */
             )
             {
-                this->SetHandlerName( stream.ReadPascalString() );
+                std::string handlerNameStr;
+                err = stream.ReadPascalString( handlerNameStr );
+                if( err ) return err;
+                this->SetHandlerName( handlerNameStr );
             }
             else
             {
-                this->SetHandlerName( stream.ReadNULLTerminatedString() );
+                std::string handlerNameStr;
+                err = stream.ReadNULLTerminatedString( handlerNameStr );
+                if( err ) return err;
+                this->SetHandlerName( handlerNameStr );
             }
         }
         else
         {
             this->SetHandlerName( "" );
         }
+        return Error();
     }
 
     std::vector< std::pair< std::string, std::string > > HDLR::GetDisplayableProperties() const

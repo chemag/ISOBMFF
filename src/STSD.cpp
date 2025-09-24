@@ -80,15 +80,24 @@ namespace ISOBMFF
         swap( o1.impl, o2.impl );
     }
 
-    void STSD::ReadData( Parser & parser, BinaryStream & stream )
+    Error STSD::ReadData( Parser & parser, BinaryStream & stream )
     {
         ContainerBox container( "????" );
+        Error err;
 
-        FullBox::ReadData( parser, stream );
-        stream.ReadBigEndianUInt32();
-        container.ReadData( parser, stream );
+        err = FullBox::ReadData( parser, stream );
+        if( err ) return err;
+
+        uint32_t temp;
+        err = stream.ReadBigEndianUInt32( temp );
+        if( err ) return err;
+
+        err = container.ReadData( parser, stream );
+        if( err ) return err;
 
         this->impl->_boxes = container.GetBoxes();
+
+        return Error();
     }
 
     void STSD::WriteDescription( std::ostream & os, std::size_t indentLevel ) const

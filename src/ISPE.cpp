@@ -80,12 +80,23 @@ namespace ISOBMFF
         swap( o1.impl, o2.impl );
     }
 
-    void ISPE::ReadData( Parser & parser, BinaryStream & stream )
+    Error ISPE::ReadData( Parser & parser, BinaryStream & stream )
     {
-        FullBox::ReadData( parser, stream );
+        Error err;
 
-        this->SetDisplayWidth( stream.ReadBigEndianUInt32() );
-        this->SetDisplayHeight( stream.ReadBigEndianUInt32() );
+        err = FullBox::ReadData( parser, stream );
+        if( err ) return err;
+
+        uint32_t displayWidth;
+        err = stream.ReadBigEndianUInt32( displayWidth );
+        if( err ) return err;
+        this->SetDisplayWidth( displayWidth );
+
+        uint32_t displayHeight;
+        err = stream.ReadBigEndianUInt32( displayHeight );
+        if( err ) return err;
+        this->SetDisplayHeight( displayHeight );
+        return Error();
     }
 
     std::vector< std::pair< std::string, std::string > > ISPE::GetDisplayableProperties() const

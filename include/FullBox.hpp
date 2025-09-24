@@ -49,7 +49,7 @@ namespace ISOBMFF
 
             FullBox & operator =( FullBox o );
 
-            void                                                 ReadData( Parser & parser, BinaryStream & stream ) override;
+            Error                                                ReadData( Parser & parser, BinaryStream & stream ) override;
             std::vector< std::pair< std::string, std::string > > GetDisplayableProperties() const override;
 
             uint8_t  GetVersion() const;

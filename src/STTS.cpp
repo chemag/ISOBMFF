@@ -83,17 +83,29 @@ namespace ISOBMFF
         swap( o1.impl, o2.impl );
     }
 
-    void STTS::ReadData( Parser & parser, BinaryStream & stream )
+    Error STTS::ReadData( Parser & parser, BinaryStream & stream )
     {
-        FullBox::ReadData( parser, stream );
+        Error err;
 
-        uint32_t entry_count = stream.ReadBigEndianUInt32();
+        err = FullBox::ReadData( parser, stream );
+        if( err ) return err;
+
+        uint32_t entry_count;
+        err = stream.ReadBigEndianUInt32( entry_count );
+        if( err ) return err;
 
         for( uint32_t i = 0; i < entry_count; i++ )
         {
-            this->impl->_sample_count.push_back(  stream.ReadBigEndianUInt32() );
-            this->impl->_sample_offset.push_back( stream.ReadBigEndianUInt32() );
+            uint32_t temp;
+            err = stream.ReadBigEndianUInt32( temp );
+            if( err ) return err;
+            this->impl->_sample_count.push_back( temp );
+
+            err = stream.ReadBigEndianUInt32( temp );
+            if( err ) return err;
+            this->impl->_sample_offset.push_back( temp );
         }
+        return Error();
     }
 
     std::vector< std::pair< std::string, std::string > > STTS::GetDisplayableProperties() const

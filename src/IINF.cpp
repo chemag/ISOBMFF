@@ -80,22 +80,29 @@ namespace ISOBMFF
         swap( o1.impl, o2.impl );
     }
 
-    void IINF::ReadData( Parser & parser, BinaryStream & stream )
+    Error IINF::ReadData( Parser & parser, BinaryStream & stream )
     {
         ContainerBox container( "????" );
+        Error err;
 
-        FullBox::ReadData( parser, stream );
+        err = FullBox::ReadData( parser, stream );
+        if( err ) return err;
 
         if( this->GetVersion() == 0 )
         {
-            stream.ReadBigEndianUInt16();
+            uint16_t temp;
+            err = stream.ReadBigEndianUInt16( temp );
+            if( err ) return err;
         }
         else
         {
-            stream.ReadBigEndianUInt32();
+            uint32_t temp;
+            err = stream.ReadBigEndianUInt32( temp );
+            if( err ) return err;
         }
 
-        container.ReadData( parser, stream );
+        err = container.ReadData( parser, stream );
+        if( err ) return err;
 
         this->impl->_entries.clear();
 
@@ -106,6 +113,8 @@ namespace ISOBMFF
                 this->AddEntry( std::dynamic_pointer_cast< INFE >( box ) );
             }
         }
+
+        return Error();
     }
 
     void IINF::WriteDescription( std::ostream & os, std::size_t indentLevel ) const

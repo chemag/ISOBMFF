@@ -81,11 +81,17 @@ namespace ISOBMFF
         swap( o1.impl, o2.impl );
     }
 
-    void FRMA::ReadData( Parser & parser, BinaryStream & stream )
+    Error FRMA::ReadData( Parser & parser, BinaryStream & stream )
     {
+        Error err;
+
         ( void )parser;
 
-        this->SetDataFormat( stream.ReadFourCC() );
+        std::string temp;
+        err = stream.ReadFourCC( temp );
+        if( err ) return err;
+        this->SetDataFormat( temp );
+        return Error();
     }
 
     std::vector< std::pair< std::string, std::string > > FRMA::GetDisplayableProperties() const

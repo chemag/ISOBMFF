@@ -55,22 +55,26 @@ namespace ISOBMFF
         {
             {
                 uint16_t u16;
-
-                u16 = stream.ReadBigEndianUInt16();
-
-                this->SetEssential( ( u16 >> 15 ) == 1 );
-                this->SetPropertyIndex( u16 & 0x7FFF );
+                Error err = stream.ReadBigEndianUInt16( u16 );
+                // Note: Constructor cannot return error, silently continue on error
+                if( !err )
+                {
+                    this->SetEssential( ( u16 >> 15 ) == 1 );
+                    this->SetPropertyIndex( u16 & 0x7FFF );
+                }
             }
         }
         else
         {
             {
                 uint8_t u8;
-
-                u8 = stream.ReadUInt8();
-
-                this->SetEssential( ( u8 >> 7 ) == 1 );
-                this->SetPropertyIndex( u8 & 0x7F );
+                Error err = stream.ReadUInt8( u8 );
+                // Note: Constructor cannot return error, silently continue on error
+                if( !err )
+                {
+                    this->SetEssential( ( u8 >> 7 ) == 1 );
+                    this->SetPropertyIndex( u8 & 0x7F );
+                }
             }
         }
     }

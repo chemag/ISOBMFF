@@ -90,21 +90,38 @@ namespace ISOBMFF
         swap( o1.impl, o2.impl );
     }
 
-    void AVCC::ReadData( Parser & parser, BinaryStream & stream )
+    Error AVCC::ReadData( Parser & parser, BinaryStream & stream )
     {
         uint8_t  u8;
         uint8_t  count;
         uint8_t  i;
+        Error    err;
 
         ( void )parser;
 
-        this->SetConfigurationVersion( stream.ReadUInt8() );
-        this->SetAVCProfileIndication( stream.ReadUInt8() );
-        this->SetProfileCompatibility( stream.ReadUInt8() );
-        this->SetAVCLevelIndication( stream.ReadUInt8() );
-        u8 = stream.ReadUInt8();
+        err = stream.ReadUInt8( u8 );
+        if( err ) return err;
+        this->SetConfigurationVersion( u8 );
+
+        err = stream.ReadUInt8( u8 );
+        if( err ) return err;
+        this->SetAVCProfileIndication( u8 );
+
+        err = stream.ReadUInt8( u8 );
+        if( err ) return err;
+        this->SetProfileCompatibility( u8 );
+
+        err = stream.ReadUInt8( u8 );
+        if( err ) return err;
+        this->SetAVCLevelIndication( u8 );
+
+        err = stream.ReadUInt8( u8 );
+        if( err ) return err;
+
         this->SetLengthSizeMinusOne( u8 & 0x3 );
-        u8 = stream.ReadUInt8();
+
+        err = stream.ReadUInt8( u8 );
+        if( err ) return err;
 
         this->SetNumOfSequenceParameterSets( u8 & 0x1f );
         count = this->GetNumOfSequenceParameterSets();
@@ -123,7 +140,10 @@ namespace ISOBMFF
             this->AddSequenceParameterSetNALUnit( std::make_shared< NALUnit >( stream ) );
         }
 
-        this->SetNumOfPictureParameterSets( stream.ReadUInt8() );
+        err = stream.ReadUInt8( u8 );
+        if( err ) return err;
+        this->SetNumOfPictureParameterSets( u8 );
+
         count = this->GetNumOfPictureParameterSets();
         for( i = 0; i < count; i++ )
         {
@@ -139,6 +159,8 @@ namespace ISOBMFF
 
             this->AddPictureParameterSetNALUnit( std::make_shared< NALUnit >( stream ) );
         }
+
+        return Error();
     }
 
     void AVCC::WriteDescription( std::ostream & os, std::size_t indentLevel ) const

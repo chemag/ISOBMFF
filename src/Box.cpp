@@ -84,12 +84,16 @@ namespace ISOBMFF
         return this->impl->_name;
     }
 
-    void Box::ReadData( Parser & parser, BinaryStream & stream )
+    Error Box::ReadData( Parser & parser, BinaryStream & stream )
     {
         ( void )parser;
 
-        this->impl->_data    = stream.ReadAllData();
+        Error err = stream.ReadAllData( this->impl->_data );
+        if( err ) return err;
+
         this->impl->_hasData = true;
+
+        return Error();
     }
 
     std::vector< uint8_t > Box::GetData() const

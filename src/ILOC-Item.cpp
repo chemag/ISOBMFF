@@ -59,34 +59,51 @@ namespace ISOBMFF
 
         if( iloc.GetVersion() < 2 )
         {
-            this->SetItemID( stream.ReadBigEndianUInt16() );
+            uint16_t temp;
+            Error err = stream.ReadBigEndianUInt16( temp );
+            if( !err ) this->SetItemID( temp );
         }
         else if( iloc.GetVersion() == 2 )
         {
-            this->SetItemID( stream.ReadBigEndianUInt32() );
+            uint32_t temp;
+            Error err = stream.ReadBigEndianUInt32( temp );
+            if( !err ) this->SetItemID( temp );
         }
 
         if( iloc.GetVersion() == 1 || iloc.GetVersion() == 2 )
         {
-            this->SetConstructionMethod( static_cast< uint8_t >( stream.ReadBigEndianUInt16() & 0xF ) );
+            uint16_t temp;
+            Error err = stream.ReadBigEndianUInt16( temp );
+            if( !err ) this->SetConstructionMethod( static_cast< uint8_t >( temp & 0xF ) );
         }
 
-        this->SetDataReferenceIndex( stream.ReadBigEndianUInt16() );
+        {
+            uint16_t temp;
+            Error err = stream.ReadBigEndianUInt16( temp );
+            if( !err ) this->SetDataReferenceIndex( temp );
+        }
 
         if( iloc.GetBaseOffsetSize() == 2 )
         {
-            this->SetBaseOffset( stream.ReadBigEndianUInt16() );
+            uint16_t temp;
+            Error err = stream.ReadBigEndianUInt16( temp );
+            if( !err ) this->SetBaseOffset( temp );
         }
         else if( iloc.GetBaseOffsetSize() == 4 )
         {
-            this->SetBaseOffset( stream.ReadBigEndianUInt32() );
+            uint32_t temp;
+            Error err = stream.ReadBigEndianUInt32( temp );
+            if( !err ) this->SetBaseOffset( temp );
         }
         else if( iloc.GetBaseOffsetSize() == 8 )
         {
-            this->SetBaseOffset( stream.ReadBigEndianUInt64() );
+            uint64_t temp;
+            Error err = stream.ReadBigEndianUInt64( temp );
+            if( !err ) this->SetBaseOffset( temp );
         }
 
-        count = stream.ReadBigEndianUInt16();
+        Error err = stream.ReadBigEndianUInt16( count );
+        if( err ) count = 0;
 
         this->impl->_extents.clear();
 

@@ -76,19 +76,21 @@ namespace ISOBMFF
         return *( this );
     }
 
-    void BinaryDataStream::Read( uint8_t * buf, size_t size )
+    Error BinaryDataStream::Read( uint8_t * buf, size_t size )
     {
         if( size > this->impl->_data.size() - this->impl->_pos )
         {
-            throw std::runtime_error( "Invalid read - Not enough data available" );
+            return Error( ErrorCode::InsufficientData, "Invalid read - Not enough data available" );
         }
 
         memcpy( buf, &( this->impl->_data[ 0 ] ) + this->impl->_pos, size );
 
         this->impl->_pos += size;
+
+        return Error();
     }
 
-    void BinaryDataStream::Seek( std::streamoff offset, SeekDirection dir )
+    Error BinaryDataStream::Seek( std::streamoff offset, SeekDirection dir )
     {
         size_t pos;
 
@@ -96,35 +98,54 @@ namespace ISOBMFF
         {
             if( offset < 0 )
             {
-                throw std::runtime_error( "Invalid seek offset" );
+                return Error( ErrorCode::InvalidSeekOffset, "Invalid seek offset" );
             }
 
-            pos = numeric_cast< size_t >( offset );
+            Error err;
+            err = numeric_cast< size_t >( pos, offset );
+            if( err ) return err;
         }
         else if( dir == SeekDirection::End )
         {
             if( offset > 0 )
             {
-                throw std::runtime_error( "Invalid seek offset" );
+                return Error( ErrorCode::InvalidSeekOffset, "Invalid seek offset" );
             }
 
-            pos = this->impl->_data.size() - numeric_cast< size_t >( std::abs( offset ) );
+            Error err;
+            size_t abs_offset;
+            err = numeric_cast< size_t >( abs_offset, std::abs( offset ) );
+            if( err ) return err;
+
+            pos = this->impl->_data.size() - abs_offset;
         }
         else if( offset < 0 )
         {
-            pos = this->impl->_pos - numeric_cast< size_t >( std::abs( offset ) );
+            Error err;
+            size_t abs_offset;
+            err = numeric_cast< size_t >( abs_offset, std::abs( offset ) );
+            if( err ) return err;
+
+            pos = this->impl->_pos - abs_offset;
         }
         else
         {
-            pos = this->impl->_pos + numeric_cast< size_t >( offset );
+            Error err;
+            size_t offset_val;
+            err = numeric_cast< size_t >( offset_val, offset );
+            if( err ) return err;
+
+            pos = this->impl->_pos + offset_val;
         }
 
         if( pos > this->impl->_data.size() )
         {
-            throw std::runtime_error( "Invalid seek offset" );
+            return Error( ErrorCode::InvalidSeekOffset, "Invalid seek offset" );
         }
 
         this->impl->_pos = pos;
+
+        return Error();
     }
 
     size_t BinaryDataStream::Tell() const

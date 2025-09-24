@@ -83,31 +83,39 @@ namespace ISOBMFF
         swap( o1.impl, o2.impl );
     }
 
-    void ILOC::ReadData( Parser & parser, BinaryStream & stream )
+    Error ILOC::ReadData( Parser & parser, BinaryStream & stream )
     {
         uint8_t  u8;
         uint32_t count;
         uint32_t i;
+        Error err;
 
-        FullBox::ReadData( parser, stream );
+        err = FullBox::ReadData( parser, stream );
+        if( err ) return err;
 
-        u8 = stream.ReadUInt8();
+        err = stream.ReadUInt8( u8 );
+        if( err ) return err;
 
         this->SetOffsetSize( u8 >> 4 );
         this->SetLengthSize( u8 & 0xF );
 
-        u8 = stream.ReadUInt8();
+        err = stream.ReadUInt8( u8 );
+        if( err ) return err;
 
         this->SetBaseOffsetSize( u8 >> 4 );
         this->SetIndexSize( u8 & 0xF );
 
         if( this->GetVersion() < 2 )
         {
-            count = stream.ReadBigEndianUInt16();
+            uint16_t temp16;
+            err = stream.ReadBigEndianUInt16( temp16 );
+            if( err ) return err;
+            count = temp16;
         }
         else
         {
-            count = stream.ReadBigEndianUInt32();
+            err = stream.ReadBigEndianUInt32( count );
+            if( err ) return err;
         }
 
         this->impl->_items.clear();
@@ -116,6 +124,8 @@ namespace ISOBMFF
         {
             this->AddItem( std::make_shared< Item >( stream, *( this ) ) );
         }
+
+        return Error();
     }
 
     void ILOC::WriteDescription( std::ostream & os, std::size_t indentLevel ) const

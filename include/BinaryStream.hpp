@@ -38,6 +38,7 @@
 #include <Casts.hpp>
 #include <Macros.hpp>
 #include <Matrix.hpp>
+#include <Error.hpp>
 
 namespace ISOBMFF
 {
@@ -54,57 +55,65 @@ namespace ISOBMFF
 
             virtual ~BinaryStream() = default;
 
-            virtual void   Read( uint8_t * buf, size_t size )               = 0;
+            virtual Error  Read( uint8_t * buf, size_t size )               = 0;
             virtual size_t Tell()                                     const = 0;
-            virtual void   Seek( std::streamoff offset, SeekDirection dir ) = 0;
+            virtual Error  Seek( std::streamoff offset, SeekDirection dir ) = 0;
 
             bool   HasBytesAvailable();
             size_t AvailableBytes();
 
-            void Seek( std::streamoff offset );
+            Error Seek( std::streamoff offset );
 
             template< typename T, typename std::enable_if< std::is_integral< T >::value && std::is_unsigned< T >::value >::type * = nullptr >
-            void Seek( T offset )
+            Error Seek( T offset )
             {
-                this->Seek( numeric_cast< std::streamoff >( offset ) );
+                Error err;
+                std::streamoff off;
+                err = numeric_cast< std::streamoff >( off, offset );
+                if( err ) return err;
+                return this->Seek( off );
             }
 
             template< typename T, typename std::enable_if< std::is_integral< T >::value && std::is_unsigned< T >::value >::type * = nullptr >
-            void Seek( T offset, SeekDirection dir )
+            Error Seek( T offset, SeekDirection dir )
             {
-                this->Seek( numeric_cast< std::streamoff >( offset ), dir );
+                Error err;
+                std::streamoff off;
+                err = numeric_cast< std::streamoff >( off, offset );
+                if( err ) return err;
+                return this->Seek( off, dir );
             }
 
-            void Get( uint8_t * buf, uint64_t pos, size_t length );
+            Error Get( uint8_t * buf, uint64_t pos, size_t length );
 
-            std::vector< uint8_t > Read( size_t size );
-            std::vector< uint8_t > ReadAllData();
+            Error Read( std::vector< uint8_t > & data, size_t size );
+            Error ReadAllData( std::vector< uint8_t > & data );
 
-            uint8_t ReadUInt8();
-            int8_t  ReadInt8();
+            Error ReadUInt8( uint8_t & value );
+            Error ReadInt8( int8_t & value );
 
-            uint16_t ReadUInt16();
-            uint16_t ReadBigEndianUInt16();
-            uint16_t ReadLittleEndianUInt16();
+            Error ReadUInt16( uint16_t & value );
+            Error ReadBigEndianUInt16( uint16_t & value );
+            Error ReadLittleEndianUInt16( uint16_t & value );
 
-            uint32_t ReadUInt32();
-            uint32_t ReadBigEndianUInt32();
-            uint32_t ReadLittleEndianUInt32();
-            int32_t ReadBigEndianInt32();
+            Error ReadUInt32( uint32_t & value );
+            Error ReadBigEndianUInt32( uint32_t & value );
+            Error ReadLittleEndianUInt32( uint32_t & value );
+            Error ReadBigEndianInt32( int32_t & value );
 
-            uint64_t ReadUInt64();
-            uint64_t ReadBigEndianUInt64();
-            uint64_t ReadLittleEndianUInt64();
+            Error ReadUInt64( uint64_t & value );
+            Error ReadBigEndianUInt64( uint64_t & value );
+            Error ReadLittleEndianUInt64( uint64_t & value );
 
-            float ReadBigEndianFixedPoint( unsigned int integerLength, unsigned int fractionalLength );
-            float ReadLittleEndianFixedPoint( unsigned int integerLength, unsigned int fractionalLength );
+            Error ReadBigEndianFixedPoint( float & value, unsigned int integerLength, unsigned int fractionalLength );
+            Error ReadLittleEndianFixedPoint( float & value, unsigned int integerLength, unsigned int fractionalLength );
 
-            std::string ReadFourCC();
-            std::string ReadPascalString();
-            std::string ReadString( size_t length );
-            std::string ReadNULLTerminatedString();
+            Error ReadFourCC( std::string & value );
+            Error ReadPascalString( std::string & value );
+            Error ReadString( std::string & value, size_t length );
+            Error ReadNULLTerminatedString( std::string & value );
 
-            Matrix ReadMatrix();
+            Error ReadMatrix( Matrix & value );
     };
 }
 

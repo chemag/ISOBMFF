@@ -23,55 +23,76 @@
  ******************************************************************************/
 
 /*!
- * @header      FTYP.hpp
+ * @header      Error.hpp
  * @copyright   (c) 2017, DigiDNA - www.digidna.net
  * @author      Jean-David Gadina - www.digidna.net
  */
 
-#ifndef ISOBMFF_FTYP_HPP
-#define ISOBMFF_FTYP_HPP
+#ifndef ISOBMFF_ERROR_HPP
+#define ISOBMFF_ERROR_HPP
 
-#include <memory>
-#include <algorithm>
-#include <Macros.hpp>
-#include <Box.hpp>
 #include <string>
-#include <vector>
-#include <cstdint>
+#include <Macros.hpp>
 
 namespace ISOBMFF
 {
-    class ISOBMFF_EXPORT FTYP: public Box
+    enum class ErrorCode
+    {
+        Success = 0,
+        InvalidFileStream,
+        InvalidReadSize,
+        InvalidSeekOffset,
+        InsufficientData,
+        BadNumericCast,
+        CannotReadFile,
+        NotISOMediaFile,
+        InvalidBoxData,
+        GenericError
+    };
+
+    class ISOBMFF_EXPORT Error
     {
         public:
+            Error();
+            Error( ErrorCode code );
+            Error( ErrorCode code, const std::string & message );
 
-            FTYP();
-            FTYP( const FTYP & o );
-            FTYP( FTYP && o ) noexcept;
-            virtual ~FTYP() override;
+            bool IsError() const;
+            ErrorCode GetCode() const;
+            std::string GetMessage() const;
 
-            FTYP & operator =( FTYP o );
-
-            Error                                                 ReadData( Parser & parser, BinaryStream & stream ) override;
-            std::vector< std::pair< std::string, std::string > > GetDisplayableProperties() const override;
-
-            std::string                GetMajorBrand()       const;
-            uint32_t                   GetMinorVersion()     const;
-            std::vector< std::string > GetCompatibleBrands() const;
-
-            void SetMajorBrand( const std::string & value );
-            void SetMinorVersion( uint32_t value );
-            void SetCompatibleBrands( const std::vector< std::string > & value );
-            void AddCompatibleBrand( const std::string & value );
-
-            ISOBMFF_EXPORT friend void swap( FTYP & o1, FTYP & o2 );
+            explicit operator bool() const;
 
         private:
-
-            class IMPL;
-
-            std::unique_ptr< IMPL > impl;
+            ErrorCode _code;
+            std::string _message;
     };
+
+    inline Error::Error() : _code( ErrorCode::Success ), _message( "" ) {}
+
+    inline Error::Error( ErrorCode code ) : _code( code ), _message( "" ) {}
+
+    inline Error::Error( ErrorCode code, const std::string & message ) : _code( code ), _message( message ) {}
+
+    inline bool Error::IsError() const
+    {
+        return _code != ErrorCode::Success;
+    }
+
+    inline ErrorCode Error::GetCode() const
+    {
+        return _code;
+    }
+
+    inline std::string Error::GetMessage() const
+    {
+        return _message;
+    }
+
+    inline Error::operator bool() const
+    {
+        return IsError();
+    }
 }
 
-#endif /* ISOBMFF_FTYP_HPP */
+#endif /* ISOBMFF_ERROR_HPP */

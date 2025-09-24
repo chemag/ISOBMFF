@@ -86,26 +86,58 @@ namespace ISOBMFF
         swap( o1.impl, o2.impl );
     }
 
-    void INFE::ReadData( Parser & parser, BinaryStream & stream )
+    Error INFE::ReadData( Parser & parser, BinaryStream & stream )
     {
-        FullBox::ReadData( parser, stream );
+        Error err;
+
+        err = FullBox::ReadData( parser, stream );
+        if( err ) return err;
 
         if( this->GetVersion() == 0 || this->GetVersion() == 1 )
         {
-            this->SetItemID( stream.ReadBigEndianUInt16() );
-            this->SetItemProtectionIndex( stream.ReadBigEndianUInt16() );
+            uint16_t itemID;
+            err = stream.ReadBigEndianUInt16( itemID );
+            if( err ) return err;
+            this->SetItemID( itemID );
+
+            uint16_t itemProtectionIndex;
+            err = stream.ReadBigEndianUInt16( itemProtectionIndex );
+            if( err ) return err;
+            this->SetItemProtectionIndex( itemProtectionIndex );
 
             if( parser.GetPreferredStringType() == Parser::StringType::Pascal )
             {
-                this->SetItemName( stream.ReadPascalString() );
-                this->SetContentType( stream.ReadPascalString() );
-                this->SetContentEncoding( stream.ReadPascalString() );
+                std::string itemName;
+                err = stream.ReadPascalString( itemName );
+                if( err ) return err;
+                this->SetItemName( itemName );
+
+                std::string contentType;
+                err = stream.ReadPascalString( contentType );
+                if( err ) return err;
+                this->SetContentType( contentType );
+
+                std::string contentEncoding;
+                err = stream.ReadPascalString( contentEncoding );
+                if( err ) return err;
+                this->SetContentEncoding( contentEncoding );
             }
             else
             {
-                this->SetItemName( stream.ReadNULLTerminatedString() );
-                this->SetContentType( stream.ReadNULLTerminatedString() );
-                this->SetContentEncoding( stream.ReadNULLTerminatedString() );
+                std::string itemName;
+                err = stream.ReadNULLTerminatedString( itemName );
+                if( err ) return err;
+                this->SetItemName( itemName );
+
+                std::string contentType;
+                err = stream.ReadNULLTerminatedString( contentType );
+                if( err ) return err;
+                this->SetContentType( contentType );
+
+                std::string contentEncoding;
+                err = stream.ReadNULLTerminatedString( contentEncoding );
+                if( err ) return err;
+                this->SetContentEncoding( contentEncoding );
             }
         }
 
@@ -138,41 +170,75 @@ namespace ISOBMFF
         {
             if( this->GetVersion() == 2 )
             {
-                this->SetItemID( stream.ReadBigEndianUInt16() );
+                uint16_t itemID;
+                err = stream.ReadBigEndianUInt16( itemID );
+                if( err ) return err;
+                this->SetItemID( itemID );
             }
             else if( this->GetVersion() == 3 )
             {
-                this->SetItemID( stream.ReadBigEndianUInt32() );
+                uint32_t itemID;
+                err = stream.ReadBigEndianUInt32( itemID );
+                if( err ) return err;
+                this->SetItemID( itemID );
             }
 
-            this->SetItemProtectionIndex( stream.ReadBigEndianUInt16() );
-            this->SetItemType( stream.ReadFourCC() );
+            uint16_t itemProtectionIndex;
+            err = stream.ReadBigEndianUInt16( itemProtectionIndex );
+            if( err ) return err;
+            this->SetItemProtectionIndex( itemProtectionIndex );
+
+            std::string itemType;
+            err = stream.ReadFourCC( itemType );
+            if( err ) return err;
+            this->SetItemType( itemType );
 
             if( parser.GetPreferredStringType() == Parser::StringType::Pascal )
             {
                 if( this->GetItemType() == "mime" )
                 {
-                    this->SetContentType( stream.ReadPascalString() );
-                    this->SetContentEncoding( stream.ReadPascalString() );
+                    std::string contentType;
+                    err = stream.ReadPascalString( contentType );
+                    if( err ) return err;
+                    this->SetContentType( contentType );
+
+                    std::string contentEncoding;
+                    err = stream.ReadPascalString( contentEncoding );
+                    if( err ) return err;
+                    this->SetContentEncoding( contentEncoding );
                 }
                 else if( this->GetItemType() == "uri " )
                 {
-                    this->SetItemURIType( stream.ReadPascalString() );
+                    std::string itemURIType;
+                    err = stream.ReadPascalString( itemURIType );
+                    if( err ) return err;
+                    this->SetItemURIType( itemURIType );
                 }
             }
             else
             {
                 if( this->GetItemType() == "mime" )
                 {
-                    this->SetContentType( stream.ReadNULLTerminatedString() );
-                    this->SetContentEncoding( stream.ReadNULLTerminatedString() );
+                    std::string contentType;
+                    err = stream.ReadNULLTerminatedString( contentType );
+                    if( err ) return err;
+                    this->SetContentType( contentType );
+
+                    std::string contentEncoding;
+                    err = stream.ReadNULLTerminatedString( contentEncoding );
+                    if( err ) return err;
+                    this->SetContentEncoding( contentEncoding );
                 }
                 else if( this->GetItemType() == "uri " )
                 {
-                    this->SetItemURIType( stream.ReadNULLTerminatedString() );
+                    std::string itemURIType;
+                    err = stream.ReadNULLTerminatedString( itemURIType );
+                    if( err ) return err;
+                    this->SetItemURIType( itemURIType );
                 }
             }
         }
+        return Error();
     }
 
     std::vector< std::pair< std::string, std::string > > INFE::GetDisplayableProperties() const

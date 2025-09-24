@@ -218,22 +218,19 @@ int main( int argc, char *const * argv )
         }
         
         stream.close();
-        
-        try
+
+        ISOBMFF::Error err = parser.Parse( path );
+        if( err )
         {
-            parser.Parse( path );
-        }
-        catch( const std::runtime_error & e )
-        {
-            std::cerr << e.what() << std::endl;
+            std::cerr << "Parse error: " << err.GetMessage() << std::endl;
 
             #if defined( _WIN32 ) && defined( _DEBUG )
             getchar();
             #endif
-            
+
             return EXIT_FAILURE;
         }
-        
+
         if ( options->analyze_flag )
         {
             std::cout << *( parser.GetFile() ) << std::endl << std::endl;

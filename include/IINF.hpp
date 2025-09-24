@@ -52,7 +52,7 @@ namespace ISOBMFF
 
             IINF & operator =( IINF o );
 
-            void ReadData( Parser & parser, BinaryStream & stream ) override;
+            Error ReadData( Parser & parser, BinaryStream & stream ) override;
             void WriteDescription( std::ostream & os, std::size_t indentLevel ) const override;
 
             void                                   AddEntry( std::shared_ptr< INFE > entry );

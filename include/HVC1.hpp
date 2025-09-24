@@ -51,7 +51,7 @@ namespace ISOBMFF
 
             HVC1 & operator =( HVC1 o );
 
-            void ReadData( Parser & parser, BinaryStream & stream ) override;
+            Error ReadData( Parser & parser, BinaryStream & stream ) override;
             void WriteDescription( std::ostream & os, std::size_t indentLevel ) const override;
 
             std::vector< std::pair< std::string, std::string > > GetDisplayableProperties() const override;

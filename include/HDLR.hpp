@@ -50,7 +50,7 @@ namespace ISOBMFF
 
             HDLR & operator =( HDLR o );
 
-            void                                                 ReadData( Parser & parser, BinaryStream & stream ) override;
+            Error                                                 ReadData( Parser & parser, BinaryStream & stream ) override;
             std::vector< std::pair< std::string, std::string > > GetDisplayableProperties() const override;
 
             std::string GetHandlerType() const;

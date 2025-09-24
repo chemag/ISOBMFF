@@ -86,25 +86,48 @@ namespace ISOBMFF
         swap( o1.impl, o2.impl );
     }
 
-    void COLR::ReadData( Parser & parser, BinaryStream & stream )
+    Error COLR::ReadData( Parser & parser, BinaryStream & stream )
     {
-        this->SetColourType( stream.ReadFourCC() );
+        Error err;
+
+        std::string tempStr;
+        err = stream.ReadFourCC( tempStr );
+        if( err ) return err;
+        this->SetColourType( tempStr );
 
         if( this->GetColourType() == "nclx" )
         {
-            this->SetColourPrimaries( stream.ReadBigEndianUInt16() );
-            this->SetTransferCharacteristics( stream.ReadBigEndianUInt16() );
-            this->SetMatrixCoefficients( stream.ReadBigEndianUInt16() );
-            this->SetFullRangeFlag( ( stream.ReadUInt8() & 0x80 ) != 0 );
+            uint16_t temp16;
+            err = stream.ReadBigEndianUInt16( temp16 );
+            if( err ) return err;
+            this->SetColourPrimaries( temp16 );
+
+            err = stream.ReadBigEndianUInt16( temp16 );
+            if( err ) return err;
+            this->SetTransferCharacteristics( temp16 );
+
+            err = stream.ReadBigEndianUInt16( temp16 );
+            if( err ) return err;
+            this->SetMatrixCoefficients( temp16 );
+
+            uint8_t temp8;
+            err = stream.ReadUInt8( temp8 );
+            if( err ) return err;
+            this->SetFullRangeFlag( ( temp8 & 0x80 ) != 0 );
         }
         else if( this->GetColourType() == "rICC" || this->GetColourType() == "prof" )
         {
-            this->SetICCProfile( stream.ReadAllData() );
+            std::vector< uint8_t > iccProfile;
+            err = stream.ReadAllData( iccProfile );
+            if( err ) return err;
+            this->SetICCProfile( iccProfile );
         }
         else
         {
-            Box::ReadData( parser, stream );
+            err = Box::ReadData( parser, stream );
+            if( err ) return err;
         }
+        return Error();
     }
 
     std::vector< std::pair< std::string, std::string > > COLR::GetDisplayableProperties() const

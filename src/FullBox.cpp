@@ -82,16 +82,20 @@ namespace ISOBMFF
         swap( o1.impl, o2.impl );
     }
 
-    void FullBox::ReadData( Parser & parser, BinaryStream & stream )
+    Error FullBox::ReadData( Parser & parser, BinaryStream & stream )
     {
         uint32_t vf;
 
         ( void )parser;
 
-        vf = stream.ReadBigEndianUInt32();
+        Error err;
+        err = stream.ReadBigEndianUInt32( vf );
+        if( err ) return err;
 
         this->SetVersion( static_cast< uint8_t >( vf >> 24 ) );
         this->SetFlags( vf & 0x00FFFFFF );
+
+        return Error();
     }
 
     std::vector< std::pair< std::string, std::string > > FullBox::GetDisplayableProperties() const

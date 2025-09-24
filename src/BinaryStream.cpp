@@ -49,222 +49,223 @@ namespace ISOBMFF
 
         pos = this->Tell();
 
-        this->Seek( numeric_cast< std::streamoff >( cur ), SeekDirection::Begin );
+        Error err;
+        std::streamoff offset;
+        err = numeric_cast< std::streamoff >( offset, cur );
+        if( !err )
+        {
+            this->Seek( offset, SeekDirection::Begin );
+        }
 
         return pos - cur;
     }
 
-    void BinaryStream::Seek( std::streamoff offset )
+    Error BinaryStream::Seek( std::streamoff offset )
     {
-        this->Seek( offset, SeekDirection::Current );
+        return this->Seek( offset, SeekDirection::Current );
     }
 
-    void BinaryStream::Get( uint8_t * buf, uint64_t pos, size_t length )
+    Error BinaryStream::Get( uint8_t * buf, uint64_t pos, size_t length )
     {
         size_t cur = this->Tell();
 
-        this->Seek( pos, SeekDirection::Current );
-        this->Read( buf, length );
-        this->Seek( cur, SeekDirection::Begin );
+        Error err = this->Seek( pos, SeekDirection::Current );
+        if( err ) return err;
+
+        err = this->Read( buf, length );
+        if( err ) return err;
+
+        return this->Seek( cur, SeekDirection::Begin );
     }
 
-    std::vector< uint8_t > BinaryStream::Read( size_t size )
+    Error BinaryStream::Read( std::vector< uint8_t > & data, size_t size )
     {
         if (size > AvailableBytes())
         {
-            throw std::runtime_error("Insufficient data available for read");
+            data = std::vector< uint8_t >();
+            return Error( ErrorCode::InsufficientData, "Insufficient data available for read" );
         }
 
-        std::vector< uint8_t > data( size, 0 );
+        data = std::vector< uint8_t >( size, 0 );
 
         if( size > 0 )
         {
-            this->Read( &( data[ 0 ] ), size );
+            Error err = this->Read( &( data[ 0 ] ), size );
+            if( err )
+            {
+                data = std::vector< uint8_t >();
+                return err;
+            }
         }
 
-        return data;
+        return Error();
     }
 
-    std::vector< uint8_t > BinaryStream::ReadAllData()
+    Error BinaryStream::ReadAllData( std::vector< uint8_t > & data )
     {
-        return this->Read( this->AvailableBytes() );
+        return this->Read( data, this->AvailableBytes() );
     }
 
-    uint8_t BinaryStream::ReadUInt8()
+    Error BinaryStream::ReadUInt8( uint8_t & value )
     {
-        uint8_t n;
-
-        n = 0;
-
-        this->Read( reinterpret_cast< uint8_t * >( &n ), 1 );
-
-        return n;
+        Error err = this->Read( reinterpret_cast< uint8_t * >( &value ), 1 );
+        if( err ) value = 0;
+        return err;
     }
 
-    int8_t BinaryStream::ReadInt8()
+    Error BinaryStream::ReadInt8( int8_t & value )
     {
-        int8_t n;
-
-        n = 0;
-
-        this->Read( reinterpret_cast< uint8_t * >( &n ), 1 );
-
-        return n;
+        Error err = this->Read( reinterpret_cast< uint8_t * >( &value ), 1 );
+        if( err ) value = 0;
+        return err;
     }
 
-    uint16_t BinaryStream::ReadUInt16()
+    Error BinaryStream::ReadUInt16( uint16_t & value )
     {
-        uint16_t n;
-
-        n = 0;
-
-        this->Read( reinterpret_cast< uint8_t * >( &n ), 2 );
-
-        return n;
+        Error err = this->Read( reinterpret_cast< uint8_t * >( &value ), 2 );
+        if( err ) value = 0;
+        return err;
     }
 
-    uint16_t BinaryStream::ReadBigEndianUInt16()
+    Error BinaryStream::ReadBigEndianUInt16( uint16_t & value )
     {
-        uint8_t  c[ 2 ];
-        uint16_t n;
+        uint8_t  c[ 2 ] = { 0, 0 };
         uint16_t n1;
         uint16_t n2;
 
-        c[ 0 ] = 0;
-        c[ 1 ] = 0;
+        Error err = this->Read( reinterpret_cast< uint8_t * >( c ), 2 );
+        if( err )
+        {
+            value = 0;
+            return err;
+        }
 
-        this->Read( reinterpret_cast< uint8_t * >( c ), 2 );
+        numeric_cast< uint16_t >( n1, c[ 0 ] );
+        numeric_cast< uint16_t >( n2, c[ 1 ] );
 
-        n1 = numeric_cast< uint16_t >( c[ 0 ] );
-        n2 = numeric_cast< uint16_t >( c[ 1 ] );
+        uint16_t tmp;
+        numeric_cast< uint16_t >( tmp, n1 << 8 );
+        value = tmp | n2;
 
-        n  = numeric_cast< uint16_t >( n1 << 8 )
-           | n2;
-
-        return n;
+        return Error();
     }
 
-    uint16_t BinaryStream::ReadLittleEndianUInt16()
+    Error BinaryStream::ReadLittleEndianUInt16( uint16_t & value )
     {
-        uint8_t  c[ 2 ];
-        uint16_t n;
+        uint8_t  c[ 2 ] = { 0, 0 };
         uint16_t n1;
         uint16_t n2;
 
-        c[ 0 ] = 0;
-        c[ 1 ] = 0;
+        Error err = this->Read( reinterpret_cast< uint8_t * >( c ), 2 );
+        if( err )
+        {
+            value = 0;
+            return err;
+        }
 
-        this->Read( reinterpret_cast< uint8_t * >( c ), 2 );
+        numeric_cast< uint16_t >( n1, c[ 1 ] );
+        numeric_cast< uint16_t >( n2, c[ 0 ] );
 
-        n1 = numeric_cast< uint16_t >( c[ 1 ] );
-        n2 = numeric_cast< uint16_t >( c[ 0 ] );
+        uint16_t tmp;
+        numeric_cast< uint16_t >( tmp, n1 << 8 );
+        value = tmp | n2;
 
-        n  = numeric_cast< uint16_t >( n1 << 8 )
-           | n2;
-
-        return n;
+        return Error();
     }
 
-    uint32_t BinaryStream::ReadUInt32()
+    Error BinaryStream::ReadUInt32( uint32_t & value )
     {
-        uint32_t n;
-
-        n = 0;
-
-        this->Read( reinterpret_cast< uint8_t * >( &n ), 4 );
-
-        return n;
+        Error err = this->Read( reinterpret_cast< uint8_t * >( &value ), 4 );
+        if( err ) value = 0;
+        return err;
     }
 
-    uint32_t BinaryStream::ReadBigEndianUInt32()
+    Error BinaryStream::ReadBigEndianUInt32( uint32_t & value )
     {
-        uint8_t  c[ 4 ];
-        uint32_t n;
+        uint8_t  c[ 4 ] = { 0, 0, 0, 0 };
         uint32_t n1;
         uint32_t n2;
         uint32_t n3;
         uint32_t n4;
 
-        c[ 0 ] = 0;
-        c[ 1 ] = 0;
-        c[ 2 ] = 0;
-        c[ 3 ] = 0;
+        Error err = this->Read( reinterpret_cast< uint8_t * >( c ), 4 );
+        if( err )
+        {
+            value = 0;
+            return err;
+        }
 
-        this->Read( reinterpret_cast< uint8_t * >( c ), 4 );
+        numeric_cast< uint32_t >( n1, c[ 0 ] );
+        numeric_cast< uint32_t >( n2, c[ 1 ] );
+        numeric_cast< uint32_t >( n3, c[ 2 ] );
+        numeric_cast< uint32_t >( n4, c[ 3 ] );
 
-        n1 = numeric_cast< uint32_t >( c[ 0 ] );
-        n2 = numeric_cast< uint32_t >( c[ 1 ] );
-        n3 = numeric_cast< uint32_t >( c[ 2 ] );
-        n4 = numeric_cast< uint32_t >( c[ 3 ] );
+        uint32_t tmp1, tmp2, tmp3;
+        numeric_cast< uint32_t >( tmp1, n1 << 24 );
+        numeric_cast< uint32_t >( tmp2, n2 << 16 );
+        numeric_cast< uint32_t >( tmp3, n3 << 8 );
+        value  = tmp1 | tmp2 | tmp3 | n4;
 
-        n  = numeric_cast< uint32_t >( n1 << 24 )
-           | numeric_cast< uint32_t >( n2 << 16 )
-           | numeric_cast< uint32_t >( n3 << 8 )
-           | n4;
-
-        return n;
+        return Error();
     }
 
-    int32_t BinaryStream::ReadBigEndianInt32()
+    Error BinaryStream::ReadBigEndianInt32( int32_t & value )
     {
-        // read the value as uint
-        uint32_t uint_value = ReadBigEndianUInt32();
-        // cast it to int
-        // extract the sign bit
+        uint32_t uint_value;
+        Error err = ReadBigEndianUInt32( uint_value );
+        if( err )
+        {
+            value = 0;
+            return err;
+        }
         int32_t sign_bit = (uint_value & 0x80000000) ? -1 : 0;
-        // Convert the uint32_t to int32_t
         int32_t int_value = (int32_t)(uint_value & 0x7FFFFFFF);
-        // Apply the sign bit
         if (sign_bit == -1) {
             int_value = -int_value;
         }
-        return int_value;
+        value = int_value;
+        return Error();
     }
 
-    uint32_t BinaryStream::ReadLittleEndianUInt32()
+    Error BinaryStream::ReadLittleEndianUInt32( uint32_t & value )
     {
-        uint8_t  c[ 4 ];
-        uint32_t n;
+        uint8_t  c[ 4 ] = { 0, 0, 0, 0 };
         uint32_t n1;
         uint32_t n2;
         uint32_t n3;
         uint32_t n4;
 
-        c[ 0 ] = 0;
-        c[ 1 ] = 0;
-        c[ 2 ] = 0;
-        c[ 3 ] = 0;
+        Error err = this->Read( reinterpret_cast< uint8_t * >( c ), 4 );
+        if( err )
+        {
+            value = 0;
+            return err;
+        }
 
-        this->Read( reinterpret_cast< uint8_t * >( c ), 4 );
+        numeric_cast< uint32_t >( n1, c[ 3 ] );
+        numeric_cast< uint32_t >( n2, c[ 2 ] );
+        numeric_cast< uint32_t >( n3, c[ 1 ] );
+        numeric_cast< uint32_t >( n4, c[ 0 ] );
 
-        n1 = numeric_cast< uint32_t >( c[ 3 ] );
-        n2 = numeric_cast< uint32_t >( c[ 2 ] );
-        n3 = numeric_cast< uint32_t >( c[ 1 ] );
-        n4 = numeric_cast< uint32_t >( c[ 0 ] );
+        uint32_t tmp1, tmp2, tmp3;
+        numeric_cast< uint32_t >( tmp1, n1 << 24 );
+        numeric_cast< uint32_t >( tmp2, n2 << 16 );
+        numeric_cast< uint32_t >( tmp3, n3 << 8 );
+        value  = tmp1 | tmp2 | tmp3 | n4;
 
-        n  = numeric_cast< uint32_t >( n1 << 24 )
-           | numeric_cast< uint32_t >( n2 << 16 )
-           | numeric_cast< uint32_t >( n3 << 8 )
-           | n4;
-
-        return n;
+        return Error();
     }
 
-    uint64_t BinaryStream::ReadUInt64()
+    Error BinaryStream::ReadUInt64( uint64_t & value )
     {
-        uint64_t n;
-
-        n = 0;
-
-        this->Read( reinterpret_cast< uint8_t * >( &n ), 8 );
-
-        return n;
+        Error err = this->Read( reinterpret_cast< uint8_t * >( &value ), 8 );
+        if( err ) value = 0;
+        return err;
     }
 
-    uint64_t BinaryStream::ReadBigEndianUInt64()
+    Error BinaryStream::ReadBigEndianUInt64( uint64_t & value )
     {
-        uint8_t  c[ 8 ];
-        uint64_t n;
+        uint8_t  c[ 8 ] = { 0, 0, 0, 0, 0, 0, 0, 0 };
         uint64_t n1;
         uint64_t n2;
         uint64_t n3;
@@ -274,42 +275,38 @@ namespace ISOBMFF
         uint64_t n7;
         uint64_t n8;
 
-        c[ 0 ] = 0;
-        c[ 1 ] = 0;
-        c[ 2 ] = 0;
-        c[ 3 ] = 0;
-        c[ 4 ] = 0;
-        c[ 5 ] = 0;
-        c[ 6 ] = 0;
-        c[ 7 ] = 0;
+        Error err = this->Read( reinterpret_cast< uint8_t * >( c ), 8 );
+        if( err )
+        {
+            value = 0;
+            return err;
+        }
 
-        this->Read( reinterpret_cast< uint8_t * >( c ), 8 );
+        numeric_cast< uint64_t >( n1, c[ 0 ] );
+        numeric_cast< uint64_t >( n2, c[ 1 ] );
+        numeric_cast< uint64_t >( n3, c[ 2 ] );
+        numeric_cast< uint64_t >( n4, c[ 3 ] );
+        numeric_cast< uint64_t >( n5, c[ 4 ] );
+        numeric_cast< uint64_t >( n6, c[ 5 ] );
+        numeric_cast< uint64_t >( n7, c[ 6 ] );
+        numeric_cast< uint64_t >( n8, c[ 7 ] );
 
-        n1 = numeric_cast< uint64_t >( c[ 0 ] );
-        n2 = numeric_cast< uint64_t >( c[ 1 ] );
-        n3 = numeric_cast< uint64_t >( c[ 2 ] );
-        n4 = numeric_cast< uint64_t >( c[ 3 ] );
-        n5 = numeric_cast< uint64_t >( c[ 4 ] );
-        n6 = numeric_cast< uint64_t >( c[ 5 ] );
-        n7 = numeric_cast< uint64_t >( c[ 6 ] );
-        n8 = numeric_cast< uint64_t >( c[ 7 ] );
+        uint64_t tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7;
+        numeric_cast< uint64_t >( tmp1, n1 << 56 );
+        numeric_cast< uint64_t >( tmp2, n2 << 48 );
+        numeric_cast< uint64_t >( tmp3, n3 << 40 );
+        numeric_cast< uint64_t >( tmp4, n4 << 32 );
+        numeric_cast< uint64_t >( tmp5, n5 << 24 );
+        numeric_cast< uint64_t >( tmp6, n6 << 16 );
+        numeric_cast< uint64_t >( tmp7, n7 << 8 );
+        value  = tmp1 | tmp2 | tmp3 | tmp4 | tmp5 | tmp6 | tmp7 | n8;
 
-        n  = numeric_cast< uint64_t >( n1 << 56 )
-           | numeric_cast< uint64_t >( n2 << 48 )
-           | numeric_cast< uint64_t >( n3 << 40 )
-           | numeric_cast< uint64_t >( n4 << 32 )
-           | numeric_cast< uint64_t >( n5 << 24 )
-           | numeric_cast< uint64_t >( n6 << 16 )
-           | numeric_cast< uint64_t >( n7 << 8 )
-           | n8;
-
-        return n;
+        return Error();
     }
 
-    uint64_t BinaryStream::ReadLittleEndianUInt64()
+    Error BinaryStream::ReadLittleEndianUInt64( uint64_t & value )
     {
-        uint8_t  c[ 8 ];
-        uint64_t n;
+        uint8_t  c[ 8 ] = { 0, 0, 0, 0, 0, 0, 0, 0 };
         uint64_t n1;
         uint64_t n2;
         uint64_t n3;
@@ -319,156 +316,211 @@ namespace ISOBMFF
         uint64_t n7;
         uint64_t n8;
 
-        c[ 0 ] = 0;
-        c[ 1 ] = 0;
-        c[ 2 ] = 0;
-        c[ 3 ] = 0;
-        c[ 4 ] = 0;
-        c[ 5 ] = 0;
-        c[ 6 ] = 0;
-        c[ 7 ] = 0;
+        Error err = this->Read( reinterpret_cast< uint8_t * >( c ), 8 );
+        if( err )
+        {
+            value = 0;
+            return err;
+        }
 
-        this->Read( reinterpret_cast< uint8_t * >( c ), 8 );
+        numeric_cast< uint64_t >( n1, c[ 7 ] );
+        numeric_cast< uint64_t >( n2, c[ 6 ] );
+        numeric_cast< uint64_t >( n3, c[ 5 ] );
+        numeric_cast< uint64_t >( n4, c[ 4 ] );
+        numeric_cast< uint64_t >( n5, c[ 3 ] );
+        numeric_cast< uint64_t >( n6, c[ 2 ] );
+        numeric_cast< uint64_t >( n7, c[ 1 ] );
+        numeric_cast< uint64_t >( n8, c[ 0 ] );
 
-        n1 = numeric_cast< uint64_t >( c[ 7 ] );
-        n2 = numeric_cast< uint64_t >( c[ 6 ] );
-        n3 = numeric_cast< uint64_t >( c[ 5 ] );
-        n4 = numeric_cast< uint64_t >( c[ 4 ] );
-        n5 = numeric_cast< uint64_t >( c[ 3 ] );
-        n6 = numeric_cast< uint64_t >( c[ 2 ] );
-        n7 = numeric_cast< uint64_t >( c[ 1 ] );
-        n8 = numeric_cast< uint64_t >( c[ 0 ] );
+        uint64_t tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7;
+        numeric_cast< uint64_t >( tmp1, n1 << 56 );
+        numeric_cast< uint64_t >( tmp2, n2 << 48 );
+        numeric_cast< uint64_t >( tmp3, n3 << 40 );
+        numeric_cast< uint64_t >( tmp4, n4 << 32 );
+        numeric_cast< uint64_t >( tmp5, n5 << 24 );
+        numeric_cast< uint64_t >( tmp6, n6 << 16 );
+        numeric_cast< uint64_t >( tmp7, n7 << 8 );
+        value  = tmp1 | tmp2 | tmp3 | tmp4 | tmp5 | tmp6 | tmp7 | n8;
 
-        n  = numeric_cast< uint64_t >( n1 << 56 )
-           | numeric_cast< uint64_t >( n2 << 48 )
-           | numeric_cast< uint64_t >( n3 << 40 )
-           | numeric_cast< uint64_t >( n4 << 32 )
-           | numeric_cast< uint64_t >( n5 << 24 )
-           | numeric_cast< uint64_t >( n6 << 16 )
-           | numeric_cast< uint64_t >( n7 << 8 )
-           | n8;
-
-        return n;
+        return Error();
     }
 
-    float BinaryStream::ReadBigEndianFixedPoint( unsigned int integerLength, unsigned int fractionalLength )
+    Error BinaryStream::ReadBigEndianFixedPoint( float & value, unsigned int integerLength, unsigned int fractionalLength )
     {
         uint32_t     n;
         unsigned int integer;
         unsigned int fractionalMask;
         float        fractional;
+        Error        err;
 
         if( integerLength + fractionalLength == 16 )
         {
-            n = this->ReadBigEndianUInt16();
+            uint16_t n16;
+            err = this->ReadBigEndianUInt16( n16 );
+            if( err )
+            {
+                value = 0.0f;
+                return err;
+            }
+            n = n16;
         }
         else
         {
-            n = this->ReadBigEndianUInt32();
+            err = this->ReadBigEndianUInt32( n );
+            if( err )
+            {
+                value = 0.0f;
+                return err;
+            }
         }
 
         integer        = n >> fractionalLength;
         fractionalMask = static_cast< unsigned int >( pow( 2, fractionalLength ) - 1 );
         fractional     = static_cast< float >( n & fractionalMask ) / static_cast< float >( 1 << fractionalLength );
 
-        return static_cast< float >( integer ) + fractional;
+        value = static_cast< float >( integer ) + fractional;
+        return Error();
     }
 
-    float BinaryStream::ReadLittleEndianFixedPoint( unsigned int integerLength, unsigned int fractionalLength )
+    Error BinaryStream::ReadLittleEndianFixedPoint( float & value, unsigned int integerLength, unsigned int fractionalLength )
     {
         uint32_t     n;
         unsigned int integer;
         unsigned int fractionalMask;
         float        fractional;
+        Error        err;
 
         if( integerLength + fractionalLength == 16 )
         {
-            n = this->ReadLittleEndianUInt16();
+            uint16_t n16;
+            err = this->ReadLittleEndianUInt16( n16 );
+            if( err )
+            {
+                value = 0.0f;
+                return err;
+            }
+            n = n16;
         }
         else
         {
-            n = this->ReadLittleEndianUInt32();
+            err = this->ReadLittleEndianUInt32( n );
+            if( err )
+            {
+                value = 0.0f;
+                return err;
+            }
         }
 
         integer        = n >> fractionalLength;
         fractionalMask = static_cast< unsigned int >( pow( 2, fractionalLength ) - 1 );
         fractional     = static_cast< float >( n & fractionalMask ) / static_cast< float >( 1 << fractionalLength );
 
-        return static_cast< float >( integer ) + fractional;
+        value = static_cast< float >( integer ) + fractional;
+        return Error();
     }
 
-    std::string BinaryStream::ReadFourCC()
+    Error BinaryStream::ReadFourCC( std::string & value )
     {
         uint8_t s[ 4 ];
 
-        this->Read( s, 4 );
+        Error err = this->Read( s, 4 );
+        if( err )
+        {
+            value = "";
+            return err;
+        }
 
-        return std::string( reinterpret_cast< char * >( s ), 4 );
+        value = std::string( reinterpret_cast< char * >( s ), 4 );
+        return Error();
     }
 
-    std::string BinaryStream::ReadPascalString()
+    Error BinaryStream::ReadPascalString( std::string & value )
     {
-        uint8_t     length;
-        std::string ret;
+        uint8_t length;
+        Error   err;
 
-        length = this->ReadUInt8();
+        err = this->ReadUInt8( length );
+        if( err )
+        {
+            value = "";
+            return err;
+        }
 
         if( length == 0 )
         {
-            return "";
+            value = "";
+            return Error();
         }
 
-        ret = std::string( length, ' ' );
+        value = std::string( length, ' ' );
 
-        this->Read( reinterpret_cast< uint8_t * >( &( ret[ 0 ] ) ), length );
+        err = this->Read( reinterpret_cast< uint8_t * >( &( value[ 0 ] ) ), length );
+        if( err )
+        {
+            value = "";
+            return err;
+        }
 
-        return ret;
+        return Error();
     }
 
-    std::string BinaryStream::ReadString( size_t length )
+    Error BinaryStream::ReadString( std::string & value, size_t length )
     {
         std::vector< char > cp( length + 1, 0 );
 
-        this->Read( reinterpret_cast< uint8_t * >( &( cp[ 0 ] ) ), length );
+        Error err = this->Read( reinterpret_cast< uint8_t * >( &( cp[ 0 ] ) ), length );
+        if( err )
+        {
+            value = "";
+            return err;
+        }
 
-        return &( cp[ 0 ] );
+        value = &( cp[ 0 ] );
+        return Error();
     }
 
-    std::string BinaryStream::ReadNULLTerminatedString()
+    Error BinaryStream::ReadNULLTerminatedString( std::string & value )
     {
-        char        c;
-        std::string s;
+        char c;
+        value = "";
 
         while( 1 )
         {
             c = 0;
 
-            this->Read( reinterpret_cast< uint8_t * >( &c ), 1 );
+            Error err = this->Read( reinterpret_cast< uint8_t * >( &c ), 1 );
+            if( err )
+            {
+                return err;
+            }
 
             if( c == 0 )
             {
                 break;
             }
 
-            s.append( 1, c );
+            value.append( 1, c );
         }
 
-        return s;
+        return Error();
     }
 
-    Matrix BinaryStream::ReadMatrix()
+    Error BinaryStream::ReadMatrix( Matrix & value )
     {
-        return Matrix
-        (
-            this->ReadBigEndianUInt32(),
-            this->ReadBigEndianUInt32(),
-            this->ReadBigEndianUInt32(),
-            this->ReadBigEndianUInt32(),
-            this->ReadBigEndianUInt32(),
-            this->ReadBigEndianUInt32(),
-            this->ReadBigEndianUInt32(),
-            this->ReadBigEndianUInt32(),
-            this->ReadBigEndianUInt32()
-        );
+        uint32_t a, b, c, d, tx, ty, u, v, w;
+        Error err;
+
+        if( ( err = this->ReadBigEndianUInt32( a ) ) ) return err;
+        if( ( err = this->ReadBigEndianUInt32( b ) ) ) return err;
+        if( ( err = this->ReadBigEndianUInt32( u ) ) ) return err;
+        if( ( err = this->ReadBigEndianUInt32( c ) ) ) return err;
+        if( ( err = this->ReadBigEndianUInt32( d ) ) ) return err;
+        if( ( err = this->ReadBigEndianUInt32( v ) ) ) return err;
+        if( ( err = this->ReadBigEndianUInt32( tx ) ) ) return err;
+        if( ( err = this->ReadBigEndianUInt32( ty ) ) ) return err;
+        if( ( err = this->ReadBigEndianUInt32( w ) ) ) return err;
+
+        value = Matrix( a, b, u, c, d, v, tx, ty, w );
+        return Error();
     }
 }

@@ -50,7 +50,7 @@ namespace ISOBMFF
 
             SingleItemTypeReferenceBox & operator =( SingleItemTypeReferenceBox o );
 
-            void                                                 ReadData( Parser & parser, BinaryStream & stream ) override;
+            Error                                                ReadData( Parser & parser, BinaryStream & stream ) override;
             std::vector< std::pair< std::string, std::string > > GetDisplayableProperties() const override;
 
             uint32_t                GetFromItemID() const;

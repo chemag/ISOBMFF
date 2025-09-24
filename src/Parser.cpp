@@ -165,37 +165,39 @@ namespace ISOBMFF
         return std::make_shared< Box >( type );
     }
 
-    void Parser::Parse( const std::string & path ) noexcept( false )
+    Error Parser::Parse( const std::string & path )
     {
         BinaryFileStream stream( path );
 
-        this->Parse( stream );
+        Error err = this->Parse( stream );
+        if( err ) return err;
 
         this->impl->_path = path;
+
+        return Error();
     }
 
-    void Parser::Parse( const std::vector< uint8_t > & data ) noexcept( false )
+    Error Parser::Parse( const std::vector< uint8_t > & data )
     {
         BinaryDataStream stream( data );
 
-        this->Parse( stream );
+        return this->Parse( stream );
     }
 
-    void Parser::Parse( BinaryStream & stream ) noexcept( false )
+    Error Parser::Parse( BinaryStream & stream )
     {
         char n[ 4 ] = { 0, 0, 0, 0 };
 
         if( stream.HasBytesAvailable() == false )
         {
-            throw std::runtime_error( std::string( "Cannot read file" ) );
+            return Error( ErrorCode::CannotReadFile, "Cannot read file" );
         }
 
-        try
+        Error err = stream.Get( reinterpret_cast< uint8_t * >( n ), 4, 4 );
+        if( err )
         {
-            stream.Get( reinterpret_cast< uint8_t * >( n ), 4, 4 );
+            return Error( ErrorCode::CannotReadFile, "Cannot read file header" );
         }
-        catch( ... )
-        {}
 
         if
         (
@@ -209,7 +211,7 @@ namespace ISOBMFF
             && memcmp( n, "pnot", 4 ) != 0
         )
         {
-            throw std::runtime_error( std::string( "Data is not an ISO media file" ) );
+            return Error( ErrorCode::NotISOMediaFile, "Data is not an ISO media file" );
         }
 
         this->impl->_path = "";
@@ -217,8 +219,11 @@ namespace ISOBMFF
 
         if( stream.HasBytesAvailable() )
         {
-            this->impl->_file->ReadData( *( this ), stream );
+            err = this->impl->_file->ReadData( *( this ), stream );
+            if( err ) return err;
         }
+
+        return Error();
     }
 
     std::shared_ptr< File > Parser::GetFile() const

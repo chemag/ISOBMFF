@@ -36,6 +36,7 @@
 #include <Macros.hpp>
 #include <BinaryStream.hpp>
 #include <DisplayableObject.hpp>
+#include <Error.hpp>
 #include <string>
 #include <ostream>
 #include <vector>
@@ -107,9 +108,10 @@ namespace ISOBMFF
              * @abstract    Reads box data from a stream.
              * @param       parser  The parser currently being used.
              * @param       stream  The binary stream from which to read the box data.
+             * @result      Error if read fails, success otherwise.
              * @discussion  Reading will discard all previous box data.
              */
-            virtual void ReadData( Parser & parser, BinaryStream & stream );
+            virtual Error ReadData( Parser & parser, BinaryStream & stream );
 
             /*!
              * @function    GetData

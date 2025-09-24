@@ -81,16 +81,25 @@ namespace ISOBMFF
         swap( o1.impl, o2.impl );
     }
 
-    void IREF::ReadData( Parser & parser, BinaryStream & stream )
+    Error IREF::ReadData( Parser & parser, BinaryStream & stream )
     {
         ContainerBox container( "????" );
+        Error err;
 
-        FullBox::ReadData( parser, stream );
+        err = FullBox::ReadData( parser, stream );
+        if( err ) return err;
+
         parser.SetInfo( "iref", this );
-        container.ReadData( parser, stream );
+
+        err = container.ReadData( parser, stream );
+
         parser.SetInfo( "iref", nullptr );
 
+        if( err ) return err;
+
         this->impl->_boxes = container.GetBoxes();
+
+        return Error();
     }
 
     void IREF::WriteDescription( std::ostream & os, std::size_t indentLevel ) const

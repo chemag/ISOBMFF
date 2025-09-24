@@ -55,13 +55,11 @@ namespace ISOBMFF
         std::vector< uint8_t > data;
         uint16_t               size;
 
-        size = stream.ReadBigEndianUInt16();
-
-        if( size > 0 )
+        Error err = stream.ReadBigEndianUInt16( size );
+        if( !err && size > 0 )
         {
             data = std::vector< uint8_t >( size );
-
-            stream.Read( &( data[ 0 ] ), size );
+            err = stream.Read( &( data[ 0 ] ), size );
         }
 
         this->SetData( data );

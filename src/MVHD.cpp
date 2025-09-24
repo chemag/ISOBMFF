@@ -90,42 +90,92 @@ namespace ISOBMFF
         swap( o1.impl, o2.impl );
     }
 
-    void MVHD::ReadData( Parser & parser, BinaryStream & stream )
+    Error MVHD::ReadData( Parser & parser, BinaryStream & stream )
     {
-        FullBox::ReadData( parser, stream );
+        Error err;
+
+        err = FullBox::ReadData( parser, stream );
+        if( err ) return err;
 
         if( this->GetVersion() == 1 )
         {
-            this->SetCreationTime( stream.ReadBigEndianUInt64() );
-            this->SetModificationTime( stream.ReadBigEndianUInt64() );
-            this->SetTimescale( stream.ReadBigEndianUInt32() );
-            this->SetDuration( stream.ReadBigEndianUInt64() );
+            uint64_t temp64;
+            err = stream.ReadBigEndianUInt64( temp64 );
+            if( err ) return err;
+            this->SetCreationTime( temp64 );
+
+            err = stream.ReadBigEndianUInt64( temp64 );
+            if( err ) return err;
+            this->SetModificationTime( temp64 );
+
+            uint32_t temp32;
+            err = stream.ReadBigEndianUInt32( temp32 );
+            if( err ) return err;
+            this->SetTimescale( temp32 );
+
+            err = stream.ReadBigEndianUInt64( temp64 );
+            if( err ) return err;
+            this->SetDuration( temp64 );
         }
         else
         {
-            this->SetCreationTime( stream.ReadBigEndianUInt32() );
-            this->SetModificationTime( stream.ReadBigEndianUInt32() );
-            this->SetTimescale( stream.ReadBigEndianUInt32() );
-            this->SetDuration( stream.ReadBigEndianUInt32() );
+            uint32_t temp32;
+            err = stream.ReadBigEndianUInt32( temp32 );
+            if( err ) return err;
+            this->SetCreationTime( temp32 );
+
+            err = stream.ReadBigEndianUInt32( temp32 );
+            if( err ) return err;
+            this->SetModificationTime( temp32 );
+
+            err = stream.ReadBigEndianUInt32( temp32 );
+            if( err ) return err;
+            this->SetTimescale( temp32 );
+
+            err = stream.ReadBigEndianUInt32( temp32 );
+            if( err ) return err;
+            this->SetDuration( temp32 );
         }
 
-        this->SetRate( stream.ReadBigEndianUInt32() );
-        this->SetVolume( stream.ReadBigEndianUInt16() );
+        uint32_t temp32;
+        err = stream.ReadBigEndianUInt32( temp32 );
+        if( err ) return err;
+        this->SetRate( temp32 );
 
-        this->impl->_reserved1      = stream.ReadBigEndianUInt16();
-        this->impl->_reserved2[ 0 ] = stream.ReadBigEndianUInt32();
-        this->impl->_reserved2[ 1 ] = stream.ReadBigEndianUInt32();
+        uint16_t temp16;
+        err = stream.ReadBigEndianUInt16( temp16 );
+        if( err ) return err;
+        this->SetVolume( temp16 );
 
-        this->SetMatrix( stream.ReadMatrix() );
+        err = stream.ReadBigEndianUInt16( this->impl->_reserved1 );
+        if( err ) return err;
+        err = stream.ReadBigEndianUInt32( this->impl->_reserved2[ 0 ] );
+        if( err ) return err;
+        err = stream.ReadBigEndianUInt32( this->impl->_reserved2[ 1 ] );
+        if( err ) return err;
 
-        this->impl->_predefined[ 0 ] = stream.ReadBigEndianUInt32();
-        this->impl->_predefined[ 1 ] = stream.ReadBigEndianUInt32();
-        this->impl->_predefined[ 2 ] = stream.ReadBigEndianUInt32();
-        this->impl->_predefined[ 3 ] = stream.ReadBigEndianUInt32();
-        this->impl->_predefined[ 4 ] = stream.ReadBigEndianUInt32();
-        this->impl->_predefined[ 5 ] = stream.ReadBigEndianUInt32();
+        Matrix tempMatrix;
+        err = stream.ReadMatrix( tempMatrix );
+        if( err ) return err;
+        this->SetMatrix( tempMatrix );
 
-        this->SetNextTrackID( stream.ReadBigEndianUInt32() );
+        err = stream.ReadBigEndianUInt32( this->impl->_predefined[ 0 ] );
+        if( err ) return err;
+        err = stream.ReadBigEndianUInt32( this->impl->_predefined[ 1 ] );
+        if( err ) return err;
+        err = stream.ReadBigEndianUInt32( this->impl->_predefined[ 2 ] );
+        if( err ) return err;
+        err = stream.ReadBigEndianUInt32( this->impl->_predefined[ 3 ] );
+        if( err ) return err;
+        err = stream.ReadBigEndianUInt32( this->impl->_predefined[ 4 ] );
+        if( err ) return err;
+        err = stream.ReadBigEndianUInt32( this->impl->_predefined[ 5 ] );
+        if( err ) return err;
+
+        err = stream.ReadBigEndianUInt32( temp32 );
+        if( err ) return err;
+        this->SetNextTrackID( temp32 );
+        return Error();
     }
 
     std::vector< std::pair< std::string, std::string > > MVHD::GetDisplayableProperties() const

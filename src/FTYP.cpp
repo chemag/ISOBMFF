@@ -83,14 +83,26 @@ namespace ISOBMFF
         swap( o1.impl, o2.impl );
     }
 
-    void FTYP::ReadData( Parser & parser, BinaryStream & stream )
+    Error FTYP::ReadData( Parser & parser, BinaryStream & stream )
     {
-        this->SetMajorBrand( stream.ReadFourCC() );
-        this->SetMinorVersion( stream.ReadBigEndianUInt32() );
+        Error err;
+
+        std::string majorBrand;
+        err = stream.ReadFourCC( majorBrand );
+        if( err ) return err;
+        this->SetMajorBrand( majorBrand );
+
+        uint32_t minorVersion;
+        err = stream.ReadBigEndianUInt32( minorVersion );
+        if( err ) return err;
+        this->SetMinorVersion( minorVersion );
 
         while( stream.HasBytesAvailable() )
         {
-            this->AddCompatibleBrand( stream.ReadFourCC() );
+            std::string compatibleBrand;
+            err = stream.ReadFourCC( compatibleBrand );
+            if( err ) return err;
+            this->AddCompatibleBrand( compatibleBrand );
         }
 
         if( this->GetMajorBrand() == "qt  " )
@@ -101,6 +113,7 @@ namespace ISOBMFF
         {
             parser.SetPreferredStringType( Parser::StringType::NULLTerminated );
         }
+        return Error();
     }
 
     std::vector< std::pair< std::string, std::string > > FTYP::GetDisplayableProperties() const

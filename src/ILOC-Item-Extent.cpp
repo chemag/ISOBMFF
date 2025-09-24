@@ -56,42 +56,60 @@ namespace ISOBMFF
         {
             if( iloc.GetIndexSize() == 2 )
             {
-                this->SetIndex( stream.ReadBigEndianUInt16() );
+                uint16_t temp;
+                Error err = stream.ReadBigEndianUInt16( temp );
+                if( !err ) this->SetIndex( temp );
             }
             else if( iloc.GetIndexSize() == 4 )
             {
-                this->SetIndex( stream.ReadBigEndianUInt32() );
+                uint32_t temp;
+                Error err = stream.ReadBigEndianUInt32( temp );
+                if( !err ) this->SetIndex( temp );
             }
             else if( iloc.GetIndexSize() == 8 )
             {
-                this->SetIndex( stream.ReadBigEndianUInt64() );
+                uint64_t temp;
+                Error err = stream.ReadBigEndianUInt64( temp );
+                if( !err ) this->SetIndex( temp );
             }
         }
 
         if( iloc.GetOffsetSize() == 2 )
         {
-            this->SetOffset( stream.ReadBigEndianUInt16() );
+            uint16_t temp;
+            Error err = stream.ReadBigEndianUInt16( temp );
+            if( !err ) this->SetOffset( temp );
         }
         else if( iloc.GetOffsetSize() == 4 )
         {
-            this->SetOffset( stream.ReadBigEndianUInt32() );
+            uint32_t temp;
+            Error err = stream.ReadBigEndianUInt32( temp );
+            if( !err ) this->SetOffset( temp );
         }
         else if( iloc.GetOffsetSize() == 8 )
         {
-            this->SetOffset( stream.ReadBigEndianUInt64() );
+            uint64_t temp;
+            Error err = stream.ReadBigEndianUInt64( temp );
+            if( !err ) this->SetOffset( temp );
         }
 
         if( iloc.GetLengthSize() == 2 )
         {
-            this->SetLength( stream.ReadBigEndianUInt16() );
+            uint16_t temp;
+            Error err = stream.ReadBigEndianUInt16( temp );
+            if( !err ) this->SetLength( temp );
         }
         else if( iloc.GetLengthSize() == 4 )
         {
-            this->SetLength( stream.ReadBigEndianUInt32() );
+            uint32_t temp;
+            Error err = stream.ReadBigEndianUInt32( temp );
+            if( !err ) this->SetLength( temp );
         }
         else if( iloc.GetLengthSize() == 8 )
         {
-            this->SetLength( stream.ReadBigEndianUInt64() );
+            uint64_t temp;
+            Error err = stream.ReadBigEndianUInt64( temp );
+            if( !err ) this->SetLength( temp );
         }
     }
 

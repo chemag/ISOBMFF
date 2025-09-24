@@ -89,44 +89,84 @@ namespace ISOBMFF
         swap( o1.impl, o2.impl );
     }
 
-    void AV01::ReadData( Parser & parser, BinaryStream & stream )
+    Error AV01::ReadData( Parser & parser, BinaryStream & stream )
     {
         ContainerBox container( "????" );
+        Error err;
 
-        // SampleEntry
-        // reserved[]
-        stream.ReadUInt8();
-        stream.ReadUInt8();
-        stream.ReadUInt8();
-        stream.ReadUInt8();
-        stream.ReadUInt8();
-        stream.ReadUInt8();
-        // data_reference_index
-        this->SetDataReferenceIndex( stream.ReadBigEndianUInt16() );
-        // VisualSampleEntry
-        // pre_defined1
-        stream.ReadBigEndianUInt16();
-        // reserved1
-        stream.ReadBigEndianUInt16();
-        // pre_defined2
-        stream.ReadBigEndianUInt32();
-        stream.ReadBigEndianUInt32();
-        stream.ReadBigEndianUInt32();
-        this->SetWidth( stream.ReadBigEndianUInt16() );
-        this->SetHeight( stream.ReadBigEndianUInt16() );
-        this->SetHorizResolution( stream.ReadBigEndianUInt32() );
-        this->SetVertResolution( stream.ReadBigEndianUInt32() );
-        // reserved2
-        stream.ReadBigEndianUInt32();
-        this->SetFrameCount( stream.ReadBigEndianUInt16() );
-        this->SetCompressorName( stream.ReadString(32) );
-        this->SetDepth( stream.ReadBigEndianUInt16() );
-        // pre_defined3
-        stream.ReadBigEndianUInt16();
+        uint8_t temp8;
+        uint16_t temp16;
+        uint32_t temp32;
 
-        container.ReadData( parser, stream );
+        err = stream.ReadUInt8( temp8 );
+        if( err ) return err;
+        err = stream.ReadUInt8( temp8 );
+        if( err ) return err;
+        err = stream.ReadUInt8( temp8 );
+        if( err ) return err;
+        err = stream.ReadUInt8( temp8 );
+        if( err ) return err;
+        err = stream.ReadUInt8( temp8 );
+        if( err ) return err;
+        err = stream.ReadUInt8( temp8 );
+        if( err ) return err;
+
+        err = stream.ReadBigEndianUInt16( temp16 );
+        if( err ) return err;
+        this->SetDataReferenceIndex( temp16 );
+
+        err = stream.ReadBigEndianUInt16( temp16 );
+        if( err ) return err;
+        err = stream.ReadBigEndianUInt16( temp16 );
+        if( err ) return err;
+        err = stream.ReadBigEndianUInt32( temp32 );
+        if( err ) return err;
+        err = stream.ReadBigEndianUInt32( temp32 );
+        if( err ) return err;
+        err = stream.ReadBigEndianUInt32( temp32 );
+        if( err ) return err;
+
+        err = stream.ReadBigEndianUInt16( temp16 );
+        if( err ) return err;
+        this->SetWidth( temp16 );
+
+        err = stream.ReadBigEndianUInt16( temp16 );
+        if( err ) return err;
+        this->SetHeight( temp16 );
+
+        err = stream.ReadBigEndianUInt32( temp32 );
+        if( err ) return err;
+        this->SetHorizResolution( temp32 );
+
+        err = stream.ReadBigEndianUInt32( temp32 );
+        if( err ) return err;
+        this->SetVertResolution( temp32 );
+
+        err = stream.ReadBigEndianUInt32( temp32 );
+        if( err ) return err;
+
+        err = stream.ReadBigEndianUInt16( temp16 );
+        if( err ) return err;
+        this->SetFrameCount( temp16 );
+
+        std::string tempStr;
+        err = stream.ReadString( tempStr, 32 );
+        if( err ) return err;
+        this->SetCompressorName( tempStr );
+
+        err = stream.ReadBigEndianUInt16( temp16 );
+        if( err ) return err;
+        this->SetDepth( temp16 );
+
+        err = stream.ReadBigEndianUInt16( temp16 );
+        if( err ) return err;
+
+        err = container.ReadData( parser, stream );
+        if( err ) return err;
 
         this->impl->_boxes = container.GetBoxes();
+
+        return Error();
     }
 
     std::vector< std::pair< std::string, std::string > > AV01::GetDisplayableProperties() const

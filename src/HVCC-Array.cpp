@@ -56,12 +56,16 @@ namespace ISOBMFF
         uint16_t count;
         uint16_t i;
 
-        u8 = stream.ReadUInt8();
+        Error err = stream.ReadUInt8( u8 );
+        // Note: Constructor cannot return error, silently continue on error
+        if( !err )
+        {
+            this->SetArrayCompleteness( ( u8 & 0x80 ) != 0 );
+            this->SetNALUnitType( u8 & 0x3F );
+        }
 
-        this->SetArrayCompleteness( ( u8 & 0x80 ) != 0 );
-        this->SetNALUnitType( u8 & 0x3F );
-
-        count = stream.ReadBigEndianUInt16();
+        err = stream.ReadBigEndianUInt16( count );
+        if( err ) count = 0;
 
         for( i = 0; i < count; i++ )
         {

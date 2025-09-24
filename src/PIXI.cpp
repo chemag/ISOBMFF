@@ -80,19 +80,24 @@ namespace ISOBMFF
         swap( o1.impl, o2.impl );
     }
 
-    void PIXI::ReadData( Parser & parser, BinaryStream & stream )
+    Error PIXI::ReadData( Parser & parser, BinaryStream & stream )
     {
         uint8_t count;
         uint8_t i;
+        Error err;
 
-        FullBox::ReadData( parser, stream );
+        err = FullBox::ReadData( parser, stream );
+        if( err ) return err;
 
-        count = stream.ReadUInt8();
+        err = stream.ReadUInt8( count );
+        if( err ) return err;
 
         for( i = 0; i < count; i++ )
         {
             this->AddChannel( std::make_shared< Channel >( stream ) );
         }
+
+        return Error();
     }
 
     void PIXI::WriteDescription( std::ostream & os, std::size_t indentLevel ) const

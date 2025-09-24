@@ -79,18 +79,28 @@ namespace ISOBMFF
         swap( o1.impl, o2.impl );
     }
 
-    void PITM::ReadData( Parser & parser, BinaryStream & stream )
+    Error PITM::ReadData( Parser & parser, BinaryStream & stream )
     {
-        FullBox::ReadData( parser, stream );
+        Error err;
+
+        err = FullBox::ReadData( parser, stream );
+        if( err ) return err;
 
         if( this->GetVersion() == 0 )
         {
-            this->SetItemID( stream.ReadBigEndianUInt16() );
+            uint16_t itemID;
+            err = stream.ReadBigEndianUInt16( itemID );
+            if( err ) return err;
+            this->SetItemID( itemID );
         }
         else
         {
-            this->SetItemID( stream.ReadBigEndianUInt32() );
+            uint32_t itemID;
+            err = stream.ReadBigEndianUInt32( itemID );
+            if( err ) return err;
+            this->SetItemID( itemID );
         }
+        return Error();
     }
 
     std::vector< std::pair< std::string, std::string > > PITM::GetDisplayableProperties() const

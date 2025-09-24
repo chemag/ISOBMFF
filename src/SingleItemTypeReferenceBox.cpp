@@ -83,43 +83,56 @@ namespace ISOBMFF
         swap( o1.impl, o2.impl );
     }
 
-    void SingleItemTypeReferenceBox::ReadData( Parser & parser, BinaryStream & stream )
+    Error SingleItemTypeReferenceBox::ReadData( Parser & parser, BinaryStream & stream )
     {
         const IREF * iref;
         uint16_t     count;
         uint16_t     i;
+        Error err;
 
         iref = static_cast< const IREF * >( parser.GetInfo( "iref" ) );
 
         if( iref == nullptr )
         {
-            Box::ReadData( parser, stream );
-
-            return;
+            return Box::ReadData( parser, stream );
         }
 
         if( iref->GetVersion() == 0 )
         {
-            this->SetFromItemID( stream.ReadBigEndianUInt16() );
+            uint16_t temp16;
+            err = stream.ReadBigEndianUInt16( temp16 );
+            if( err ) return err;
+            this->SetFromItemID( temp16 );
 
-            count = stream.ReadBigEndianUInt16();
+            err = stream.ReadBigEndianUInt16( count );
+            if( err ) return err;
 
             for( i = 0; i < count; i++ )
             {
-                this->AddToItemID( stream.ReadBigEndianUInt16() );
+                err = stream.ReadBigEndianUInt16( temp16 );
+                if( err ) return err;
+                this->AddToItemID( temp16 );
             }
         }
         else if( iref->GetVersion() == 1 )
         {
-            this->SetFromItemID( stream.ReadBigEndianUInt32() );
+            uint32_t temp32;
+            err = stream.ReadBigEndianUInt32( temp32 );
+            if( err ) return err;
+            this->SetFromItemID( temp32 );
 
-            count = stream.ReadBigEndianUInt16();
+            err = stream.ReadBigEndianUInt16( count );
+            if( err ) return err;
 
             for( i = 0; i < count; i++ )
             {
-                this->AddToItemID( stream.ReadBigEndianUInt32() );
+                err = stream.ReadBigEndianUInt32( temp32 );
+                if( err ) return err;
+                this->AddToItemID( temp32 );
             }
         }
+
+        return Error();
     }
 
     std::vector< std::pair< std::string, std::string > > SingleItemTypeReferenceBox::GetDisplayableProperties() const

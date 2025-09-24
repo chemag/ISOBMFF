@@ -87,61 +87,80 @@ namespace ISOBMFF
         swap( o1.impl, o2.impl );
     }
 
-    void MDHD::ReadData( Parser & parser, BinaryStream & stream )
+    Error MDHD::ReadData( Parser & parser, BinaryStream & stream )
     {
         uint64_t u64;
         uint32_t u32;
         uint16_t u16;
+        Error err;
 
-        FullBox::ReadData( parser, stream );
+        err = FullBox::ReadData( parser, stream );
+        if( err ) return err;
 
         if( this->GetVersion() == 1 )
         {
-            u64 = stream.ReadBigEndianUInt64();
+            err = stream.ReadBigEndianUInt64( u64 );
+            if( err ) return err;
         }
         else
         {
-            u64 = stream.ReadBigEndianUInt32();
+            uint32_t temp32;
+            err = stream.ReadBigEndianUInt32( temp32 );
+            if( err ) return err;
+            u64 = temp32;
         }
 
         this->SetCreationTime( u64 );
 
         if( this->GetVersion() == 1 )
         {
-            u64 = stream.ReadBigEndianUInt64();
+            err = stream.ReadBigEndianUInt64( u64 );
+            if( err ) return err;
         }
         else
         {
-            u64 = stream.ReadBigEndianUInt32();
+            uint32_t temp32;
+            err = stream.ReadBigEndianUInt32( temp32 );
+            if( err ) return err;
+            u64 = temp32;
         }
 
         this->SetModificationTime( u64 );
 
-        u32 = stream.ReadBigEndianUInt32();
+        err = stream.ReadBigEndianUInt32( u32 );
+        if( err ) return err;
 
         this->SetTimescale( u32 );
 
         if( this->GetVersion() == 1 )
         {
-            u64 = stream.ReadBigEndianUInt64();
+            err = stream.ReadBigEndianUInt64( u64 );
+            if( err ) return err;
         }
         else
         {
-            u64 = stream.ReadBigEndianUInt32();
+            uint32_t temp32;
+            err = stream.ReadBigEndianUInt32( temp32 );
+            if( err ) return err;
+            u64 = temp32;
         }
 
         this->SetDuration( u64 );
 
-       u16 = stream.ReadBigEndianUInt16();
+       err = stream.ReadBigEndianUInt16( u16 );
+       if( err ) return err;
 
        this->SetPad( u16 >> 15 );
        this->SetLanguage0( ( u16 >> 10 ) & 0b11111 );
        this->SetLanguage1( ( u16 >>  5 ) & 0b11111 );
        this->SetLanguage2( ( u16 >>  0 ) & 0b11111 );
 
-       u16 = stream.ReadBigEndianUInt16();
+       err = stream.ReadBigEndianUInt16( u16 );
+       if( err ) return err;
 
        this->SetPredefined( u16 );
+
+       return Error();
     }
 
     void MDHD::WriteDescription( std::ostream & os, std::size_t indentLevel ) const

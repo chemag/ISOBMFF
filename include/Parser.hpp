@@ -160,24 +160,27 @@ namespace ISOBMFF
              * @abstract    Parses a file.
              * @discussion  This will discard any previously parsed file.
              * @param       path    The file's path.
+             * @result      Error if parsing fails, success otherwise.
              */
-            void Parse( const std::string & path ) noexcept( false );
+            Error Parse( const std::string & path );
 
             /*!
              * @function    Parse
              * @abstract    Parses data.
              * @discussion  This will discard any previously parsed file/data.
              * @param       data    The data bytes.
+             * @result      Error if parsing fails, success otherwise.
              */
-            void Parse( const std::vector< uint8_t > & data ) noexcept( false );
+            Error Parse( const std::vector< uint8_t > & data );
 
             /*!
              * @function    Parse
              * @abstract    Parses data from a stream.
              * @discussion  This will discard any previously parsed file/data.
              * @param       stream  The stream object.
+             * @result      Error if parsing fails, success otherwise.
              */
-            void Parse( BinaryStream & stream ) noexcept( false );
+            Error Parse( BinaryStream & stream );
 
             /*!
              * @function    GetFile

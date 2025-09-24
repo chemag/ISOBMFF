@@ -83,39 +83,65 @@ namespace ISOBMFF
         swap( o1.impl, o2.impl );
     }
 
-    void MP4A::ReadData( Parser & parser, BinaryStream & stream )
+    Error MP4A::ReadData( Parser & parser, BinaryStream & stream )
     {
+        Error err;
         ContainerBox container( "????" );
 
         // const unsigned int(8)[6] reserved = 0;
-        stream.ReadUInt8();
-        stream.ReadUInt8();
-        stream.ReadUInt8();
-        stream.ReadUInt8();
-        stream.ReadUInt8();
-        stream.ReadUInt8();
+        uint8_t temp8;
+        err = stream.ReadUInt8( temp8 );
+        if( err ) return err;
+        err = stream.ReadUInt8( temp8 );
+        if( err ) return err;
+        err = stream.ReadUInt8( temp8 );
+        if( err ) return err;
+        err = stream.ReadUInt8( temp8 );
+        if( err ) return err;
+        err = stream.ReadUInt8( temp8 );
+        if( err ) return err;
+        err = stream.ReadUInt8( temp8 );
+        if( err ) return err;
         // const unsigned int(16) data_reference_index;
-        stream.ReadUInt16();
+        uint16_t temp16;
+        err = stream.ReadUInt16( temp16 );
+        if( err ) return err;
         // const unsigned int(32)[2] reserved = 0;
-        stream.ReadUInt32();
-        stream.ReadUInt32();
+        uint32_t temp32;
+        err = stream.ReadUInt32( temp32 );
+        if( err ) return err;
+        err = stream.ReadUInt32( temp32 );
+        if( err ) return err;
 
         // unsigned int(16) channelcount;
-        SetChannelCount( stream.ReadBigEndianUInt16() );
+        uint16_t channelCount;
+        err = stream.ReadBigEndianUInt16( channelCount );
+        if( err ) return err;
+        SetChannelCount( channelCount );
+
         // template unsigned int(16) samplesize = 16;
-        SetSampleSize( stream.ReadBigEndianUInt16() );
+        uint16_t sampleSize;
+        err = stream.ReadBigEndianUInt16( sampleSize );
+        if( err ) return err;
+        SetSampleSize( sampleSize );
 
         // unsigned int(16) pre_defined = 0;
-        stream.ReadUInt16();
+        err = stream.ReadUInt16( temp16 );
+        if( err ) return err;
         // unsigned int(16) reserved = 0;
-        stream.ReadUInt16();
+        err = stream.ReadUInt16( temp16 );
+        if( err ) return err;
 
         // template unsigned int(32) samplerate = { default samplerate of media } << 16;
-        SetSampleRateRaw( stream.ReadBigEndianUInt32() );
+        uint32_t sampleRate;
+        err = stream.ReadBigEndianUInt32( sampleRate );
+        if( err ) return err;
+        SetSampleRateRaw( sampleRate );
 
 	// stoping reading here
         // container.ReadData( parser, stream );
         this->impl->_boxes = container.GetBoxes();
+        return Error();
     }
 
     std::vector< std::pair< std::string, std::string > > MP4A::GetDisplayableProperties() const

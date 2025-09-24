@@ -82,23 +82,29 @@ namespace ISOBMFF
         swap( o1.impl, o2.impl );
     }
 
-    void META::ReadData( Parser & parser, BinaryStream & stream )
+    Error META::ReadData( Parser & parser, BinaryStream & stream )
     {
         char         n[ 4 ];
         ContainerBox container( "????" );
+        Error err;
 
-        stream.Get( reinterpret_cast< uint8_t * >( n ), 4, 4 );
+        err = stream.Get( reinterpret_cast< uint8_t * >( n ), 4, 4 );
+        if( err ) return err;
 
         this->impl->_isFullBox = strncmp( n, "hdlr", 4 ) != 0;
 
         if( this->impl->_isFullBox )
         {
-            FullBox::ReadData( parser, stream );
+            err = FullBox::ReadData( parser, stream );
+            if( err ) return err;
         }
 
-        container.ReadData( parser, stream );
+        err = container.ReadData( parser, stream );
+        if( err ) return err;
 
         this->impl->_boxes = container.GetBoxes();
+
+        return Error();
     }
 
     void META::WriteDescription( std::ostream & os, std::size_t indentLevel ) const

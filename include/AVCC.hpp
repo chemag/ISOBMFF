@@ -53,7 +53,7 @@ namespace ISOBMFF
 
             AVCC & operator =( AVCC o );
 
-            void ReadData( Parser & parser, BinaryStream & stream ) override;
+            Error ReadData( Parser & parser, BinaryStream & stream ) override;
             void WriteDescription( std::ostream & os, std::size_t indentLevel ) const override;
 
             virtual std::vector< std::shared_ptr< DisplayableObject > >  GetDisplayableObjects()    const override;

@@ -98,75 +98,95 @@ namespace ISOBMFF
         swap( o1.impl, o2.impl );
     }
 
-    void HVCC::ReadData( Parser & parser, BinaryStream & stream )
+    Error HVCC::ReadData( Parser & parser, BinaryStream & stream )
     {
         uint8_t  u8;
         uint16_t u16;
         uint32_t u32;
         uint8_t  count;
         uint8_t  i;
+        Error err;
 
         ( void )parser;
 
-        this->SetConfigurationVersion( stream.ReadUInt8() );
+        err = stream.ReadUInt8( u8 );
+        if( err ) return err;
+        this->SetConfigurationVersion( u8 );
 
-        u8 = stream.ReadUInt8();
+        err = stream.ReadUInt8( u8 );
+        if( err ) return err;
 
         this->SetGeneralProfileSpace( u8 >> 6 );
         this->SetGeneralTierFlag( ( u8 >> 5 ) & 0x01 );
         this->SetGeneralProfileIDC( u8 & 0x1F );
-        this->SetGeneralProfileCompatibilityFlags( stream.ReadBigEndianUInt32() );
 
-        u16 = stream.ReadBigEndianUInt16();
-        u32 = stream.ReadBigEndianUInt32();
+        err = stream.ReadBigEndianUInt32( u32 );
+        if( err ) return err;
+        this->SetGeneralProfileCompatibilityFlags( u32 );
+
+        err = stream.ReadBigEndianUInt16( u16 );
+        if( err ) return err;
+
+        err = stream.ReadBigEndianUInt32( u32 );
+        if( err ) return err;
 
         this->SetGeneralConstraintIndicatorFlags( ( static_cast< uint64_t >( u16 ) << 32 ) | static_cast< uint64_t >( u32 ) );
-        this->SetGeneralLevelIDC( stream.ReadUInt8() );
 
-        u16 = stream.ReadBigEndianUInt16();
+        err = stream.ReadUInt8( u8 );
+        if( err ) return err;
+        this->SetGeneralLevelIDC( u8 );
+
+        err = stream.ReadBigEndianUInt16( u16 );
+        if( err ) return err;
 
         this->SetMinSpatialSegmentationIDC( u16 & 0x0FFF );
 
-        u8 = stream.ReadUInt8();
+        err = stream.ReadUInt8( u8 );
+        if( err ) return err;
 
         this->SetParallelismType( u8 & 0x03 );
 
-        u8 = stream.ReadUInt8();
+        err = stream.ReadUInt8( u8 );
+        if( err ) return err;
 
         this->SetChromaFormat( u8 & 0x03 );
 
-        u8 = stream.ReadUInt8();
+        err = stream.ReadUInt8( u8 );
+        if( err ) return err;
 
         this->SetBitDepthLumaMinus8( u8 & 0x07 );
 
-        u8 = stream.ReadUInt8();
+        err = stream.ReadUInt8( u8 );
+        if( err ) return err;
 
         this->SetBitDepthChromaMinus8( u8 & 0x07 );
-        this->SetAvgFrameRate( stream.ReadBigEndianUInt16() );
 
-        u8 = stream.ReadUInt8();
+        err = stream.ReadBigEndianUInt16( u16 );
+        if( err ) return err;
+        this->SetAvgFrameRate( u16 );
+
+        err = stream.ReadUInt8( u8 );
+        if( err ) return err;
 
         this->SetConstantFrameRate( ( u8 >> 6 ) & 0x03 );
         this->SetNumTemporalLayers( ( u8 >> 3 )& 0x07 );
         this->SetTemporalIdNested( ( u8 >> 2 ) & 0x01 );
         this->SetLengthSizeMinusOne( u8 & 0x03 );
 
-        count = stream.ReadUInt8();
+        err = stream.ReadUInt8( count );
+        if( err ) return err;
 
         for( i = 0; i < count; i++ )
         {
             if( stream.HasBytesAvailable() == false )
             {
-                /*
-                 * Shouldn't happen in theory, but happens on some files...
-                 * So simply don't process next arrays if we don't have any data
-                 * available...
-                 */
                 break;
             }
 
             this->AddArray( std::make_shared< Array >( stream ) );
         }
+
+        return Error();
     }
 
     void HVCC::WriteDescription( std::ostream & os, std::size_t indentLevel ) const

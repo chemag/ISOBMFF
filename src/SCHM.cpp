@@ -83,24 +83,41 @@ namespace ISOBMFF
         swap( o1.impl, o2.impl );
     }
 
-    void SCHM::ReadData( Parser & parser, BinaryStream & stream )
+    Error SCHM::ReadData( Parser & parser, BinaryStream & stream )
     {
-        FullBox::ReadData( parser, stream );
+        Error err;
 
-        this->SetSchemeType( stream.ReadFourCC() );
-        this->SetSchemeVersion( stream.ReadBigEndianUInt32() );
+        err = FullBox::ReadData( parser, stream );
+        if( err ) return err;
+
+        std::string schemeType;
+        err = stream.ReadFourCC( schemeType );
+        if( err ) return err;
+        this->SetSchemeType( schemeType );
+
+        uint32_t schemeVersion;
+        err = stream.ReadBigEndianUInt32( schemeVersion );
+        if( err ) return err;
+        this->SetSchemeVersion( schemeVersion );
 
         if( this->GetFlags() & 0x000001 )
         {
             if( parser.GetPreferredStringType() == Parser::StringType::Pascal )
             {
-                this->SetSchemeURI( stream.ReadPascalString() );
+                std::string schemeURI;
+                err = stream.ReadPascalString( schemeURI );
+                if( err ) return err;
+                this->SetSchemeURI( schemeURI );
             }
             else
             {
-                this->SetSchemeURI( stream.ReadNULLTerminatedString() );
+                std::string schemeURI;
+                err = stream.ReadNULLTerminatedString( schemeURI );
+                if( err ) return err;
+                this->SetSchemeURI( schemeURI );
             }
         }
+        return Error();
     }
 
     std::vector< std::pair< std::string, std::string > > SCHM::GetDisplayableProperties() const

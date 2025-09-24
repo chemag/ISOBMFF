@@ -81,7 +81,7 @@ namespace ISOBMFF
         swap( o1.impl, o2.impl );
     }
 
-    void ContainerBox::ReadData( Parser & parser, BinaryStream & stream )
+    Error ContainerBox::ReadData( Parser & parser, BinaryStream & stream )
     {
         uint64_t               length;
         std::string            name;
@@ -94,19 +94,26 @@ namespace ISOBMFF
         {
             ( void )parser;
 
-            length   = stream.ReadBigEndianUInt32();
+            Error err;
+            uint32_t temp32;
+            err = stream.ReadBigEndianUInt32( temp32 );
+            if( err ) return err;
+            length = temp32;
+
             if( length == 0 && !stream.HasBytesAvailable() )
             {
-                // some ISOBMFF multiplexers end a box list with a length=0
-                // entry
                 break;
             }
-            name     = stream.ReadFourCC();
+
+            err = stream.ReadFourCC( name );
+            if( err ) return err;
+
             content  = nullptr;
 
             if( length == 1 )
             {
-                length = stream.ReadBigEndianUInt64();
+                err = stream.ReadBigEndianUInt64( length );
+                if( err ) return err;
 
                 if
                 (
@@ -114,22 +121,32 @@ namespace ISOBMFF
                     || ( name == "mdat" && !parser.HasOption( Parser::Options::DoNotSkipMDATData ) )
                 )
                 {
-                    stream.Seek( length - 16, BinaryStream::SeekDirection::Current );
+                    err = stream.Seek( length - 16, BinaryStream::SeekDirection::Current );
+                    if( err ) return err;
                 }
                 else
                 {
-                    content = new BinaryDataStream( stream.Read( static_cast< size_t >( length ) - 16 ) );
+                    std::vector< uint8_t > data;
+                    err = stream.Read( data, static_cast< size_t >( length ) - 16 );
+                    if( err ) return err;
+
+                    content = new BinaryDataStream( data );
                 }
             }
             else
             {
                 if( name == "mdat" && !parser.HasOption( Parser::Options::DoNotSkipMDATData ) )
                 {
-                    stream.Seek( length - 8, BinaryStream::SeekDirection::Current );
+                    err = stream.Seek( length - 8, BinaryStream::SeekDirection::Current );
+                    if( err ) return err;
                 }
                 else
                 {
-                    content = new BinaryDataStream( stream.Read( static_cast< uint32_t >( length ) - 8 ) );
+                    std::vector< uint8_t > data;
+                    err = stream.Read( data, static_cast< uint32_t >( length ) - 8 );
+                    if( err ) return err;
+
+                    content = new BinaryDataStream( data );
                 }
             }
 
@@ -139,14 +156,12 @@ namespace ISOBMFF
             {
                 if( content )
                 {
-                    try{
-                        box->ReadData( parser, *content );
-                    }
-                    catch( std::exception & e )
+                    Error box_err = box->ReadData( parser, *content );
+                    if( box_err )
                     {
                         delete( content );
-                        std::cerr << "Exception while reading box " << name << ": " << e.what() << std::endl;
-                        throw;
+                        std::cerr << "Error while reading box " << name << ": " << box_err.GetMessage() << std::endl;
+                        return box_err;
                     }
                 }
 
@@ -157,6 +172,8 @@ namespace ISOBMFF
                 delete( content );
             }
         }
+
+        return Error();
     }
 
     void ContainerBox::AddBox( std::shared_ptr< Box > box )

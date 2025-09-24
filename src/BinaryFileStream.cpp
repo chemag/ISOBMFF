@@ -60,24 +60,31 @@ namespace ISOBMFF
     BinaryFileStream::~BinaryFileStream()
     {}
 
-    void BinaryFileStream::Read( uint8_t * buf, size_t size )
+    Error BinaryFileStream::Read( uint8_t * buf, size_t size )
     {
         if( this->impl->_stream.is_open() == false )
         {
-            throw std::runtime_error( "Invalid file stream" );
+            return Error( ErrorCode::InvalidFileStream, "Invalid file stream" );
         }
 
         if( size > this->impl->_size - this->impl->_pos )
         {
-            throw std::runtime_error( "Invalid read - Not enough data available" );
+            return Error( ErrorCode::InvalidReadSize, "Invalid read - Not enough data available" );
         }
 
         this->impl->_pos += size;
 
-        this->impl->_stream.read( reinterpret_cast< char * >( buf ), numeric_cast< std::streamsize >( size ) );
+        Error err;
+        std::streamsize stream_size;
+        err = numeric_cast< std::streamsize >( stream_size, size );
+        if( err ) return err;
+
+        this->impl->_stream.read( reinterpret_cast< char * >( buf ), stream_size );
+
+        return Error();
     }
 
-    void BinaryFileStream::Seek( std::streamoff offset, SeekDirection dir )
+    Error BinaryFileStream::Seek( std::streamoff offset, SeekDirection dir )
     {
         size_t pos;
 
@@ -85,46 +92,65 @@ namespace ISOBMFF
         {
             if( offset < 0 )
             {
-                throw std::runtime_error( "Invalid seek offset" );
+                return Error( ErrorCode::InvalidSeekOffset, "Invalid seek offset" );
             }
 
-            pos = numeric_cast< size_t >( offset );
+            Error err;
+            err = numeric_cast< size_t >( pos, offset );
+            if( err ) return err;
         }
         else if( dir == SeekDirection::End )
         {
             if( offset > 0 )
             {
-                throw std::runtime_error( "Invalid seek offset" );
+                return Error( ErrorCode::InvalidSeekOffset, "Invalid seek offset" );
             }
 
-            pos = this->impl->_size - numeric_cast< size_t >( std::abs( offset ) );
+            Error err;
+            size_t abs_offset;
+            err = numeric_cast< size_t >( abs_offset, std::abs( offset ) );
+            if( err ) return err;
+
+            pos = this->impl->_size - abs_offset;
         }
         else if( offset < 0 )
         {
-            pos = this->impl->_pos - numeric_cast< size_t >( std::abs( offset ) );
+            Error err;
+            size_t abs_offset;
+            err = numeric_cast< size_t >( abs_offset, std::abs( offset ) );
+            if( err ) return err;
+
+            pos = this->impl->_pos - abs_offset;
         }
         else
         {
-            pos = this->impl->_pos + numeric_cast< size_t >( offset );
+            Error err;
+            size_t offset_val;
+            err = numeric_cast< size_t >( offset_val, offset );
+            if( err ) return err;
+
+            pos = this->impl->_pos + offset_val;
         }
 
         if( pos > this->impl->_size )
         {
-            throw std::runtime_error( "Invalid seek offset" );
+            return Error( ErrorCode::InvalidSeekOffset, "Invalid seek offset" );
         }
 
         this->impl->_pos = pos;
 
-        this->impl->_stream.seekg( numeric_cast< std::streamsize >( pos ), std::ios_base::beg );
+        Error err;
+        std::streamsize stream_pos;
+        err = numeric_cast< std::streamsize >( stream_pos, pos );
+        if( err ) return err;
+
+        this->impl->_stream.seekg( stream_pos, std::ios_base::beg );
+
+        return Error();
     }
 
     size_t BinaryFileStream::Tell() const
     {
-        if( this->impl->_stream.is_open() == false )
-        {
-            throw std::runtime_error( "Invalid file stream" );
-        }
-
         return this->impl->_pos;
     }
 
@@ -146,7 +172,9 @@ namespace ISOBMFF
             this->_stream.seekg( 0, std::ios_base::end );
 
             pos         = this->_stream.tellg();
-            this->_size = numeric_cast< size_t >( pos );
+
+            Error err;
+            err = numeric_cast< size_t >( this->_size, pos );
 
             this->_stream.seekg( 0, std::ios_base::beg );
         }

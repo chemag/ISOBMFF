@@ -81,17 +81,24 @@ namespace ISOBMFF
         swap( o1.impl, o2.impl );
     }
 
-    void DREF::ReadData(Parser &parser, BinaryStream &stream)
+    Error DREF::ReadData(Parser &parser, BinaryStream &stream)
     {
         ContainerBox container("????");
+        Error err;
 
-        FullBox::ReadData(parser, stream);
+        err = FullBox::ReadData(parser, stream);
+        if( err ) return err;
 
-        // auto entry_count =
-        stream.ReadBigEndianUInt32();
-        container.ReadData(parser, stream);
-        
+        uint32_t temp;
+        err = stream.ReadBigEndianUInt32( temp );
+        if( err ) return err;
+
+        err = container.ReadData(parser, stream);
+        if( err ) return err;
+
         this->impl->_boxes = container.GetBoxes();
+
+        return Error();
     }
 
     void DREF::WriteDescription( std::ostream & os, std::size_t indentLevel ) const
