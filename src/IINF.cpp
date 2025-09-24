@@ -28,146 +28,113 @@
  * @author      Jean-David Gadina - www.digidna.net
  */
 
-#include <IINF.hpp>
 #include <ContainerBox.hpp>
+#include <IINF.hpp>
 
-namespace ISOBMFF
-{
-    class IINF::IMPL
-    {
-        public:
+namespace ISOBMFF {
+class IINF::IMPL {
+ public:
+  IMPL();
+  IMPL(const IMPL& o);
+  ~IMPL();
 
-            IMPL();
-            IMPL( const IMPL & o );
-            ~IMPL();
+  std::vector<std::shared_ptr<INFE> > _entries;
+};
 
-            std::vector< std::shared_ptr< INFE > > _entries;
-    };
+IINF::IINF() : FullBox("iinf"), impl(std::make_unique<IMPL>()) {}
 
-    IINF::IINF():
-        FullBox( "iinf" ),
-        impl( std::make_unique< IMPL >() )
-    {}
+IINF::IINF(const IINF& o)
+    : FullBox(o), impl(std::make_unique<IMPL>(*(o.impl))) {}
 
-    IINF::IINF( const IINF & o ):
-        FullBox( o ),
-        impl( std::make_unique< IMPL >( *( o.impl ) ) )
-    {}
-
-    IINF::IINF( IINF && o ) noexcept:
-        FullBox( std::move( o ) ),
-        impl( std::move( o.impl ) )
-    {
-        o.impl = nullptr;
-    }
-
-    IINF::~IINF()
-    {}
-
-    IINF & IINF::operator =( IINF o )
-    {
-        FullBox::operator=( o );
-        swap( *( this ), o );
-
-        return *( this );
-    }
-
-    void swap( IINF & o1, IINF & o2 )
-    {
-        using std::swap;
-
-        swap( static_cast< FullBox & >( o1 ), static_cast< FullBox & >( o2 ) );
-        swap( o1.impl, o2.impl );
-    }
-
-    Error IINF::ReadData( Parser & parser, BinaryStream & stream )
-    {
-        ContainerBox container( "????" );
-        Error err;
-
-        err = FullBox::ReadData( parser, stream );
-        if( err ) return err;
-
-        if( this->GetVersion() == 0 )
-        {
-            uint16_t temp;
-            err = stream.ReadBigEndianUInt16( temp );
-            if( err ) return err;
-        }
-        else
-        {
-            uint32_t temp;
-            err = stream.ReadBigEndianUInt32( temp );
-            if( err ) return err;
-        }
-
-        err = container.ReadData( parser, stream );
-        if( err ) return err;
-
-        this->impl->_entries.clear();
-
-        for( const auto & box: container.GetBoxes() )
-        {
-            if( dynamic_cast< INFE * >( box.get() ) != nullptr )
-            {
-                this->AddEntry( std::dynamic_pointer_cast< INFE >( box ) );
-            }
-        }
-
-        return Error();
-    }
-
-    void IINF::WriteDescription( std::ostream & os, std::size_t indentLevel ) const
-    {
-        FullBox::WriteDescription( os, indentLevel );
-        Container::WriteBoxes( os, indentLevel );
-    }
-
-    void IINF::AddEntry( std::shared_ptr< INFE > entry )
-    {
-        if( entry != nullptr )
-        {
-            this->impl->_entries.push_back( entry );
-        }
-    }
-
-    std::vector< std::shared_ptr< INFE > > IINF::GetEntries() const
-    {
-        return this->impl->_entries;
-    }
-
-    std::shared_ptr< INFE > IINF::GetItemInfo( uint32_t itemID ) const
-    {
-        for( const auto & infe: this->GetEntries() )
-        {
-            if( infe->GetItemID() == itemID )
-            {
-                return infe;
-            }
-        }
-
-        return nullptr;
-    }
-
-    void IINF::AddBox( std::shared_ptr< Box > box )
-    {
-        this->AddEntry( std::dynamic_pointer_cast< INFE >( box ) );
-    }
-
-    std::vector< std::shared_ptr< Box > > IINF::GetBoxes() const
-    {
-        auto v( this->GetEntries() );
-
-        return std::vector< std::shared_ptr< Box > >( v.begin(), v.end() );
-    }
-
-    IINF::IMPL::IMPL()
-    {}
-
-    IINF::IMPL::IMPL( const IMPL & o ):
-        _entries( o._entries )
-    {}
-
-    IINF::IMPL::~IMPL()
-    {}
+IINF::IINF(IINF&& o) noexcept : FullBox(std::move(o)), impl(std::move(o.impl)) {
+  o.impl = nullptr;
 }
+
+IINF::~IINF() {}
+
+IINF& IINF::operator=(IINF o) {
+  FullBox::operator=(o);
+  swap(*(this), o);
+
+  return *(this);
+}
+
+void swap(IINF& o1, IINF& o2) {
+  using std::swap;
+
+  swap(static_cast<FullBox&>(o1), static_cast<FullBox&>(o2));
+  swap(o1.impl, o2.impl);
+}
+
+Error IINF::ReadData(Parser& parser, BinaryStream& stream) {
+  ContainerBox container("????");
+  Error err;
+
+  err = FullBox::ReadData(parser, stream);
+  if (err) return err;
+
+  if (this->GetVersion() == 0) {
+    uint16_t temp;
+    err = stream.ReadBigEndianUInt16(temp);
+    if (err) return err;
+  } else {
+    uint32_t temp;
+    err = stream.ReadBigEndianUInt32(temp);
+    if (err) return err;
+  }
+
+  err = container.ReadData(parser, stream);
+  if (err) return err;
+
+  this->impl->_entries.clear();
+
+  for (const auto& box : container.GetBoxes()) {
+    if (dynamic_cast<INFE*>(box.get()) != nullptr) {
+      this->AddEntry(std::dynamic_pointer_cast<INFE>(box));
+    }
+  }
+
+  return Error();
+}
+
+void IINF::WriteDescription(std::ostream& os, std::size_t indentLevel) const {
+  FullBox::WriteDescription(os, indentLevel);
+  Container::WriteBoxes(os, indentLevel);
+}
+
+void IINF::AddEntry(std::shared_ptr<INFE> entry) {
+  if (entry != nullptr) {
+    this->impl->_entries.push_back(entry);
+  }
+}
+
+std::vector<std::shared_ptr<INFE> > IINF::GetEntries() const {
+  return this->impl->_entries;
+}
+
+std::shared_ptr<INFE> IINF::GetItemInfo(uint32_t itemID) const {
+  for (const auto& infe : this->GetEntries()) {
+    if (infe->GetItemID() == itemID) {
+      return infe;
+    }
+  }
+
+  return nullptr;
+}
+
+void IINF::AddBox(std::shared_ptr<Box> box) {
+  this->AddEntry(std::dynamic_pointer_cast<INFE>(box));
+}
+
+std::vector<std::shared_ptr<Box> > IINF::GetBoxes() const {
+  auto v(this->GetEntries());
+
+  return std::vector<std::shared_ptr<Box> >(v.begin(), v.end());
+}
+
+IINF::IMPL::IMPL() {}
+
+IINF::IMPL::IMPL(const IMPL& o) : _entries(o._entries) {}
+
+IINF::IMPL::~IMPL() {}
+}  // namespace ISOBMFF

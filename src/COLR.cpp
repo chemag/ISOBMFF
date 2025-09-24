@@ -29,228 +29,183 @@
  */
 
 #include <COLR.hpp>
-#include <sstream>
 #include <iomanip>
+#include <sstream>
 
-namespace ISOBMFF
-{
-    class COLR::IMPL
-    {
-        public:
+namespace ISOBMFF {
+class COLR::IMPL {
+ public:
+  IMPL();
+  IMPL(const IMPL& o);
+  ~IMPL();
 
-            IMPL();
-            IMPL( const IMPL & o );
-            ~IMPL();
+  std::string _colourType;
+  uint16_t _colourPrimaries;
+  uint16_t _transferCharacteristics;
+  uint16_t _matrixCoefficients;
+  bool _fullRangeFlag;
+  std::vector<uint8_t> _iccProfile;
+};
 
-            std::string            _colourType;
-            uint16_t               _colourPrimaries;
-            uint16_t               _transferCharacteristics;
-            uint16_t               _matrixCoefficients;
-            bool                   _fullRangeFlag;
-            std::vector< uint8_t > _iccProfile;
-    };
+COLR::COLR() : Box("colr"), impl(std::make_unique<IMPL>()) {}
 
-    COLR::COLR():
-        Box( "colr" ),
-        impl( std::make_unique< IMPL >() )
-    {}
+COLR::COLR(const COLR& o) : Box(o), impl(std::make_unique<IMPL>(*(o.impl))) {}
 
-    COLR::COLR( const COLR & o ):
-        Box( o ),
-        impl( std::make_unique< IMPL >( *( o.impl ) ) )
-    {}
-
-    COLR::COLR( COLR && o ) noexcept:
-        Box( std::move( o ) ),
-        impl( std::move( o.impl ) )
-    {
-        o.impl = nullptr;
-    }
-
-    COLR::~COLR()
-    {}
-
-    COLR & COLR::operator =( COLR o )
-    {
-        Box::operator=( o );
-        swap( *( this ), o );
-
-        return *( this );
-    }
-
-    void swap( COLR & o1, COLR & o2 )
-    {
-        using std::swap;
-
-        swap( static_cast< Box & >( o1 ), static_cast< Box & >( o2 ) );
-        swap( o1.impl, o2.impl );
-    }
-
-    Error COLR::ReadData( Parser & parser, BinaryStream & stream )
-    {
-        Error err;
-
-        std::string tempStr;
-        err = stream.ReadFourCC( tempStr );
-        if( err ) return err;
-        this->SetColourType( tempStr );
-
-        if( this->GetColourType() == "nclx" )
-        {
-            uint16_t temp16;
-            err = stream.ReadBigEndianUInt16( temp16 );
-            if( err ) return err;
-            this->SetColourPrimaries( temp16 );
-
-            err = stream.ReadBigEndianUInt16( temp16 );
-            if( err ) return err;
-            this->SetTransferCharacteristics( temp16 );
-
-            err = stream.ReadBigEndianUInt16( temp16 );
-            if( err ) return err;
-            this->SetMatrixCoefficients( temp16 );
-
-            uint8_t temp8;
-            err = stream.ReadUInt8( temp8 );
-            if( err ) return err;
-            this->SetFullRangeFlag( ( temp8 & 0x80 ) != 0 );
-        }
-        else if( this->GetColourType() == "rICC" || this->GetColourType() == "prof" )
-        {
-            std::vector< uint8_t > iccProfile;
-            err = stream.ReadAllData( iccProfile );
-            if( err ) return err;
-            this->SetICCProfile( iccProfile );
-        }
-        else
-        {
-            err = Box::ReadData( parser, stream );
-            if( err ) return err;
-        }
-        return Error();
-    }
-
-    std::vector< std::pair< std::string, std::string > > COLR::GetDisplayableProperties() const
-    {
-        auto props( Box::GetDisplayableProperties() );
-
-        props.push_back( { "Colour type", this->GetColourType() } );
-
-        if( this->GetColourType() == "nclx" )
-        {
-            props.push_back( { "Colour primaries",         std::to_string( this->GetColourPrimaries() ) } );
-            props.push_back( { "Transfer characteristics", std::to_string( this->GetTransferCharacteristics() ) } );
-            props.push_back( { "Matrix coefficients",      std::to_string( this->GetMatrixCoefficients() ) } );
-            props.push_back( { "Full range flag",          ( this->GetFullRangeFlag() ) ? "yes" : "no" } );
-        }
-        else if( this->GetColourType() == "rICC" || this->GetColourType() == "prof" )
-        {
-            {
-                std::vector< uint8_t > data;
-                std::stringstream      ss;
-                std::string            s;
-
-                data = this->GetICCProfile();
-
-                if( data.size() > 0 )
-                {
-                    for( auto byte: data )
-                    {
-                        ss << std::hex
-                           << std::uppercase
-                           << std::setfill( '0' )
-                           << std::setw( 2 )
-                           << static_cast< uint32_t >( byte )
-                           << " ";
-                    }
-
-                    s = ss.str();
-                    s = s.substr( 0, s.length() - 1 );
-                }
-
-                props.push_back( { "ICC profile", s } );
-            }
-        }
-
-        return props;
-    }
-
-    std::string COLR::GetColourType() const
-    {
-        return this->impl->_colourType;
-    }
-
-    uint16_t COLR::GetColourPrimaries() const
-    {
-        return this->impl->_colourPrimaries;
-    }
-
-    uint16_t COLR::GetTransferCharacteristics() const
-    {
-        return this->impl->_transferCharacteristics;
-    }
-
-    uint16_t COLR::GetMatrixCoefficients() const
-    {
-        return this->impl->_matrixCoefficients;
-    }
-
-    bool COLR::GetFullRangeFlag() const
-    {
-        return this->impl->_fullRangeFlag;
-    }
-
-    std::vector< uint8_t > COLR::GetICCProfile() const
-    {
-        return this->impl->_iccProfile;
-    }
-
-    void COLR::SetColourType( const std::string & value )
-    {
-        this->impl->_colourType = value;
-    }
-
-    void COLR::SetColourPrimaries( uint16_t value )
-    {
-        this->impl->_colourPrimaries = value;
-    }
-
-    void COLR::SetTransferCharacteristics( uint16_t value )
-    {
-        this->impl->_transferCharacteristics = value;
-    }
-
-    void COLR::SetMatrixCoefficients( uint16_t value )
-    {
-        this->impl->_matrixCoefficients = value;
-    }
-
-    void COLR::SetFullRangeFlag( bool value )
-    {
-        this->impl->_fullRangeFlag = value;
-    }
-
-    void COLR::SetICCProfile( const std::vector< uint8_t > & value )
-    {
-        this->impl->_iccProfile = value;
-    }
-
-    COLR::IMPL::IMPL():
-        _colourPrimaries( 0 ),
-        _transferCharacteristics( 0 ),
-        _matrixCoefficients( 0 ),
-        _fullRangeFlag( false )
-    {}
-
-    COLR::IMPL::IMPL( const IMPL & o ):
-        _colourType( o._colourType ),
-        _colourPrimaries( o._colourPrimaries ),
-        _transferCharacteristics( o._transferCharacteristics ),
-        _matrixCoefficients( o._matrixCoefficients ),
-        _fullRangeFlag( o._fullRangeFlag ),
-        _iccProfile( o._iccProfile )
-    {}
-
-    COLR::IMPL::~IMPL()
-    {}
+COLR::COLR(COLR&& o) noexcept : Box(std::move(o)), impl(std::move(o.impl)) {
+  o.impl = nullptr;
 }
+
+COLR::~COLR() {}
+
+COLR& COLR::operator=(COLR o) {
+  Box::operator=(o);
+  swap(*(this), o);
+
+  return *(this);
+}
+
+void swap(COLR& o1, COLR& o2) {
+  using std::swap;
+
+  swap(static_cast<Box&>(o1), static_cast<Box&>(o2));
+  swap(o1.impl, o2.impl);
+}
+
+Error COLR::ReadData(Parser& parser, BinaryStream& stream) {
+  Error err;
+
+  std::string tempStr;
+  err = stream.ReadFourCC(tempStr);
+  if (err) return err;
+  this->SetColourType(tempStr);
+
+  if (this->GetColourType() == "nclx") {
+    uint16_t temp16;
+    err = stream.ReadBigEndianUInt16(temp16);
+    if (err) return err;
+    this->SetColourPrimaries(temp16);
+
+    err = stream.ReadBigEndianUInt16(temp16);
+    if (err) return err;
+    this->SetTransferCharacteristics(temp16);
+
+    err = stream.ReadBigEndianUInt16(temp16);
+    if (err) return err;
+    this->SetMatrixCoefficients(temp16);
+
+    uint8_t temp8;
+    err = stream.ReadUInt8(temp8);
+    if (err) return err;
+    this->SetFullRangeFlag((temp8 & 0x80) != 0);
+  } else if (this->GetColourType() == "rICC" ||
+             this->GetColourType() == "prof") {
+    std::vector<uint8_t> iccProfile;
+    err = stream.ReadAllData(iccProfile);
+    if (err) return err;
+    this->SetICCProfile(iccProfile);
+  } else {
+    err = Box::ReadData(parser, stream);
+    if (err) return err;
+  }
+  return Error();
+}
+
+std::vector<std::pair<std::string, std::string> >
+COLR::GetDisplayableProperties() const {
+  auto props(Box::GetDisplayableProperties());
+
+  props.push_back({"Colour type", this->GetColourType()});
+
+  if (this->GetColourType() == "nclx") {
+    props.push_back(
+        {"Colour primaries", std::to_string(this->GetColourPrimaries())});
+    props.push_back({"Transfer characteristics",
+                     std::to_string(this->GetTransferCharacteristics())});
+    props.push_back(
+        {"Matrix coefficients", std::to_string(this->GetMatrixCoefficients())});
+    props.push_back(
+        {"Full range flag", (this->GetFullRangeFlag()) ? "yes" : "no"});
+  } else if (this->GetColourType() == "rICC" ||
+             this->GetColourType() == "prof") {
+    {
+      std::vector<uint8_t> data;
+      std::stringstream ss;
+      std::string s;
+
+      data = this->GetICCProfile();
+
+      if (data.size() > 0) {
+        for (auto byte : data) {
+          ss << std::hex << std::uppercase << std::setfill('0') << std::setw(2)
+             << static_cast<uint32_t>(byte) << " ";
+        }
+
+        s = ss.str();
+        s = s.substr(0, s.length() - 1);
+      }
+
+      props.push_back({"ICC profile", s});
+    }
+  }
+
+  return props;
+}
+
+std::string COLR::GetColourType() const { return this->impl->_colourType; }
+
+uint16_t COLR::GetColourPrimaries() const {
+  return this->impl->_colourPrimaries;
+}
+
+uint16_t COLR::GetTransferCharacteristics() const {
+  return this->impl->_transferCharacteristics;
+}
+
+uint16_t COLR::GetMatrixCoefficients() const {
+  return this->impl->_matrixCoefficients;
+}
+
+bool COLR::GetFullRangeFlag() const { return this->impl->_fullRangeFlag; }
+
+std::vector<uint8_t> COLR::GetICCProfile() const {
+  return this->impl->_iccProfile;
+}
+
+void COLR::SetColourType(const std::string& value) {
+  this->impl->_colourType = value;
+}
+
+void COLR::SetColourPrimaries(uint16_t value) {
+  this->impl->_colourPrimaries = value;
+}
+
+void COLR::SetTransferCharacteristics(uint16_t value) {
+  this->impl->_transferCharacteristics = value;
+}
+
+void COLR::SetMatrixCoefficients(uint16_t value) {
+  this->impl->_matrixCoefficients = value;
+}
+
+void COLR::SetFullRangeFlag(bool value) { this->impl->_fullRangeFlag = value; }
+
+void COLR::SetICCProfile(const std::vector<uint8_t>& value) {
+  this->impl->_iccProfile = value;
+}
+
+COLR::IMPL::IMPL()
+    : _colourPrimaries(0),
+      _transferCharacteristics(0),
+      _matrixCoefficients(0),
+      _fullRangeFlag(false) {}
+
+COLR::IMPL::IMPL(const IMPL& o)
+    : _colourType(o._colourType),
+      _colourPrimaries(o._colourPrimaries),
+      _transferCharacteristics(o._transferCharacteristics),
+      _matrixCoefficients(o._matrixCoefficients),
+      _fullRangeFlag(o._fullRangeFlag),
+      _iccProfile(o._iccProfile) {}
+
+COLR::IMPL::~IMPL() {}
+}  // namespace ISOBMFF

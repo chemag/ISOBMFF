@@ -35,74 +35,75 @@
 #include <Utils.hpp>
 #include <ostream>
 #include <sstream>
-#include <vector>
-#include <utility>
 #include <string>
+#include <utility>
+#include <vector>
 
-namespace ISOBMFF
-{
-    /*!
-     * @class       DisplayableObject
-     * @abstract    Interface for displayable objects.
-     */
-    class ISOBMFF_EXPORT DisplayableObject
-    {
-        public:
+namespace ISOBMFF {
+/*!
+ * @class       DisplayableObject
+ * @abstract    Interface for displayable objects.
+ */
+class ISOBMFF_EXPORT DisplayableObject {
+ public:
+  DisplayableObject() = default;
+  DisplayableObject(const DisplayableObject&) = default;
+  DisplayableObject& operator=(const DisplayableObject&) = default;
 
-            DisplayableObject()                                         = default;
-            DisplayableObject( const DisplayableObject & )              = default;
-            DisplayableObject & operator =( const DisplayableObject & ) = default;
+  /*!
+   * @function    ~DisplayableObject
+   * @abstarct    Destructor.
+   */
+  virtual ~DisplayableObject();
 
-            /*!
-             * @function    ~DisplayableObject
-             * @abstarct    Destructor.
-             */
-            virtual ~DisplayableObject();
+  /*!
+   * @function    GetDisplayableProperties
+   * @abstract    Returns the object's displayable properties and values.
+   * @result      The object's properties/values.
+   */
+  virtual std::vector<std::pair<std::string, std::string> >
+  GetDisplayableProperties() const = 0;
 
-            /*!
-             * @function    GetDisplayableProperties
-             * @abstract    Returns the object's displayable properties and values.
-             * @result      The object's properties/values.
-             */
-            virtual std::vector< std::pair< std::string, std::string > > GetDisplayableProperties() const = 0;
+  /*!
+   * @function    GetName
+   * @abstract    Returns the object's displayable name.
+   * @result      The object's name.
+   */
+  virtual std::string GetName() const = 0;
 
-            /*!
-             * @function    GetName
-             * @abstract    Returns the object's displayable name.
-             * @result      The object's name.
-             */
-            virtual std::string GetName() const = 0;
+  /*!
+   * @function    WriteDescription
+   * @abstract    Writes the object's description to an output stream.
+   * @param       os              The output stream in which to write the
+   * description.
+   * @param       indentLevel     The requested indent level.
+   * @discussion  This will write the object's name followed by its
+   *              displayable properties.
+   * @see         GetName
+   * @see         GetDisplayableProperties
+   */
+  virtual void WriteDescription(std::ostream& os,
+                                std::size_t indentLevel) const;
 
-            /*!
-             * @function    WriteDescription
-             * @abstract    Writes the object's description to an output stream.
-             * @param       os              The output stream in which to write the description.
-             * @param       indentLevel     The requested indent level.
-             * @discussion  This will write the object's name followed by its
-             *              displayable properties.
-             * @see         GetName
-             * @see         GetDisplayableProperties
-             */
-            virtual void WriteDescription( std::ostream & os, std::size_t indentLevel ) const;
+  /*!
+   * @function    ToString
+   * @abstract    Returns a string representation of the object.
+   * @result      A string representation of the object.
+   * @see         WriteDescription
+   */
+  virtual std::string ToString() const;
 
-            /*!
-             * @function    ToString
-             * @abstract    Returns a string representation of the object.
-             * @result      A string representation of the object.
-             * @see         WriteDescription
-             */
-            virtual std::string ToString() const;
-
-            /*!
-             * @function    operator <<
-             * @abstract    Writes the description of an object to an output stream.
-             * @param       os  The output stream.
-             * @param       o   The object to write.
-             * @result      The output stream.
-             * @see         WriteDescription
-             */
-            ISOBMFF_EXPORT friend std::ostream & operator << ( std::ostream & os, const DisplayableObject & o );
-    };
-}
+  /*!
+   * @function    operator <<
+   * @abstract    Writes the description of an object to an output stream.
+   * @param       os  The output stream.
+   * @param       o   The object to write.
+   * @result      The output stream.
+   * @see         WriteDescription
+   */
+  ISOBMFF_EXPORT friend std::ostream& operator<<(std::ostream& os,
+                                                 const DisplayableObject& o);
+};
+}  // namespace ISOBMFF
 
 #endif /* ISOBMFF_DISPLAYABLE_OBJECT_HPP */

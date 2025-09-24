@@ -31,38 +31,35 @@
 #ifndef ISOBMFF_IROT_HPP
 #define ISOBMFF_IROT_HPP
 
-#include <memory>
-#include <algorithm>
-#include <Macros.hpp>
 #include <FullBox.hpp>
+#include <Macros.hpp>
+#include <algorithm>
+#include <memory>
 
-namespace ISOBMFF
-{
-    class ISOBMFF_EXPORT IROT: public Box
-    {
-        public:
+namespace ISOBMFF {
+class ISOBMFF_EXPORT IROT : public Box {
+ public:
+  IROT();
+  IROT(const IROT& o);
+  IROT(IROT&& o) noexcept;
+  virtual ~IROT() override;
 
-            IROT();
-            IROT( const IROT & o );
-            IROT( IROT && o ) noexcept;
-            virtual ~IROT() override;
+  IROT& operator=(IROT o);
 
-            IROT & operator =( IROT o );
+  Error ReadData(Parser& parser, BinaryStream& stream) override;
+  std::vector<std::pair<std::string, std::string> > GetDisplayableProperties()
+      const override;
 
-            Error                                                 ReadData( Parser & parser, BinaryStream & stream ) override;
-            std::vector< std::pair< std::string, std::string > > GetDisplayableProperties() const override;
+  uint8_t GetAngle() const;
+  void SetAngle(uint8_t value);
 
-            uint8_t GetAngle() const;
-            void    SetAngle( uint8_t value );
+  ISOBMFF_EXPORT friend void swap(IROT& o1, IROT& o2);
 
-            ISOBMFF_EXPORT friend void swap( IROT & o1, IROT & o2 );
+ private:
+  class IMPL;
 
-        private:
-
-            class IMPL;
-
-            std::unique_ptr< IMPL > impl;
-    };
-}
+  std::unique_ptr<IMPL> impl;
+};
+}  // namespace ISOBMFF
 
 #endif /* ISOBMFF_IROT_HPP */

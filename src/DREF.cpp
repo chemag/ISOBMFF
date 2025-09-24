@@ -28,105 +28,82 @@
  * @author      Jean-David Gadina - www.digidna.net
  */
 
-#include <DREF.hpp>
 #include <ContainerBox.hpp>
+#include <DREF.hpp>
 #include <iostream>
 
-namespace ISOBMFF
-{
-    class DREF::IMPL
-    {
-        public:
+namespace ISOBMFF {
+class DREF::IMPL {
+ public:
+  IMPL();
+  IMPL(const IMPL &o);
+  ~IMPL();
 
-            IMPL();
-            IMPL( const IMPL & o );
-            ~IMPL();
+  std::vector<std::shared_ptr<Box> > _boxes;
+};
 
-            std::vector< std::shared_ptr< Box > > _boxes;
-    };
+DREF::DREF() : FullBox("dref"), impl(std::make_unique<IMPL>()) {}
 
-    DREF::DREF():
-        FullBox( "dref" ),
-        impl( std::make_unique< IMPL >() )
-    {}
+DREF::DREF(const DREF &o)
+    : FullBox(o), impl(std::make_unique<IMPL>(*(o.impl))) {}
 
-    DREF::DREF( const DREF & o ):
-        FullBox( o ),
-        impl( std::make_unique< IMPL >( *( o.impl ) ) )
-    {}
-
-    DREF::DREF( DREF && o ) noexcept:
-        FullBox( std::move( o ) ),
-        impl( std::move( o.impl ) )
-    {
-        o.impl = nullptr;
-    }
-
-    DREF::~DREF()
-    {}
-
-    DREF & DREF::operator =( DREF o )
-    {
-        FullBox::operator=( o );
-        swap( *( this ), o );
-
-        return *( this );
-    }
-
-    void swap( DREF & o1, DREF & o2 )
-    {
-        using std::swap;
-
-        swap( static_cast< FullBox & >( o1 ), static_cast< FullBox & >( o2 ) );
-        swap( o1.impl, o2.impl );
-    }
-
-    Error DREF::ReadData(Parser &parser, BinaryStream &stream)
-    {
-        ContainerBox container("????");
-        Error err;
-
-        err = FullBox::ReadData(parser, stream);
-        if( err ) return err;
-
-        uint32_t temp;
-        err = stream.ReadBigEndianUInt32( temp );
-        if( err ) return err;
-
-        err = container.ReadData(parser, stream);
-        if( err ) return err;
-
-        this->impl->_boxes = container.GetBoxes();
-
-        return Error();
-    }
-
-    void DREF::WriteDescription( std::ostream & os, std::size_t indentLevel ) const
-    {
-        FullBox::WriteDescription( os, indentLevel );
-        Container::WriteBoxes( os, indentLevel );
-    }
-
-    void DREF::AddBox( std::shared_ptr< Box > box )
-    {
-        if( box != nullptr )
-        {
-            this->impl->_boxes.push_back( box );
-        }
-    }
-
-    std::vector< std::shared_ptr< Box > > DREF::GetBoxes() const
-    {
-        return this->impl->_boxes;
-    }
-
-    DREF::IMPL::IMPL()
-    {}
-
-    DREF::IMPL::IMPL( const IMPL & o ):
-        _boxes( o._boxes )
-    {}
-
-    DREF::IMPL::~IMPL()
-    {}
+DREF::DREF(DREF &&o) noexcept : FullBox(std::move(o)), impl(std::move(o.impl)) {
+  o.impl = nullptr;
 }
+
+DREF::~DREF() {}
+
+DREF &DREF::operator=(DREF o) {
+  FullBox::operator=(o);
+  swap(*(this), o);
+
+  return *(this);
+}
+
+void swap(DREF &o1, DREF &o2) {
+  using std::swap;
+
+  swap(static_cast<FullBox &>(o1), static_cast<FullBox &>(o2));
+  swap(o1.impl, o2.impl);
+}
+
+Error DREF::ReadData(Parser &parser, BinaryStream &stream) {
+  ContainerBox container("????");
+  Error err;
+
+  err = FullBox::ReadData(parser, stream);
+  if (err) return err;
+
+  uint32_t temp;
+  err = stream.ReadBigEndianUInt32(temp);
+  if (err) return err;
+
+  err = container.ReadData(parser, stream);
+  if (err) return err;
+
+  this->impl->_boxes = container.GetBoxes();
+
+  return Error();
+}
+
+void DREF::WriteDescription(std::ostream &os, std::size_t indentLevel) const {
+  FullBox::WriteDescription(os, indentLevel);
+  Container::WriteBoxes(os, indentLevel);
+}
+
+void DREF::AddBox(std::shared_ptr<Box> box) {
+  if (box != nullptr) {
+    this->impl->_boxes.push_back(box);
+  }
+}
+
+std::vector<std::shared_ptr<Box> > DREF::GetBoxes() const {
+  return this->impl->_boxes;
+}
+
+DREF::IMPL::IMPL() {}
+
+DREF::IMPL::IMPL(const IMPL &o) : _boxes(o._boxes) {}
+
+DREF::IMPL::~IMPL() {}
+}  // namespace ISOBMFF

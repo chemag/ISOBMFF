@@ -31,200 +31,146 @@
 #ifndef ISOBMFF_CASTS_HPP
 #define ISOBMFF_CASTS_HPP
 
-#include <type_traits>
-#include <limits>
 #include <Error.hpp>
+#include <limits>
+#include <type_traits>
 
-namespace ISOBMFF
-{
-    template
-    <
-        typename T,
-        typename U,
-        typename std::enable_if
-        <
-               std::is_integral< T >::value
-            && std::is_integral< U >::value
-            && std::is_unsigned< T >::value
-            && std::is_unsigned< U >::value
-        >
-        ::type * = nullptr
-    >
-    Error numeric_cast( T & result, U v )
-    {
-        if( ( std::numeric_limits< T >::max )() < ( std::numeric_limits< U >::max )() && v > ( std::numeric_limits< T >::max )() )
-        {
-            result = T();
-            return Error( ErrorCode::BadNumericCast, "Bad numeric cast - value too large" );
-        }
+namespace ISOBMFF {
+template <typename T, typename U,
+          typename std::enable_if<
+              std::is_integral<T>::value && std::is_integral<U>::value &&
+              std::is_unsigned<T>::value && std::is_unsigned<U>::value>::type* =
+              nullptr>
+Error numeric_cast(T& result, U v) {
+  if ((std::numeric_limits<T>::max)() < (std::numeric_limits<U>::max)() &&
+      v > (std::numeric_limits<T>::max)()) {
+    result = T();
+    return Error(ErrorCode::BadNumericCast,
+                 "Bad numeric cast - value too large");
+  }
 
-        result = static_cast< T >( v );
-        return Error();
-    }
-
-    template
-    <
-        typename T,
-        typename U,
-        typename std::enable_if
-        <
-               std::is_integral< T >::value
-            && std::is_integral< U >::value
-            && std::is_signed< T >::value
-            && std::is_signed< U >::value
-        >
-        ::type * = nullptr
-    >
-    Error numeric_cast( T & result, U v )
-    {
-        if( ( std::numeric_limits< T >::max )() < ( std::numeric_limits< U >::max )() && v > ( std::numeric_limits< T >::max )() )
-        {
-            result = T();
-            return Error( ErrorCode::BadNumericCast, "Bad numeric cast - value too large" );
-        }
-
-        if( ( std::numeric_limits< T >::min )() > ( std::numeric_limits< U >::min )() && v < ( std::numeric_limits< T >::min )() )
-        {
-            result = T();
-            return Error( ErrorCode::BadNumericCast, "Bad numeric cast - value too small" );
-        }
-
-        result = static_cast< T >( v );
-        return Error();
-    }
-
-    template
-    <
-        typename T,
-        typename U,
-        typename std::enable_if
-        <
-               std::is_integral< T >::value
-            && std::is_integral< U >::value
-            && std::is_signed< T >::value
-            && std::is_unsigned< U >::value
-        >
-        ::type * = nullptr
-    >
-    Error numeric_cast( T & result, U v )
-    {
-        if( static_cast< typename std::make_unsigned< T >::type >( ( std::numeric_limits< T >::max )() ) < ( std::numeric_limits< U >::max )() && v > static_cast< typename std::make_unsigned< T >::type >( ( std::numeric_limits< T >::max )() ) )
-        {
-            result = T();
-            return Error( ErrorCode::BadNumericCast, "Bad numeric cast - value too large" );
-        }
-
-        result = static_cast< T >( v );
-        return Error();
-    }
-
-    template
-    <
-        typename T,
-        typename U,
-        typename std::enable_if
-        <
-               std::is_integral< T >::value
-            && std::is_integral< U >::value
-            && std::is_unsigned< T >::value
-            && std::is_signed< U >::value
-        >
-        ::type * = nullptr
-    >
-    Error numeric_cast( T & result, U v )
-    {
-        if( v < 0 )
-        {
-            result = T();
-            return Error( ErrorCode::BadNumericCast, "Bad numeric cast - negative value" );
-        }
-
-        if( ( std::numeric_limits< T >::max )() < static_cast< typename std::make_unsigned< U >::type >( ( std::numeric_limits< U >::max )() ) && static_cast< typename std::make_unsigned< U >::type >( v ) > ( std::numeric_limits< T >::max )() )
-        {
-            result = T();
-            return Error( ErrorCode::BadNumericCast, "Bad numeric cast - value too large" );
-        }
-
-        result = static_cast< T >( v );
-        return Error();
-    }
-
-    template
-    <
-        typename T,
-        typename U,
-        typename std::enable_if
-        <
-               std::is_integral< T >::value
-            && std::is_unsigned< T >::value
-            && std::is_floating_point< U >::value
-        >
-        ::type * = nullptr
-    >
-    Error numeric_cast( T & result, U v )
-    {
-        if( v < 0 )
-        {
-            result = T();
-            return Error( ErrorCode::BadNumericCast, "Bad numeric cast - negative value" );
-        }
-
-        if( v > ( std::numeric_limits< T >::max )() )
-        {
-            result = T();
-            return Error( ErrorCode::BadNumericCast, "Bad numeric cast - value too large" );
-        }
-
-        result = static_cast< T >( v );
-        return Error();
-    }
-
-    template
-    <
-        typename T,
-        typename U,
-        typename std::enable_if
-        <
-               std::is_integral< T >::value
-            && std::is_signed< T >::value
-            && std::is_floating_point< U >::value
-        >
-        ::type * = nullptr
-    >
-    Error numeric_cast( T & result, U v )
-    {
-        if( v > ( std::numeric_limits< T >::max )() )
-        {
-            result = T();
-            return Error( ErrorCode::BadNumericCast, "Bad numeric cast - value too large" );
-        }
-
-        if( v < ( std::numeric_limits< T >::min )() )
-        {
-            result = T();
-            return Error( ErrorCode::BadNumericCast, "Bad numeric cast - value too small" );
-        }
-
-        result = static_cast< T >( v );
-        return Error();
-    }
-
-    template
-    <
-        typename T,
-        typename U,
-        typename std::enable_if
-        <
-               std::is_floating_point< T >::value
-            && std::is_integral< U >::value
-        >
-        ::type * = nullptr
-    >
-    Error numeric_cast( T & result, U v )
-    {
-        result = static_cast< T >( v );
-        return Error();
-    }
+  result = static_cast<T>(v);
+  return Error();
 }
+
+template <
+    typename T, typename U,
+    typename std::enable_if<
+        std::is_integral<T>::value && std::is_integral<U>::value &&
+        std::is_signed<T>::value && std::is_signed<U>::value>::type* = nullptr>
+Error numeric_cast(T& result, U v) {
+  if ((std::numeric_limits<T>::max)() < (std::numeric_limits<U>::max)() &&
+      v > (std::numeric_limits<T>::max)()) {
+    result = T();
+    return Error(ErrorCode::BadNumericCast,
+                 "Bad numeric cast - value too large");
+  }
+
+  if ((std::numeric_limits<T>::min)() > (std::numeric_limits<U>::min)() &&
+      v < (std::numeric_limits<T>::min)()) {
+    result = T();
+    return Error(ErrorCode::BadNumericCast,
+                 "Bad numeric cast - value too small");
+  }
+
+  result = static_cast<T>(v);
+  return Error();
+}
+
+template <typename T, typename U,
+          typename std::enable_if<
+              std::is_integral<T>::value && std::is_integral<U>::value &&
+              std::is_signed<T>::value && std::is_unsigned<U>::value>::type* =
+              nullptr>
+Error numeric_cast(T& result, U v) {
+  if (static_cast<typename std::make_unsigned<T>::type>(
+          (std::numeric_limits<T>::max)()) < (std::numeric_limits<U>::max)() &&
+      v > static_cast<typename std::make_unsigned<T>::type>(
+              (std::numeric_limits<T>::max)())) {
+    result = T();
+    return Error(ErrorCode::BadNumericCast,
+                 "Bad numeric cast - value too large");
+  }
+
+  result = static_cast<T>(v);
+  return Error();
+}
+
+template <typename T, typename U,
+          typename std::enable_if<
+              std::is_integral<T>::value && std::is_integral<U>::value &&
+              std::is_unsigned<T>::value && std::is_signed<U>::value>::type* =
+              nullptr>
+Error numeric_cast(T& result, U v) {
+  if (v < 0) {
+    result = T();
+    return Error(ErrorCode::BadNumericCast,
+                 "Bad numeric cast - negative value");
+  }
+
+  if ((std::numeric_limits<T>::max)() <
+          static_cast<typename std::make_unsigned<U>::type>(
+              (std::numeric_limits<U>::max)()) &&
+      static_cast<typename std::make_unsigned<U>::type>(v) >
+          (std::numeric_limits<T>::max)()) {
+    result = T();
+    return Error(ErrorCode::BadNumericCast,
+                 "Bad numeric cast - value too large");
+  }
+
+  result = static_cast<T>(v);
+  return Error();
+}
+
+template <typename T, typename U,
+          typename std::enable_if<
+              std::is_integral<T>::value && std::is_unsigned<T>::value &&
+              std::is_floating_point<U>::value>::type* = nullptr>
+Error numeric_cast(T& result, U v) {
+  if (v < 0) {
+    result = T();
+    return Error(ErrorCode::BadNumericCast,
+                 "Bad numeric cast - negative value");
+  }
+
+  if (v > (std::numeric_limits<T>::max)()) {
+    result = T();
+    return Error(ErrorCode::BadNumericCast,
+                 "Bad numeric cast - value too large");
+  }
+
+  result = static_cast<T>(v);
+  return Error();
+}
+
+template <typename T, typename U,
+          typename std::enable_if<
+              std::is_integral<T>::value && std::is_signed<T>::value &&
+              std::is_floating_point<U>::value>::type* = nullptr>
+Error numeric_cast(T& result, U v) {
+  if (v > (std::numeric_limits<T>::max)()) {
+    result = T();
+    return Error(ErrorCode::BadNumericCast,
+                 "Bad numeric cast - value too large");
+  }
+
+  if (v < (std::numeric_limits<T>::min)()) {
+    result = T();
+    return Error(ErrorCode::BadNumericCast,
+                 "Bad numeric cast - value too small");
+  }
+
+  result = static_cast<T>(v);
+  return Error();
+}
+
+template <typename T, typename U,
+          typename std::enable_if<std::is_floating_point<T>::value &&
+                                  std::is_integral<U>::value>::type* = nullptr>
+Error numeric_cast(T& result, U v) {
+  result = static_cast<T>(v);
+  return Error();
+}
+}  // namespace ISOBMFF
 
 #endif /* ISOBMFF_CASTS_HPP */

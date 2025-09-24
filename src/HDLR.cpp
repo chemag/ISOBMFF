@@ -33,153 +33,118 @@
 #include <cstdint>
 #include <cstring>
 
-namespace ISOBMFF
-{
-    class HDLR::IMPL
-    {
-        public:
+namespace ISOBMFF {
+class HDLR::IMPL {
+ public:
+  IMPL();
+  IMPL(const IMPL& o);
+  ~IMPL();
 
-            IMPL();
-            IMPL( const IMPL & o );
-            ~IMPL();
+  uint32_t _predefined;
+  std::string _handlerType;
+  uint32_t _reserved[3];
+  std::string _handlerName;
+};
 
-            uint32_t    _predefined;
-            std::string _handlerType;
-            uint32_t    _reserved[ 3 ];
-            std::string _handlerName;
-    };
+HDLR::HDLR() : FullBox("hdlr"), impl(std::make_unique<IMPL>()) {}
 
-    HDLR::HDLR():
-        FullBox( "hdlr" ),
-        impl( std::make_unique< IMPL >() )
-    {}
+HDLR::HDLR(const HDLR& o)
+    : FullBox(o), impl(std::make_unique<IMPL>(*(o.impl))) {}
 
-    HDLR::HDLR( const HDLR & o ):
-        FullBox( o ),
-        impl( std::make_unique< IMPL >( *( o.impl ) ) )
-    {}
-
-    HDLR::HDLR( HDLR && o ) noexcept:
-        FullBox( std::move( o ) ),
-        impl( std::move( o.impl ) )
-    {
-        o.impl = nullptr;
-    }
-
-    HDLR::~HDLR()
-    {}
-
-    HDLR & HDLR::operator =( HDLR o )
-    {
-        FullBox::operator=( o );
-        swap( *( this ), o );
-
-        return *( this );
-    }
-
-    void swap( HDLR & o1, HDLR & o2 )
-    {
-        using std::swap;
-
-        swap( static_cast< FullBox & >( o1 ), static_cast< FullBox & >( o2 ) );
-        swap( o1.impl, o2.impl );
-    }
-
-    Error HDLR::ReadData( Parser & parser, BinaryStream & stream )
-    {
-        Error err;
-
-        err = FullBox::ReadData( parser, stream );
-        if( err ) return err;
-
-        err = stream.ReadBigEndianUInt32( this->impl->_predefined );
-        if( err ) return err;
-
-        std::string tempStr;
-        err = stream.ReadFourCC( tempStr );
-        if( err ) return err;
-        this->SetHandlerType( tempStr );
-
-        err = stream.ReadBigEndianUInt32( this->impl->_reserved[ 0 ] );
-        if( err ) return err;
-        err = stream.ReadBigEndianUInt32( this->impl->_reserved[ 1 ] );
-        if( err ) return err;
-        err = stream.ReadBigEndianUInt32( this->impl->_reserved[ 2 ] );
-        if( err ) return err;
-
-        if( stream.HasBytesAvailable() )
-        {
-            if
-            (
-                   parser.GetPreferredStringType() == Parser::StringType::Pascal
-                || this->impl->_predefined         == 1835560050 /* mhlr */
-                || this->impl->_reserved[ 0 ]      == 1634758764 /* appl */
-            )
-            {
-                std::string handlerNameStr;
-                err = stream.ReadPascalString( handlerNameStr );
-                if( err ) return err;
-                this->SetHandlerName( handlerNameStr );
-            }
-            else
-            {
-                std::string handlerNameStr;
-                err = stream.ReadNULLTerminatedString( handlerNameStr );
-                if( err ) return err;
-                this->SetHandlerName( handlerNameStr );
-            }
-        }
-        else
-        {
-            this->SetHandlerName( "" );
-        }
-        return Error();
-    }
-
-    std::vector< std::pair< std::string, std::string > > HDLR::GetDisplayableProperties() const
-    {
-        auto props( FullBox::GetDisplayableProperties() );
-
-        props.push_back( { "Handler type", this->GetHandlerType() } );
-        props.push_back( { "Handler name", this->GetHandlerName() } );
-
-        return props;
-    }
-
-    std::string HDLR::GetHandlerType() const
-    {
-        return this->impl->_handlerType;
-    }
-
-    std::string HDLR::GetHandlerName() const
-    {
-        return this->impl->_handlerName;
-    }
-
-    void HDLR::SetHandlerType( const std::string & value )
-    {
-        this->impl->_handlerType = value;
-    }
-
-    void HDLR::SetHandlerName( const std::string & value )
-    {
-        this->impl->_handlerName = value;
-    }
-
-    HDLR::IMPL::IMPL():
-        _predefined( 0 )
-    {
-        memset( this->_reserved, 0, sizeof( this->_reserved ) );
-    }
-
-    HDLR::IMPL::IMPL( const IMPL & o ):
-        _predefined( o._predefined ),
-        _handlerType( o._handlerType ),
-        _handlerName( o._handlerName )
-    {
-        memcpy( this->_reserved, o._reserved, sizeof( this->_reserved ) );
-    }
-
-    HDLR::IMPL::~IMPL()
-    {}
+HDLR::HDLR(HDLR&& o) noexcept : FullBox(std::move(o)), impl(std::move(o.impl)) {
+  o.impl = nullptr;
 }
+
+HDLR::~HDLR() {}
+
+HDLR& HDLR::operator=(HDLR o) {
+  FullBox::operator=(o);
+  swap(*(this), o);
+
+  return *(this);
+}
+
+void swap(HDLR& o1, HDLR& o2) {
+  using std::swap;
+
+  swap(static_cast<FullBox&>(o1), static_cast<FullBox&>(o2));
+  swap(o1.impl, o2.impl);
+}
+
+Error HDLR::ReadData(Parser& parser, BinaryStream& stream) {
+  Error err;
+
+  err = FullBox::ReadData(parser, stream);
+  if (err) return err;
+
+  err = stream.ReadBigEndianUInt32(this->impl->_predefined);
+  if (err) return err;
+
+  std::string tempStr;
+  err = stream.ReadFourCC(tempStr);
+  if (err) return err;
+  this->SetHandlerType(tempStr);
+
+  err = stream.ReadBigEndianUInt32(this->impl->_reserved[0]);
+  if (err) return err;
+  err = stream.ReadBigEndianUInt32(this->impl->_reserved[1]);
+  if (err) return err;
+  err = stream.ReadBigEndianUInt32(this->impl->_reserved[2]);
+  if (err) return err;
+
+  if (stream.HasBytesAvailable()) {
+    if (parser.GetPreferredStringType() == Parser::StringType::Pascal ||
+        this->impl->_predefined == 1835560050     /* mhlr */
+        || this->impl->_reserved[0] == 1634758764 /* appl */
+    ) {
+      std::string handlerNameStr;
+      err = stream.ReadPascalString(handlerNameStr);
+      if (err) return err;
+      this->SetHandlerName(handlerNameStr);
+    } else {
+      std::string handlerNameStr;
+      err = stream.ReadNULLTerminatedString(handlerNameStr);
+      if (err) return err;
+      this->SetHandlerName(handlerNameStr);
+    }
+  } else {
+    this->SetHandlerName("");
+  }
+  return Error();
+}
+
+std::vector<std::pair<std::string, std::string> >
+HDLR::GetDisplayableProperties() const {
+  auto props(FullBox::GetDisplayableProperties());
+
+  props.push_back({"Handler type", this->GetHandlerType()});
+  props.push_back({"Handler name", this->GetHandlerName()});
+
+  return props;
+}
+
+std::string HDLR::GetHandlerType() const { return this->impl->_handlerType; }
+
+std::string HDLR::GetHandlerName() const { return this->impl->_handlerName; }
+
+void HDLR::SetHandlerType(const std::string& value) {
+  this->impl->_handlerType = value;
+}
+
+void HDLR::SetHandlerName(const std::string& value) {
+  this->impl->_handlerName = value;
+}
+
+HDLR::IMPL::IMPL() : _predefined(0) {
+  memset(this->_reserved, 0, sizeof(this->_reserved));
+}
+
+HDLR::IMPL::IMPL(const IMPL& o)
+    : _predefined(o._predefined),
+      _handlerType(o._handlerType),
+      _handlerName(o._handlerName) {
+  memcpy(this->_reserved, o._reserved, sizeof(this->_reserved));
+}
+
+HDLR::IMPL::~IMPL() {}
+}  // namespace ISOBMFF

@@ -5,7 +5,7 @@ all: none
 
 
 format:
-	clang-format -i -style=google ./include/*h
+	clang-format -i -style=google ./include/*hpp
 	clang-format -i -style=google ./src/*cpp
 	clang-format -i -style=google ./tools/*cpp
 

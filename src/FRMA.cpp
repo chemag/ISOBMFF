@@ -32,94 +32,70 @@
 #include <Parser.hpp>
 #include <Utils.hpp>
 
-namespace ISOBMFF
-{
-    class FRMA::IMPL
-    {
-        public:
+namespace ISOBMFF {
+class FRMA::IMPL {
+ public:
+  IMPL();
+  IMPL(const IMPL& o);
+  ~IMPL();
 
-            IMPL();
-            IMPL( const IMPL & o );
-            ~IMPL();
+  std::string _dataFormat;
+};
 
-            std::string _dataFormat;
-    };
+FRMA::FRMA() : Box("frma"), impl(std::make_unique<IMPL>()) {}
 
-    FRMA::FRMA():
-        Box( "frma" ),
-        impl( std::make_unique< IMPL >() )
-    {}
+FRMA::FRMA(const FRMA& o) : Box(o), impl(std::make_unique<IMPL>(*(o.impl))) {}
 
-    FRMA::FRMA( const FRMA & o ):
-        Box( o ),
-        impl( std::make_unique< IMPL >( *( o.impl ) ) )
-    {}
-
-    FRMA::FRMA( FRMA && o ) noexcept:
-        Box( std::move( o ) ),
-        impl( std::move( o.impl ) )
-    {
-        o.impl = nullptr;
-    }
-
-    FRMA::~FRMA()
-    {}
-
-    FRMA & FRMA::operator =( FRMA o )
-    {
-        Box::operator=( o );
-        swap( *( this ), o );
-
-        return *( this );
-    }
-
-    void swap( FRMA & o1, FRMA & o2 )
-    {
-        using std::swap;
-
-        swap( static_cast< Box & >( o1 ), static_cast< Box & >( o2 ) );
-        swap( o1.impl, o2.impl );
-    }
-
-    Error FRMA::ReadData( Parser & parser, BinaryStream & stream )
-    {
-        Error err;
-
-        ( void )parser;
-
-        std::string temp;
-        err = stream.ReadFourCC( temp );
-        if( err ) return err;
-        this->SetDataFormat( temp );
-        return Error();
-    }
-
-    std::vector< std::pair< std::string, std::string > > FRMA::GetDisplayableProperties() const
-    {
-        auto props( Box::GetDisplayableProperties() );
-
-        props.push_back( { "Data format", this->GetDataFormat() } );
-
-        return props;
-    }
-
-    std::string FRMA::GetDataFormat() const
-    {
-        return this->impl->_dataFormat;
-    }
-
-    void FRMA::SetDataFormat( const std::string & value )
-    {
-        this->impl->_dataFormat = value;
-    }
-
-    FRMA::IMPL::IMPL()
-    {}
-
-    FRMA::IMPL::IMPL( const IMPL & o ):
-        _dataFormat( o._dataFormat )
-    {}
-
-    FRMA::IMPL::~IMPL()
-    {}
+FRMA::FRMA(FRMA&& o) noexcept : Box(std::move(o)), impl(std::move(o.impl)) {
+  o.impl = nullptr;
 }
+
+FRMA::~FRMA() {}
+
+FRMA& FRMA::operator=(FRMA o) {
+  Box::operator=(o);
+  swap(*(this), o);
+
+  return *(this);
+}
+
+void swap(FRMA& o1, FRMA& o2) {
+  using std::swap;
+
+  swap(static_cast<Box&>(o1), static_cast<Box&>(o2));
+  swap(o1.impl, o2.impl);
+}
+
+Error FRMA::ReadData(Parser& parser, BinaryStream& stream) {
+  Error err;
+
+  (void)parser;
+
+  std::string temp;
+  err = stream.ReadFourCC(temp);
+  if (err) return err;
+  this->SetDataFormat(temp);
+  return Error();
+}
+
+std::vector<std::pair<std::string, std::string> >
+FRMA::GetDisplayableProperties() const {
+  auto props(Box::GetDisplayableProperties());
+
+  props.push_back({"Data format", this->GetDataFormat()});
+
+  return props;
+}
+
+std::string FRMA::GetDataFormat() const { return this->impl->_dataFormat; }
+
+void FRMA::SetDataFormat(const std::string& value) {
+  this->impl->_dataFormat = value;
+}
+
+FRMA::IMPL::IMPL() {}
+
+FRMA::IMPL::IMPL(const IMPL& o) : _dataFormat(o._dataFormat) {}
+
+FRMA::IMPL::~IMPL() {}
+}  // namespace ISOBMFF

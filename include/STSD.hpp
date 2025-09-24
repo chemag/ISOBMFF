@@ -31,40 +31,37 @@
 #ifndef ISOBMFF_STSD_HPP
 #define ISOBMFF_STSD_HPP
 
-#include <memory>
-#include <algorithm>
-#include <Macros.hpp>
-#include <FullBox.hpp>
 #include <Container.hpp>
+#include <FullBox.hpp>
+#include <Macros.hpp>
+#include <algorithm>
 #include <cstdint>
+#include <memory>
 
-namespace ISOBMFF
-{
-    class ISOBMFF_EXPORT STSD: public FullBox, public Container
-    {
-        public:
+namespace ISOBMFF {
+class ISOBMFF_EXPORT STSD : public FullBox, public Container {
+ public:
+  STSD();
+  STSD(const STSD& o);
+  STSD(STSD&& o) noexcept;
+  virtual ~STSD() override;
 
-            STSD();
-            STSD( const STSD & o );
-            STSD( STSD && o ) noexcept;
-            virtual ~STSD() override;
+  STSD& operator=(STSD o);
 
-            STSD & operator =( STSD o );
+  Error ReadData(Parser& parser, BinaryStream& stream) override;
+  void WriteDescription(std::ostream& os,
+                        std::size_t indentLevel) const override;
 
-            Error ReadData( Parser & parser, BinaryStream & stream ) override;
-            void WriteDescription( std::ostream & os, std::size_t indentLevel ) const override;
+  void AddBox(std::shared_ptr<Box> box) override;
+  std::vector<std::shared_ptr<Box> > GetBoxes() const override;
 
-            void                                  AddBox( std::shared_ptr< Box > box ) override;
-            std::vector< std::shared_ptr< Box > > GetBoxes() const override;
+  ISOBMFF_EXPORT friend void swap(STSD& o1, STSD& o2);
 
-            ISOBMFF_EXPORT friend void swap( STSD & o1, STSD & o2 );
+ private:
+  class IMPL;
 
-        private:
-
-            class IMPL;
-
-            std::unique_ptr< IMPL > impl;
-    };
-}
+  std::unique_ptr<IMPL> impl;
+};
+}  // namespace ISOBMFF
 
 #endif /* ISOBMFF_STSD_HPP */

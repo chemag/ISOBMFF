@@ -28,106 +28,83 @@
  * @author      Jean-David Gadina - www.digidna.net
  */
 
-#include <IREF.hpp>
 #include <ContainerBox.hpp>
+#include <IREF.hpp>
 #include <Parser.hpp>
 
-namespace ISOBMFF
-{
-    class IREF::IMPL
-    {
-        public:
+namespace ISOBMFF {
+class IREF::IMPL {
+ public:
+  IMPL();
+  IMPL(const IMPL& o);
+  ~IMPL();
 
-            IMPL();
-            IMPL( const IMPL & o );
-            ~IMPL();
+  std::vector<std::shared_ptr<Box> > _boxes;
+};
 
-            std::vector< std::shared_ptr< Box > > _boxes;
-    };
+IREF::IREF() : FullBox("iref"), impl(std::make_unique<IMPL>()) {}
 
-    IREF::IREF():
-        FullBox( "iref" ),
-        impl( std::make_unique< IMPL >() )
-    {}
+IREF::IREF(const IREF& o)
+    : FullBox(o), impl(std::make_unique<IMPL>(*(o.impl))) {}
 
-    IREF::IREF( const IREF & o ):
-        FullBox( o ),
-        impl( std::make_unique< IMPL >( *( o.impl ) ) )
-    {}
-
-    IREF::IREF( IREF && o ) noexcept:
-        FullBox( std::move( o ) ),
-        impl( std::move( o.impl ) )
-    {
-        o.impl = nullptr;
-    }
-
-    IREF::~IREF()
-    {}
-
-    IREF & IREF::operator =( IREF o )
-    {
-        FullBox::operator=( o );
-        swap( *( this ), o );
-
-        return *( this );
-    }
-
-    void swap( IREF & o1, IREF & o2 )
-    {
-        using std::swap;
-
-        swap( static_cast< FullBox & >( o1 ), static_cast< FullBox & >( o2 ) );
-        swap( o1.impl, o2.impl );
-    }
-
-    Error IREF::ReadData( Parser & parser, BinaryStream & stream )
-    {
-        ContainerBox container( "????" );
-        Error err;
-
-        err = FullBox::ReadData( parser, stream );
-        if( err ) return err;
-
-        parser.SetInfo( "iref", this );
-
-        err = container.ReadData( parser, stream );
-
-        parser.SetInfo( "iref", nullptr );
-
-        if( err ) return err;
-
-        this->impl->_boxes = container.GetBoxes();
-
-        return Error();
-    }
-
-    void IREF::WriteDescription( std::ostream & os, std::size_t indentLevel ) const
-    {
-        FullBox::WriteDescription( os, indentLevel );
-        Container::WriteBoxes( os, indentLevel );
-    }
-
-    void IREF::AddBox( std::shared_ptr< Box > box )
-    {
-        if( box != nullptr )
-        {
-            this->impl->_boxes.push_back( box );
-        }
-    }
-
-    std::vector< std::shared_ptr< Box > > IREF::GetBoxes() const
-    {
-        return this->impl->_boxes;
-    }
-
-    IREF::IMPL::IMPL()
-    {}
-
-    IREF::IMPL::IMPL( const IMPL & o ):
-        _boxes( o._boxes )
-    {}
-
-    IREF::IMPL::~IMPL()
-    {}
+IREF::IREF(IREF&& o) noexcept : FullBox(std::move(o)), impl(std::move(o.impl)) {
+  o.impl = nullptr;
 }
+
+IREF::~IREF() {}
+
+IREF& IREF::operator=(IREF o) {
+  FullBox::operator=(o);
+  swap(*(this), o);
+
+  return *(this);
+}
+
+void swap(IREF& o1, IREF& o2) {
+  using std::swap;
+
+  swap(static_cast<FullBox&>(o1), static_cast<FullBox&>(o2));
+  swap(o1.impl, o2.impl);
+}
+
+Error IREF::ReadData(Parser& parser, BinaryStream& stream) {
+  ContainerBox container("????");
+  Error err;
+
+  err = FullBox::ReadData(parser, stream);
+  if (err) return err;
+
+  parser.SetInfo("iref", this);
+
+  err = container.ReadData(parser, stream);
+
+  parser.SetInfo("iref", nullptr);
+
+  if (err) return err;
+
+  this->impl->_boxes = container.GetBoxes();
+
+  return Error();
+}
+
+void IREF::WriteDescription(std::ostream& os, std::size_t indentLevel) const {
+  FullBox::WriteDescription(os, indentLevel);
+  Container::WriteBoxes(os, indentLevel);
+}
+
+void IREF::AddBox(std::shared_ptr<Box> box) {
+  if (box != nullptr) {
+    this->impl->_boxes.push_back(box);
+  }
+}
+
+std::vector<std::shared_ptr<Box> > IREF::GetBoxes() const {
+  return this->impl->_boxes;
+}
+
+IREF::IMPL::IMPL() {}
+
+IREF::IMPL::IMPL(const IMPL& o) : _boxes(o._boxes) {}
+
+IREF::IMPL::~IMPL() {}
+}  // namespace ISOBMFF

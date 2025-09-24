@@ -31,32 +31,28 @@
 #ifndef ISOBMFF_URL_HPP
 #define ISOBMFF_URL_HPP
 
-#include <memory>
-#include <algorithm>
-#include <Macros.hpp>
 #include <FullBox.hpp>
+#include <Macros.hpp>
+#include <algorithm>
+#include <memory>
 
-namespace ISOBMFF
-{
-    class ISOBMFF_EXPORT URL: public FullBox
-    {
-        public:
+namespace ISOBMFF {
+class ISOBMFF_EXPORT URL : public FullBox {
+ public:
+  URL();
+  URL(const URL& o);
+  URL(URL&& o) noexcept;
+  virtual ~URL() override;
 
-            URL();
-            URL( const URL & o );
-            URL( URL && o ) noexcept;
-            virtual ~URL() override;
+  URL& operator=(URL o);
 
-            URL & operator =( URL o );
+  ISOBMFF_EXPORT friend void swap(URL& o1, URL& o2);
 
-            ISOBMFF_EXPORT friend void swap( URL & o1, URL & o2 );
+ private:
+  class IMPL;
 
-        private:
-
-            class IMPL;
-
-            std::unique_ptr< IMPL > impl;
-    };
-}
+  std::unique_ptr<IMPL> impl;
+};
+}  // namespace ISOBMFF
 
 #endif /* ISOBMFF_URL_HPP */

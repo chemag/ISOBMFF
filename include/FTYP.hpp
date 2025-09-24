@@ -31,47 +31,44 @@
 #ifndef ISOBMFF_FTYP_HPP
 #define ISOBMFF_FTYP_HPP
 
-#include <memory>
-#include <algorithm>
-#include <Macros.hpp>
 #include <Box.hpp>
+#include <Macros.hpp>
+#include <algorithm>
+#include <cstdint>
+#include <memory>
 #include <string>
 #include <vector>
-#include <cstdint>
 
-namespace ISOBMFF
-{
-    class ISOBMFF_EXPORT FTYP: public Box
-    {
-        public:
+namespace ISOBMFF {
+class ISOBMFF_EXPORT FTYP : public Box {
+ public:
+  FTYP();
+  FTYP(const FTYP& o);
+  FTYP(FTYP&& o) noexcept;
+  virtual ~FTYP() override;
 
-            FTYP();
-            FTYP( const FTYP & o );
-            FTYP( FTYP && o ) noexcept;
-            virtual ~FTYP() override;
+  FTYP& operator=(FTYP o);
 
-            FTYP & operator =( FTYP o );
+  Error ReadData(Parser& parser, BinaryStream& stream) override;
+  std::vector<std::pair<std::string, std::string> > GetDisplayableProperties()
+      const override;
 
-            Error                                                 ReadData( Parser & parser, BinaryStream & stream ) override;
-            std::vector< std::pair< std::string, std::string > > GetDisplayableProperties() const override;
+  std::string GetMajorBrand() const;
+  uint32_t GetMinorVersion() const;
+  std::vector<std::string> GetCompatibleBrands() const;
 
-            std::string                GetMajorBrand()       const;
-            uint32_t                   GetMinorVersion()     const;
-            std::vector< std::string > GetCompatibleBrands() const;
+  void SetMajorBrand(const std::string& value);
+  void SetMinorVersion(uint32_t value);
+  void SetCompatibleBrands(const std::vector<std::string>& value);
+  void AddCompatibleBrand(const std::string& value);
 
-            void SetMajorBrand( const std::string & value );
-            void SetMinorVersion( uint32_t value );
-            void SetCompatibleBrands( const std::vector< std::string > & value );
-            void AddCompatibleBrand( const std::string & value );
+  ISOBMFF_EXPORT friend void swap(FTYP& o1, FTYP& o2);
 
-            ISOBMFF_EXPORT friend void swap( FTYP & o1, FTYP & o2 );
+ private:
+  class IMPL;
 
-        private:
-
-            class IMPL;
-
-            std::unique_ptr< IMPL > impl;
-    };
-}
+  std::unique_ptr<IMPL> impl;
+};
+}  // namespace ISOBMFF
 
 #endif /* ISOBMFF_FTYP_HPP */

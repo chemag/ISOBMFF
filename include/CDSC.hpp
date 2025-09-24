@@ -31,32 +31,28 @@
 #ifndef ISOBMFF_CDSC_HPP
 #define ISOBMFF_CDSC_HPP
 
-#include <memory>
-#include <algorithm>
 #include <Macros.hpp>
 #include <SingleItemTypeReferenceBox.hpp>
+#include <algorithm>
+#include <memory>
 
-namespace ISOBMFF
-{
-    class ISOBMFF_EXPORT CDSC: public SingleItemTypeReferenceBox
-    {
-        public:
+namespace ISOBMFF {
+class ISOBMFF_EXPORT CDSC : public SingleItemTypeReferenceBox {
+ public:
+  CDSC();
+  CDSC(const CDSC& o);
+  CDSC(CDSC&& o) noexcept;
+  virtual ~CDSC() override;
 
-            CDSC();
-            CDSC( const CDSC & o );
-            CDSC( CDSC && o ) noexcept;
-            virtual ~CDSC() override;
+  CDSC& operator=(CDSC o);
 
-            CDSC & operator =( CDSC o );
+  ISOBMFF_EXPORT friend void swap(CDSC& o1, CDSC& o2);
 
-            ISOBMFF_EXPORT friend void swap( CDSC & o1, CDSC & o2 );
+ private:
+  class IMPL;
 
-        private:
-
-            class IMPL;
-
-            std::unique_ptr< IMPL > impl;
-    };
-}
+  std::unique_ptr<IMPL> impl;
+};
+}  // namespace ISOBMFF
 
 #endif /* ISOBMFF_CDSC_HPP */

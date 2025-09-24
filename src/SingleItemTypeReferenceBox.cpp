@@ -28,152 +28,128 @@
  * @author      Jean-David Gadina - www.digidna.net
  */
 
-#include <SingleItemTypeReferenceBox.hpp>
 #include <IREF.hpp>
 #include <Parser.hpp>
+#include <SingleItemTypeReferenceBox.hpp>
 #include <Utils.hpp>
 
-namespace ISOBMFF
-{
-    class SingleItemTypeReferenceBox::IMPL
-    {
-        public:
+namespace ISOBMFF {
+class SingleItemTypeReferenceBox::IMPL {
+ public:
+  IMPL();
+  IMPL(const IMPL& o);
+  ~IMPL();
 
-            IMPL();
-            IMPL( const IMPL & o );
-            ~IMPL();
+  uint32_t _fromItemID;
+  std::vector<uint32_t> _toItemIDs;
+};
 
-            uint32_t                _fromItemID;
-            std::vector< uint32_t > _toItemIDs;
-    };
+SingleItemTypeReferenceBox::SingleItemTypeReferenceBox(const std::string& name)
+    : Box(name), impl(std::make_unique<IMPL>()) {}
 
-    SingleItemTypeReferenceBox::SingleItemTypeReferenceBox( const std::string & name ):
-        Box( name ),
-        impl( std::make_unique< IMPL >() )
-    {}
+SingleItemTypeReferenceBox::SingleItemTypeReferenceBox(
+    const SingleItemTypeReferenceBox& o)
+    : Box(o), impl(std::make_unique<IMPL>(*(o.impl))) {}
 
-    SingleItemTypeReferenceBox::SingleItemTypeReferenceBox( const SingleItemTypeReferenceBox & o ):
-        Box( o ),
-        impl( std::make_unique< IMPL >( *( o.impl ) ) )
-    {}
-
-    SingleItemTypeReferenceBox::SingleItemTypeReferenceBox( SingleItemTypeReferenceBox && o ) noexcept:
-        Box( std::move( o ) ),
-        impl( std::move( o.impl ) )
-    {
-        o.impl = nullptr;
-    }
-
-    SingleItemTypeReferenceBox::~SingleItemTypeReferenceBox()
-    {}
-
-    SingleItemTypeReferenceBox & SingleItemTypeReferenceBox::operator =( SingleItemTypeReferenceBox o )
-    {
-        Box::operator=( o );
-        swap( *( this ), o );
-
-        return *( this );
-    }
-
-    void swap( SingleItemTypeReferenceBox & o1, SingleItemTypeReferenceBox & o2 )
-    {
-        using std::swap;
-
-        swap( static_cast< Box & >( o1 ), static_cast< Box & >( o2 ) );
-        swap( o1.impl, o2.impl );
-    }
-
-    Error SingleItemTypeReferenceBox::ReadData( Parser & parser, BinaryStream & stream )
-    {
-        const IREF * iref;
-        uint16_t     count;
-        uint16_t     i;
-        Error err;
-
-        iref = static_cast< const IREF * >( parser.GetInfo( "iref" ) );
-
-        if( iref == nullptr )
-        {
-            return Box::ReadData( parser, stream );
-        }
-
-        if( iref->GetVersion() == 0 )
-        {
-            uint16_t temp16;
-            err = stream.ReadBigEndianUInt16( temp16 );
-            if( err ) return err;
-            this->SetFromItemID( temp16 );
-
-            err = stream.ReadBigEndianUInt16( count );
-            if( err ) return err;
-
-            for( i = 0; i < count; i++ )
-            {
-                err = stream.ReadBigEndianUInt16( temp16 );
-                if( err ) return err;
-                this->AddToItemID( temp16 );
-            }
-        }
-        else if( iref->GetVersion() == 1 )
-        {
-            uint32_t temp32;
-            err = stream.ReadBigEndianUInt32( temp32 );
-            if( err ) return err;
-            this->SetFromItemID( temp32 );
-
-            err = stream.ReadBigEndianUInt16( count );
-            if( err ) return err;
-
-            for( i = 0; i < count; i++ )
-            {
-                err = stream.ReadBigEndianUInt32( temp32 );
-                if( err ) return err;
-                this->AddToItemID( temp32 );
-            }
-        }
-
-        return Error();
-    }
-
-    std::vector< std::pair< std::string, std::string > > SingleItemTypeReferenceBox::GetDisplayableProperties() const
-    {
-        auto props( Box::GetDisplayableProperties() );
-
-        props.push_back( { "From item ID", std::to_string( this->GetFromItemID() ) } );
-        props.push_back( { "To item IDs",  Utils::ToString( this->GetToItemIDs() ) } );
-
-        return props;
-    }
-
-    uint32_t SingleItemTypeReferenceBox::GetFromItemID() const
-    {
-        return this->impl->_fromItemID;
-    }
-
-    std::vector< uint32_t > SingleItemTypeReferenceBox::GetToItemIDs() const
-    {
-        return this->impl->_toItemIDs;
-    }
-
-    void SingleItemTypeReferenceBox::SetFromItemID( uint32_t value )
-    {
-        this->impl->_fromItemID = value;
-    }
-
-    void SingleItemTypeReferenceBox::AddToItemID( uint32_t value )
-    {
-        this->impl->_toItemIDs.push_back( value );
-    }
-
-    SingleItemTypeReferenceBox::IMPL::IMPL():
-        _fromItemID( 0 )
-    {}
-
-    SingleItemTypeReferenceBox::IMPL::IMPL( const IMPL & o ):
-        _fromItemID( o._fromItemID ),
-        _toItemIDs( o._toItemIDs )
-    {}
-
-    SingleItemTypeReferenceBox::IMPL::~IMPL()
-    {}
+SingleItemTypeReferenceBox::SingleItemTypeReferenceBox(
+    SingleItemTypeReferenceBox&& o) noexcept
+    : Box(std::move(o)), impl(std::move(o.impl)) {
+  o.impl = nullptr;
 }
+
+SingleItemTypeReferenceBox::~SingleItemTypeReferenceBox() {}
+
+SingleItemTypeReferenceBox& SingleItemTypeReferenceBox::operator=(
+    SingleItemTypeReferenceBox o) {
+  Box::operator=(o);
+  swap(*(this), o);
+
+  return *(this);
+}
+
+void swap(SingleItemTypeReferenceBox& o1, SingleItemTypeReferenceBox& o2) {
+  using std::swap;
+
+  swap(static_cast<Box&>(o1), static_cast<Box&>(o2));
+  swap(o1.impl, o2.impl);
+}
+
+Error SingleItemTypeReferenceBox::ReadData(Parser& parser,
+                                           BinaryStream& stream) {
+  const IREF* iref;
+  uint16_t count;
+  uint16_t i;
+  Error err;
+
+  iref = static_cast<const IREF*>(parser.GetInfo("iref"));
+
+  if (iref == nullptr) {
+    return Box::ReadData(parser, stream);
+  }
+
+  if (iref->GetVersion() == 0) {
+    uint16_t temp16;
+    err = stream.ReadBigEndianUInt16(temp16);
+    if (err) return err;
+    this->SetFromItemID(temp16);
+
+    err = stream.ReadBigEndianUInt16(count);
+    if (err) return err;
+
+    for (i = 0; i < count; i++) {
+      err = stream.ReadBigEndianUInt16(temp16);
+      if (err) return err;
+      this->AddToItemID(temp16);
+    }
+  } else if (iref->GetVersion() == 1) {
+    uint32_t temp32;
+    err = stream.ReadBigEndianUInt32(temp32);
+    if (err) return err;
+    this->SetFromItemID(temp32);
+
+    err = stream.ReadBigEndianUInt16(count);
+    if (err) return err;
+
+    for (i = 0; i < count; i++) {
+      err = stream.ReadBigEndianUInt32(temp32);
+      if (err) return err;
+      this->AddToItemID(temp32);
+    }
+  }
+
+  return Error();
+}
+
+std::vector<std::pair<std::string, std::string> >
+SingleItemTypeReferenceBox::GetDisplayableProperties() const {
+  auto props(Box::GetDisplayableProperties());
+
+  props.push_back({"From item ID", std::to_string(this->GetFromItemID())});
+  props.push_back({"To item IDs", Utils::ToString(this->GetToItemIDs())});
+
+  return props;
+}
+
+uint32_t SingleItemTypeReferenceBox::GetFromItemID() const {
+  return this->impl->_fromItemID;
+}
+
+std::vector<uint32_t> SingleItemTypeReferenceBox::GetToItemIDs() const {
+  return this->impl->_toItemIDs;
+}
+
+void SingleItemTypeReferenceBox::SetFromItemID(uint32_t value) {
+  this->impl->_fromItemID = value;
+}
+
+void SingleItemTypeReferenceBox::AddToItemID(uint32_t value) {
+  this->impl->_toItemIDs.push_back(value);
+}
+
+SingleItemTypeReferenceBox::IMPL::IMPL() : _fromItemID(0) {}
+
+SingleItemTypeReferenceBox::IMPL::IMPL(const IMPL& o)
+    : _fromItemID(o._fromItemID), _toItemIDs(o._toItemIDs) {}
+
+SingleItemTypeReferenceBox::IMPL::~IMPL() {}
+}  // namespace ISOBMFF

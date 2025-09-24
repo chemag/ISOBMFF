@@ -31,44 +31,41 @@
 #ifndef ISOBMFF_SCHM_HPP
 #define ISOBMFF_SCHM_HPP
 
-#include <memory>
-#include <algorithm>
-#include <Macros.hpp>
 #include <FullBox.hpp>
+#include <Macros.hpp>
+#include <algorithm>
+#include <memory>
 #include <string>
 
-namespace ISOBMFF
-{
-    class ISOBMFF_EXPORT SCHM: public FullBox
-    {
-        public:
+namespace ISOBMFF {
+class ISOBMFF_EXPORT SCHM : public FullBox {
+ public:
+  SCHM();
+  SCHM(const SCHM& o);
+  SCHM(SCHM&& o) noexcept;
+  virtual ~SCHM() override;
 
-            SCHM();
-            SCHM( const SCHM & o );
-            SCHM( SCHM && o ) noexcept;
-            virtual ~SCHM() override;
+  SCHM& operator=(SCHM o);
 
-            SCHM & operator =( SCHM o );
+  Error ReadData(Parser& parser, BinaryStream& stream) override;
+  std::vector<std::pair<std::string, std::string> > GetDisplayableProperties()
+      const override;
 
-            Error                                                 ReadData( Parser & parser, BinaryStream & stream ) override;
-            std::vector< std::pair< std::string, std::string > > GetDisplayableProperties() const override;
+  std::string GetSchemeType() const;
+  uint32_t GetSchemeVersion() const;
+  std::string GetSchemeURI() const;
 
-            std::string GetSchemeType()    const;
-            uint32_t    GetSchemeVersion() const;
-            std::string GetSchemeURI()     const;
+  void SetSchemeType(const std::string& value);
+  void SetSchemeVersion(uint32_t value);
+  void SetSchemeURI(const std::string& value);
 
-            void SetSchemeType( const std::string & value );
-            void SetSchemeVersion( uint32_t value );
-            void SetSchemeURI( const std::string & value );
+  ISOBMFF_EXPORT friend void swap(SCHM& o1, SCHM& o2);
 
-            ISOBMFF_EXPORT friend void swap( SCHM & o1, SCHM & o2 );
+ private:
+  class IMPL;
 
-        private:
-
-            class IMPL;
-
-            std::unique_ptr< IMPL > impl;
-    };
-}
+  std::unique_ptr<IMPL> impl;
+};
+}  // namespace ISOBMFF
 
 #endif /* ISOBMFF_SCHM_HPP */

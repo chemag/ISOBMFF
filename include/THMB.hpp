@@ -31,32 +31,28 @@
 #ifndef ISOBMFF_THMB_HPP
 #define ISOBMFF_THMB_HPP
 
-#include <memory>
-#include <algorithm>
 #include <Macros.hpp>
 #include <SingleItemTypeReferenceBox.hpp>
+#include <algorithm>
+#include <memory>
 
-namespace ISOBMFF
-{
-    class ISOBMFF_EXPORT THMB: public SingleItemTypeReferenceBox
-    {
-        public:
+namespace ISOBMFF {
+class ISOBMFF_EXPORT THMB : public SingleItemTypeReferenceBox {
+ public:
+  THMB();
+  THMB(const THMB& o);
+  THMB(THMB&& o) noexcept;
+  virtual ~THMB() override;
 
-            THMB();
-            THMB( const THMB & o );
-            THMB( THMB && o ) noexcept;
-            virtual ~THMB() override;
+  THMB& operator=(THMB o);
 
-            THMB & operator =( THMB o );
+  ISOBMFF_EXPORT friend void swap(THMB& o1, THMB& o2);
 
-            ISOBMFF_EXPORT friend void swap( THMB & o1, THMB & o2 );
+ private:
+  class IMPL;
 
-        private:
-
-            class IMPL;
-
-            std::unique_ptr< IMPL > impl;
-    };
-}
+  std::unique_ptr<IMPL> impl;
+};
+}  // namespace ISOBMFF
 
 #endif /* ISOBMFF_THMB_HPP */

@@ -31,35 +31,32 @@
 #ifndef ISOBMFF_CONTAINER_HPP
 #define ISOBMFF_CONTAINER_HPP
 
-#include <Macros.hpp>
 #include <Box.hpp>
-#include <vector>
+#include <Macros.hpp>
 #include <memory>
+#include <vector>
 
-namespace ISOBMFF
-{
-    class ISOBMFF_EXPORT Container
-    {
-        public:
+namespace ISOBMFF {
+class ISOBMFF_EXPORT Container {
+ public:
+  static void WriteBoxes(const std::vector<std::shared_ptr<Box> >& boxes,
+                         std::ostream& os, std::size_t indentLevel);
 
-            static void WriteBoxes( const std::vector< std::shared_ptr< Box > > & boxes, std::ostream & os, std::size_t indentLevel );
+  virtual ~Container();
 
-            virtual ~Container();
+  virtual void AddBox(std::shared_ptr<Box> box) = 0;
+  virtual std::vector<std::shared_ptr<Box> > GetBoxes() const = 0;
 
-            virtual void                                  AddBox( std::shared_ptr< Box > box ) = 0;
-            virtual std::vector< std::shared_ptr< Box > > GetBoxes()                     const = 0;
+  void WriteBoxes(std::ostream& os, std::size_t indentLevel) const;
 
-            void WriteBoxes( std::ostream & os, std::size_t indentLevel ) const;
+  std::vector<std::shared_ptr<Box> > GetBoxes(const std::string& name) const;
+  std::shared_ptr<Box> GetBox(const std::string& name) const;
 
-            std::vector< std::shared_ptr< Box > > GetBoxes( const std::string & name ) const;
-            std::shared_ptr< Box >                GetBox( const std::string & name )   const;
-
-            template< class _T_ >
-            std::shared_ptr< _T_ > GetTypedBox( const std::string & name ) const
-            {
-                return std::dynamic_pointer_cast< _T_ >( this->GetBox( name ) );
-            }
-    };
-}
+  template <class _T_>
+  std::shared_ptr<_T_> GetTypedBox(const std::string& name) const {
+    return std::dynamic_pointer_cast<_T_>(this->GetBox(name));
+  }
+};
+}  // namespace ISOBMFF
 
 #endif /* ISOBMFF_CONTAINER_HPP */

@@ -32,41 +32,37 @@
 #define ISOBMFF_BINARY_DATA_STREAM_HPP
 
 #include <BinaryStream.hpp>
-#include <string>
-#include <iostream>
-#include <cstdint>
-#include <memory>
 #include <algorithm>
+#include <cstdint>
+#include <iostream>
+#include <memory>
+#include <string>
 
-namespace ISOBMFF
-{
-    class ISOBMFF_EXPORT BinaryDataStream: public BinaryStream
-    {
-        public:
+namespace ISOBMFF {
+class ISOBMFF_EXPORT BinaryDataStream : public BinaryStream {
+ public:
+  BinaryDataStream();
+  BinaryDataStream(const std::vector<uint8_t>& data);
+  BinaryDataStream(const BinaryDataStream& o);
+  BinaryDataStream(BinaryDataStream&& o) noexcept;
 
-            BinaryDataStream();
-            BinaryDataStream( const std::vector< uint8_t > & data );
-            BinaryDataStream( const BinaryDataStream & o );
-            BinaryDataStream( BinaryDataStream && o ) noexcept;
+  virtual ~BinaryDataStream() override;
 
-            virtual ~BinaryDataStream() override;
+  BinaryDataStream& operator=(BinaryDataStream o);
 
-            BinaryDataStream & operator =( BinaryDataStream o );
+  using BinaryStream::Read;
 
-            using BinaryStream::Read;
+  Error Read(uint8_t* buf, size_t size) override;
+  Error Seek(std::streamoff offset, SeekDirection dir) override;
+  size_t Tell() const override;
 
-            Error  Read( uint8_t * buf, size_t size )               override;
-            Error  Seek( std::streamoff offset, SeekDirection dir ) override;
-            size_t Tell()                                     const override;
+  ISOBMFF_EXPORT friend void swap(BinaryDataStream& o1, BinaryDataStream& o2);
 
-            ISOBMFF_EXPORT friend void swap( BinaryDataStream & o1, BinaryDataStream & o2 );
+ private:
+  class IMPL;
 
-        private:
-
-            class IMPL;
-
-            std::unique_ptr< IMPL > impl;
-    };
-}
+  std::unique_ptr<IMPL> impl;
+};
+}  // namespace ISOBMFF
 
 #endif /* ISOBMFF_BINARY_DATA_STREAM_HPP */

@@ -30,61 +30,45 @@
 
 #include <THMB.hpp>
 
-namespace ISOBMFF
-{
-    class THMB::IMPL
-    {
-        public:
+namespace ISOBMFF {
+class THMB::IMPL {
+ public:
+  IMPL();
+  IMPL(const IMPL& o);
+  ~IMPL();
+};
 
-            IMPL();
-            IMPL( const IMPL & o );
-            ~IMPL();
-    };
+THMB::THMB()
+    : SingleItemTypeReferenceBox("thmb"), impl(std::make_unique<IMPL>()) {}
 
-    THMB::THMB():
-        SingleItemTypeReferenceBox( "thmb" ),
-        impl( std::make_unique< IMPL >() )
-    {}
+THMB::THMB(const THMB& o)
+    : SingleItemTypeReferenceBox(o), impl(std::make_unique<IMPL>(*(o.impl))) {}
 
-    THMB::THMB( const THMB & o ):
-        SingleItemTypeReferenceBox( o ),
-        impl( std::make_unique< IMPL >( *( o.impl ) ) )
-    {}
-
-    THMB::THMB( THMB && o ) noexcept:
-        SingleItemTypeReferenceBox( std::move( o ) ),
-        impl( std::move( o.impl ) )
-    {
-        o.impl = nullptr;
-    }
-
-    THMB::~THMB()
-    {}
-
-    THMB & THMB::operator =( THMB o )
-    {
-        SingleItemTypeReferenceBox::operator=( o );
-        swap( *( this ), o );
-
-        return *( this );
-    }
-
-    void swap( THMB & o1, THMB & o2 )
-    {
-        using std::swap;
-
-        swap( static_cast< SingleItemTypeReferenceBox & >( o1 ), static_cast< SingleItemTypeReferenceBox & >( o2 ) );
-        swap( o1.impl, o2.impl );
-    }
-
-    THMB::IMPL::IMPL()
-    {}
-
-    THMB::IMPL::IMPL( const IMPL & o )
-    {
-        ( void )o;
-    }
-
-    THMB::IMPL::~IMPL()
-    {}
+THMB::THMB(THMB&& o) noexcept
+    : SingleItemTypeReferenceBox(std::move(o)), impl(std::move(o.impl)) {
+  o.impl = nullptr;
 }
+
+THMB::~THMB() {}
+
+THMB& THMB::operator=(THMB o) {
+  SingleItemTypeReferenceBox::operator=(o);
+  swap(*(this), o);
+
+  return *(this);
+}
+
+void swap(THMB& o1, THMB& o2) {
+  using std::swap;
+
+  swap(static_cast<SingleItemTypeReferenceBox&>(o1),
+       static_cast<SingleItemTypeReferenceBox&>(o2));
+  swap(o1.impl, o2.impl);
+}
+
+THMB::IMPL::IMPL() {}
+
+THMB::IMPL::IMPL(const IMPL& o) { (void)o; }
+
+THMB::IMPL::~IMPL() {}
+}  // namespace ISOBMFF

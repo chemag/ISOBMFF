@@ -30,126 +30,97 @@
 
 #include <IPMA.hpp>
 
-namespace ISOBMFF
-{
-    class IPMA::IMPL
-    {
-        public:
+namespace ISOBMFF {
+class IPMA::IMPL {
+ public:
+  IMPL();
+  IMPL(const IMPL& o);
+  ~IMPL();
 
-            IMPL();
-            IMPL( const IMPL & o );
-            ~IMPL();
+  std::vector<std::shared_ptr<Entry> > _entries;
+};
 
-            std::vector< std::shared_ptr< Entry > > _entries;
-    };
+IPMA::IPMA() : FullBox("ipma"), impl(std::make_unique<IMPL>()) {}
 
-    IPMA::IPMA():
-        FullBox( "ipma" ),
-        impl( std::make_unique< IMPL >() )
-    {}
+IPMA::IPMA(const IPMA& o)
+    : FullBox(o), impl(std::make_unique<IMPL>(*(o.impl))) {}
 
-    IPMA::IPMA( const IPMA & o ):
-        FullBox( o ),
-        impl( std::make_unique< IMPL >( *( o.impl ) ) )
-    {}
-
-    IPMA::IPMA( IPMA && o ) noexcept:
-        FullBox( std::move( o ) ),
-        impl( std::move( o.impl ) )
-    {
-        o.impl = nullptr;
-    }
-
-    IPMA::~IPMA()
-    {}
-
-    IPMA & IPMA::operator =( IPMA o )
-    {
-        FullBox::operator=( o );
-        swap( *( this ), o );
-
-        return *( this );
-    }
-
-    void swap( IPMA & o1, IPMA & o2 )
-    {
-        using std::swap;
-
-        swap( static_cast< FullBox & >( o1 ), static_cast< FullBox & >( o2 ) );
-        swap( o1.impl, o2.impl );
-    }
-
-    Error IPMA::ReadData( Parser & parser, BinaryStream & stream )
-    {
-        uint32_t count;
-        uint32_t i;
-        Error err;
-
-        err = FullBox::ReadData( parser, stream );
-        if( err ) return err;
-
-        err = stream.ReadBigEndianUInt32( count );
-        if( err ) return err;
-
-        for( i = 0; i < count; i++ )
-        {
-            this->AddEntry( std::make_shared< Entry >( stream, *( this ) ) );
-        }
-
-        return Error();
-    }
-
-    void IPMA::WriteDescription( std::ostream & os, std::size_t indentLevel ) const
-    {
-        FullBox::WriteDescription( os, indentLevel );
-        DisplayableObjectContainer::WriteDescription( os, indentLevel );
-    }
-
-    std::vector< std::pair< std::string, std::string > > IPMA::GetDisplayableProperties() const
-    {
-        return
-        {
-            { "Entries", std::to_string( this->GetEntries().size() ) }
-        };
-    }
-
-    std::vector< std::shared_ptr< DisplayableObject > > IPMA::GetDisplayableObjects() const
-    {
-        auto v( this->GetEntries() );
-
-        return std::vector< std::shared_ptr< DisplayableObject > >( v.begin(), v.end() );
-    }
-
-    std::vector< std::shared_ptr< IPMA::Entry > > IPMA::GetEntries() const
-    {
-        return this->impl->_entries;
-    }
-
-    std::shared_ptr< IPMA::Entry > IPMA::GetEntry( uint32_t itemID ) const
-    {
-        for( const auto & entry: this->GetEntries() )
-        {
-            if( entry->GetItemID() == itemID )
-            {
-                return entry;
-            }
-        }
-
-        return nullptr;
-    }
-
-    void IPMA::AddEntry( std::shared_ptr< Entry > entry )
-    {
-        this->impl->_entries.push_back( entry );
-    }
-
-    IPMA::IMPL::IMPL()
-    {}
-
-    IPMA::IMPL::IMPL( const IMPL & o ):
-        _entries( o._entries )
-    {}
-
-    IPMA::IMPL::~IMPL()
-    {}
+IPMA::IPMA(IPMA&& o) noexcept : FullBox(std::move(o)), impl(std::move(o.impl)) {
+  o.impl = nullptr;
 }
+
+IPMA::~IPMA() {}
+
+IPMA& IPMA::operator=(IPMA o) {
+  FullBox::operator=(o);
+  swap(*(this), o);
+
+  return *(this);
+}
+
+void swap(IPMA& o1, IPMA& o2) {
+  using std::swap;
+
+  swap(static_cast<FullBox&>(o1), static_cast<FullBox&>(o2));
+  swap(o1.impl, o2.impl);
+}
+
+Error IPMA::ReadData(Parser& parser, BinaryStream& stream) {
+  uint32_t count;
+  uint32_t i;
+  Error err;
+
+  err = FullBox::ReadData(parser, stream);
+  if (err) return err;
+
+  err = stream.ReadBigEndianUInt32(count);
+  if (err) return err;
+
+  for (i = 0; i < count; i++) {
+    this->AddEntry(std::make_shared<Entry>(stream, *(this)));
+  }
+
+  return Error();
+}
+
+void IPMA::WriteDescription(std::ostream& os, std::size_t indentLevel) const {
+  FullBox::WriteDescription(os, indentLevel);
+  DisplayableObjectContainer::WriteDescription(os, indentLevel);
+}
+
+std::vector<std::pair<std::string, std::string> >
+IPMA::GetDisplayableProperties() const {
+  return {{"Entries", std::to_string(this->GetEntries().size())}};
+}
+
+std::vector<std::shared_ptr<DisplayableObject> > IPMA::GetDisplayableObjects()
+    const {
+  auto v(this->GetEntries());
+
+  return std::vector<std::shared_ptr<DisplayableObject> >(v.begin(), v.end());
+}
+
+std::vector<std::shared_ptr<IPMA::Entry> > IPMA::GetEntries() const {
+  return this->impl->_entries;
+}
+
+std::shared_ptr<IPMA::Entry> IPMA::GetEntry(uint32_t itemID) const {
+  for (const auto& entry : this->GetEntries()) {
+    if (entry->GetItemID() == itemID) {
+      return entry;
+    }
+  }
+
+  return nullptr;
+}
+
+void IPMA::AddEntry(std::shared_ptr<Entry> entry) {
+  this->impl->_entries.push_back(entry);
+}
+
+IPMA::IMPL::IMPL() {}
+
+IPMA::IMPL::IMPL(const IMPL& o) : _entries(o._entries) {}
+
+IPMA::IMPL::~IMPL() {}
+}  // namespace ISOBMFF

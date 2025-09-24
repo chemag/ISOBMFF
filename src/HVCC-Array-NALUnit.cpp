@@ -29,122 +29,91 @@
  */
 
 #include <HVCC.hpp>
-#include <sstream>
 #include <iomanip>
+#include <sstream>
 
-namespace ISOBMFF
-{
-    class HVCC::Array::NALUnit::IMPL
-    {
-        public:
+namespace ISOBMFF {
+class HVCC::Array::NALUnit::IMPL {
+ public:
+  IMPL();
+  IMPL(const IMPL& o);
+  ~IMPL();
 
-            IMPL();
-            IMPL( const IMPL & o );
-            ~IMPL();
+  std::vector<uint8_t> _data;
+};
 
-            std::vector< uint8_t > _data;
-    };
+HVCC::Array::NALUnit::NALUnit() : impl(std::make_unique<IMPL>()) {}
 
-    HVCC::Array::NALUnit::NALUnit():
-        impl( std::make_unique< IMPL >() )
-    {}
+HVCC::Array::NALUnit::NALUnit(BinaryStream& stream)
+    : impl(std::make_unique<IMPL>()) {
+  std::vector<uint8_t> data;
+  uint16_t size;
 
-    HVCC::Array::NALUnit::NALUnit( BinaryStream & stream ):
-        impl( std::make_unique< IMPL >() )
-    {
-        std::vector< uint8_t > data;
-        uint16_t               size;
+  Error err = stream.ReadBigEndianUInt16(size);
+  if (!err && size > 0) {
+    data = std::vector<uint8_t>(size);
+    err = stream.Read(&(data[0]), size);
+  }
 
-        Error err = stream.ReadBigEndianUInt16( size );
-        if( !err && size > 0 )
-        {
-            data = std::vector< uint8_t >( size );
-            err = stream.Read( &( data[ 0 ] ), size );
-        }
-
-        this->SetData( data );
-    }
-
-    HVCC::Array::NALUnit::NALUnit( const HVCC::Array::NALUnit & o ):
-        impl( std::make_unique< IMPL >( *( o.impl ) ) )
-    {}
-
-    HVCC::Array::NALUnit::NALUnit( HVCC::Array::NALUnit && o ) noexcept:
-        impl( std::move( o.impl ) )
-    {
-        o.impl = nullptr;
-    }
-
-    HVCC::Array::NALUnit::~NALUnit()
-    {}
-
-    HVCC::Array::NALUnit & HVCC::Array::NALUnit::operator =( HVCC::Array::NALUnit o )
-    {
-        swap( *( this ), o );
-
-        return *( this );
-    }
-
-    void swap( HVCC::Array::NALUnit & o1, HVCC::Array::NALUnit & o2 )
-    {
-        using std::swap;
-
-        swap( o1.impl, o2.impl );
-    }
-
-    std::string HVCC::Array::NALUnit::GetName() const
-    {
-        return "NALUnit";
-    }
-
-    std::vector< uint8_t > HVCC::Array::NALUnit::GetData() const
-    {
-        return this->impl->_data;
-    }
-
-    void HVCC::Array::NALUnit::SetData( const std::vector< uint8_t > & value )
-    {
-        this->impl->_data = value;
-    }
-
-    std::vector< std::pair< std::string, std::string > > HVCC::Array::NALUnit::GetDisplayableProperties() const
-    {
-        std::vector< uint8_t > data;
-        std::stringstream      ss;
-        std::string            s;
-
-        data = this->GetData();
-
-        if( data.size() > 0 )
-        {
-            for( auto byte: data )
-            {
-                ss << std::hex
-                   << std::uppercase
-                   << std::setfill( '0' )
-                   << std::setw( 2 )
-                   << static_cast< uint32_t >( byte )
-                   << " ";
-            }
-
-            s = ss.str();
-            s = s.substr( 0, s.length() - 1 );
-        }
-
-        return
-        {
-            { "Data", s },
-            { "Size", std::to_string( data.size() ) }
-        };
-    }
-
-    HVCC::Array::NALUnit::IMPL::IMPL()
-    {}
-
-    HVCC::Array::NALUnit::IMPL::IMPL( const IMPL & o ):
-        _data( o._data )
-    {}
-
-    HVCC::Array::NALUnit::IMPL::~IMPL()
-    {}
+  this->SetData(data);
 }
+
+HVCC::Array::NALUnit::NALUnit(const HVCC::Array::NALUnit& o)
+    : impl(std::make_unique<IMPL>(*(o.impl))) {}
+
+HVCC::Array::NALUnit::NALUnit(HVCC::Array::NALUnit&& o) noexcept
+    : impl(std::move(o.impl)) {
+  o.impl = nullptr;
+}
+
+HVCC::Array::NALUnit::~NALUnit() {}
+
+HVCC::Array::NALUnit& HVCC::Array::NALUnit::operator=(HVCC::Array::NALUnit o) {
+  swap(*(this), o);
+
+  return *(this);
+}
+
+void swap(HVCC::Array::NALUnit& o1, HVCC::Array::NALUnit& o2) {
+  using std::swap;
+
+  swap(o1.impl, o2.impl);
+}
+
+std::string HVCC::Array::NALUnit::GetName() const { return "NALUnit"; }
+
+std::vector<uint8_t> HVCC::Array::NALUnit::GetData() const {
+  return this->impl->_data;
+}
+
+void HVCC::Array::NALUnit::SetData(const std::vector<uint8_t>& value) {
+  this->impl->_data = value;
+}
+
+std::vector<std::pair<std::string, std::string> >
+HVCC::Array::NALUnit::GetDisplayableProperties() const {
+  std::vector<uint8_t> data;
+  std::stringstream ss;
+  std::string s;
+
+  data = this->GetData();
+
+  if (data.size() > 0) {
+    for (auto byte : data) {
+      ss << std::hex << std::uppercase << std::setfill('0') << std::setw(2)
+         << static_cast<uint32_t>(byte) << " ";
+    }
+
+    s = ss.str();
+    s = s.substr(0, s.length() - 1);
+  }
+
+  return {{"Data", s}, {"Size", std::to_string(data.size())}};
+}
+
+HVCC::Array::NALUnit::IMPL::IMPL() {}
+
+HVCC::Array::NALUnit::IMPL::IMPL(const IMPL& o) : _data(o._data) {}
+
+HVCC::Array::NALUnit::IMPL::~IMPL() {}
+}  // namespace ISOBMFF

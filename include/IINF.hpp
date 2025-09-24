@@ -31,45 +31,42 @@
 #ifndef ISOBMFF_IINF_HPP
 #define ISOBMFF_IINF_HPP
 
-#include <memory>
-#include <algorithm>
-#include <Macros.hpp>
 #include <Container.hpp>
 #include <FullBox.hpp>
 #include <INFE.hpp>
+#include <Macros.hpp>
+#include <algorithm>
+#include <memory>
 #include <vector>
 
-namespace ISOBMFF
-{
-    class ISOBMFF_EXPORT IINF: public FullBox, public Container
-    {
-        public:
+namespace ISOBMFF {
+class ISOBMFF_EXPORT IINF : public FullBox, public Container {
+ public:
+  IINF();
+  IINF(const IINF& o);
+  IINF(IINF&& o) noexcept;
+  virtual ~IINF() override;
 
-            IINF();
-            IINF( const IINF & o );
-            IINF( IINF && o ) noexcept;
-            virtual ~IINF() override;
+  IINF& operator=(IINF o);
 
-            IINF & operator =( IINF o );
+  Error ReadData(Parser& parser, BinaryStream& stream) override;
+  void WriteDescription(std::ostream& os,
+                        std::size_t indentLevel) const override;
 
-            Error ReadData( Parser & parser, BinaryStream & stream ) override;
-            void WriteDescription( std::ostream & os, std::size_t indentLevel ) const override;
+  void AddEntry(std::shared_ptr<INFE> entry);
+  std::vector<std::shared_ptr<INFE> > GetEntries() const;
+  std::shared_ptr<INFE> GetItemInfo(uint32_t itemID) const;
 
-            void                                   AddEntry( std::shared_ptr< INFE > entry );
-            std::vector< std::shared_ptr< INFE > > GetEntries()                   const;
-            std::shared_ptr< INFE >                GetItemInfo( uint32_t itemID ) const;
+  void AddBox(std::shared_ptr<Box> box) override;
+  std::vector<std::shared_ptr<Box> > GetBoxes() const override;
 
-            void                                  AddBox( std::shared_ptr< Box > box ) override;
-            std::vector< std::shared_ptr< Box > > GetBoxes() const override;
+  ISOBMFF_EXPORT friend void swap(IINF& o1, IINF& o2);
 
-            ISOBMFF_EXPORT friend void swap( IINF & o1, IINF & o2 );
+ private:
+  class IMPL;
 
-        private:
-
-            class IMPL;
-
-            std::unique_ptr< IMPL > impl;
-    };
-}
+  std::unique_ptr<IMPL> impl;
+};
+}  // namespace ISOBMFF
 
 #endif /* ISOBMFF_IINF_HPP */

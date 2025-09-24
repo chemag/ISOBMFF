@@ -31,41 +31,38 @@
 #ifndef ISOBMFF_CONTAINER_BOX_HPP
 #define ISOBMFF_CONTAINER_BOX_HPP
 
-#include <memory>
-#include <algorithm>
-#include <Macros.hpp>
 #include <Box.hpp>
 #include <Container.hpp>
-#include <vector>
+#include <Macros.hpp>
+#include <algorithm>
+#include <memory>
 #include <ostream>
+#include <vector>
 
-namespace ISOBMFF
-{
-    class ISOBMFF_EXPORT ContainerBox: public Box, public Container
-    {
-        public:
+namespace ISOBMFF {
+class ISOBMFF_EXPORT ContainerBox : public Box, public Container {
+ public:
+  ContainerBox(const std::string& name);
+  ContainerBox(const ContainerBox& o);
+  ContainerBox(ContainerBox&& o) noexcept;
+  virtual ~ContainerBox() override;
 
-            ContainerBox( const std::string & name );
-            ContainerBox( const ContainerBox & o );
-            ContainerBox( ContainerBox && o ) noexcept;
-            virtual ~ContainerBox() override;
+  ContainerBox& operator=(ContainerBox o);
 
-            ContainerBox & operator =( ContainerBox o );
+  Error ReadData(Parser& parser, BinaryStream& stream) override;
+  void WriteDescription(std::ostream& os,
+                        std::size_t indentLevel) const override;
 
-            Error ReadData( Parser & parser, BinaryStream & stream ) override;
-            void WriteDescription( std::ostream & os, std::size_t indentLevel ) const override;
+  void AddBox(std::shared_ptr<Box> box) override;
+  std::vector<std::shared_ptr<Box> > GetBoxes() const override;
 
-            void                                  AddBox( std::shared_ptr< Box > box ) override;
-            std::vector< std::shared_ptr< Box > > GetBoxes() const override;
+  ISOBMFF_EXPORT friend void swap(ContainerBox& o1, ContainerBox& o2);
 
-            ISOBMFF_EXPORT friend void swap( ContainerBox & o1, ContainerBox & o2 );
+ private:
+  class IMPL;
 
-        private:
-
-            class IMPL;
-
-            std::unique_ptr< IMPL > impl;
-    };
-}
+  std::unique_ptr<IMPL> impl;
+};
+}  // namespace ISOBMFF
 
 #endif /* ISOBMFF_CONTAINER_BOX_HPP */

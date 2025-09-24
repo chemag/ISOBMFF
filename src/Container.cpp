@@ -30,64 +30,50 @@
 
 #include <Container.hpp>
 
-namespace ISOBMFF
-{
-    Container::~Container()
-    {}
+namespace ISOBMFF {
+Container::~Container() {}
 
-    void Container::WriteBoxes( const std::vector< std::shared_ptr< Box > > & boxes, std::ostream & os, std::size_t indentLevel )
-    {
-        std::string i( indentLevel * 4, ' ' );
+void Container::WriteBoxes(const std::vector<std::shared_ptr<Box> >& boxes,
+                           std::ostream& os, std::size_t indentLevel) {
+  std::string i(indentLevel * 4, ' ');
 
-        if( boxes.size() > 0 )
-        {
-            os << std::endl
-               << i
-               << "{"
-               << std::endl;
+  if (boxes.size() > 0) {
+    os << std::endl << i << "{" << std::endl;
 
-            for( const auto & box: boxes )
-            {
-                box->WriteDescription( os, indentLevel + 1 );
+    for (const auto& box : boxes) {
+      box->WriteDescription(os, indentLevel + 1);
 
-                os << std::endl;
-            }
-
-            os << i
-               << "}";
-        }
+      os << std::endl;
     }
 
-    void Container::WriteBoxes( std::ostream & os, std::size_t indentLevel ) const
-    {
-        Container::WriteBoxes( this->GetBoxes(), os, indentLevel );
-    }
-
-    std::vector< std::shared_ptr< Box > > Container::GetBoxes( const std::string & name ) const
-    {
-        std::vector< std::shared_ptr< Box > > boxes;
-
-        for( const auto & box: this->GetBoxes() )
-        {
-            if( box->GetName() == name )
-            {
-                boxes.push_back( box );
-            }
-        }
-
-        return boxes;
-    }
-
-    std::shared_ptr< Box > Container::GetBox( const std::string & name ) const
-    {
-        for( const auto & box: this->GetBoxes() )
-        {
-            if( box->GetName() == name )
-            {
-                return box;
-            }
-        }
-
-        return nullptr;
-    }
+    os << i << "}";
+  }
 }
+
+void Container::WriteBoxes(std::ostream& os, std::size_t indentLevel) const {
+  Container::WriteBoxes(this->GetBoxes(), os, indentLevel);
+}
+
+std::vector<std::shared_ptr<Box> > Container::GetBoxes(
+    const std::string& name) const {
+  std::vector<std::shared_ptr<Box> > boxes;
+
+  for (const auto& box : this->GetBoxes()) {
+    if (box->GetName() == name) {
+      boxes.push_back(box);
+    }
+  }
+
+  return boxes;
+}
+
+std::shared_ptr<Box> Container::GetBox(const std::string& name) const {
+  for (const auto& box : this->GetBoxes()) {
+    if (box->GetName() == name) {
+      return box;
+    }
+  }
+
+  return nullptr;
+}
+}  // namespace ISOBMFF

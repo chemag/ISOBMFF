@@ -30,211 +30,166 @@
 
 #include <ILOC.hpp>
 
-namespace ISOBMFF
-{
-    class ILOC::Item::IMPL
-    {
-        public:
+namespace ISOBMFF {
+class ILOC::Item::IMPL {
+ public:
+  IMPL();
+  IMPL(const IMPL& o);
+  ~IMPL();
 
-            IMPL();
-            IMPL( const IMPL & o );
-            ~IMPL();
+  uint32_t _itemID;
+  uint8_t _constructionMethod;
+  uint16_t _dataReferenceIndex;
+  uint64_t _baseOffset;
+  std::vector<std::shared_ptr<Extent> > _extents;
+};
 
-            uint32_t                                 _itemID;
-            uint8_t                                  _constructionMethod;
-            uint16_t                                 _dataReferenceIndex;
-            uint64_t                                 _baseOffset;
-            std::vector< std::shared_ptr< Extent > > _extents;
-    };
+ILOC::Item::Item() : impl(std::make_unique<IMPL>()) {}
 
-    ILOC::Item::Item():
-        impl( std::make_unique< IMPL >() )
-    {}
+ILOC::Item::Item(BinaryStream& stream, const ILOC& iloc)
+    : impl(std::make_unique<IMPL>()) {
+  uint16_t count;
+  uint16_t i;
 
-    ILOC::Item::Item( BinaryStream & stream, const ILOC & iloc ):
-        impl( std::make_unique< IMPL >() )
-    {
-        uint16_t count;
-        uint16_t i;
+  if (iloc.GetVersion() < 2) {
+    uint16_t temp;
+    Error err = stream.ReadBigEndianUInt16(temp);
+    if (!err) this->SetItemID(temp);
+  } else if (iloc.GetVersion() == 2) {
+    uint32_t temp;
+    Error err = stream.ReadBigEndianUInt32(temp);
+    if (!err) this->SetItemID(temp);
+  }
 
-        if( iloc.GetVersion() < 2 )
-        {
-            uint16_t temp;
-            Error err = stream.ReadBigEndianUInt16( temp );
-            if( !err ) this->SetItemID( temp );
-        }
-        else if( iloc.GetVersion() == 2 )
-        {
-            uint32_t temp;
-            Error err = stream.ReadBigEndianUInt32( temp );
-            if( !err ) this->SetItemID( temp );
-        }
+  if (iloc.GetVersion() == 1 || iloc.GetVersion() == 2) {
+    uint16_t temp;
+    Error err = stream.ReadBigEndianUInt16(temp);
+    if (!err) this->SetConstructionMethod(static_cast<uint8_t>(temp & 0xF));
+  }
 
-        if( iloc.GetVersion() == 1 || iloc.GetVersion() == 2 )
-        {
-            uint16_t temp;
-            Error err = stream.ReadBigEndianUInt16( temp );
-            if( !err ) this->SetConstructionMethod( static_cast< uint8_t >( temp & 0xF ) );
-        }
+  {
+    uint16_t temp;
+    Error err = stream.ReadBigEndianUInt16(temp);
+    if (!err) this->SetDataReferenceIndex(temp);
+  }
 
-        {
-            uint16_t temp;
-            Error err = stream.ReadBigEndianUInt16( temp );
-            if( !err ) this->SetDataReferenceIndex( temp );
-        }
+  if (iloc.GetBaseOffsetSize() == 2) {
+    uint16_t temp;
+    Error err = stream.ReadBigEndianUInt16(temp);
+    if (!err) this->SetBaseOffset(temp);
+  } else if (iloc.GetBaseOffsetSize() == 4) {
+    uint32_t temp;
+    Error err = stream.ReadBigEndianUInt32(temp);
+    if (!err) this->SetBaseOffset(temp);
+  } else if (iloc.GetBaseOffsetSize() == 8) {
+    uint64_t temp;
+    Error err = stream.ReadBigEndianUInt64(temp);
+    if (!err) this->SetBaseOffset(temp);
+  }
 
-        if( iloc.GetBaseOffsetSize() == 2 )
-        {
-            uint16_t temp;
-            Error err = stream.ReadBigEndianUInt16( temp );
-            if( !err ) this->SetBaseOffset( temp );
-        }
-        else if( iloc.GetBaseOffsetSize() == 4 )
-        {
-            uint32_t temp;
-            Error err = stream.ReadBigEndianUInt32( temp );
-            if( !err ) this->SetBaseOffset( temp );
-        }
-        else if( iloc.GetBaseOffsetSize() == 8 )
-        {
-            uint64_t temp;
-            Error err = stream.ReadBigEndianUInt64( temp );
-            if( !err ) this->SetBaseOffset( temp );
-        }
+  Error err = stream.ReadBigEndianUInt16(count);
+  if (err) count = 0;
 
-        Error err = stream.ReadBigEndianUInt16( count );
-        if( err ) count = 0;
+  this->impl->_extents.clear();
 
-        this->impl->_extents.clear();
-
-        for( i = 0; i < count; i++ )
-        {
-            this->AddExtent( std::make_shared< Extent >( stream, iloc ) );
-        }
-    }
-
-    ILOC::Item::Item( const ILOC::Item & o ):
-        impl( std::make_unique< IMPL >( *( o.impl ) ) )
-    {}
-
-    ILOC::Item::Item( ILOC::Item && o ) noexcept:
-        impl( std::move( o.impl ) )
-    {
-        o.impl = nullptr;
-    }
-
-    ILOC::Item::~Item()
-    {}
-
-    ILOC::Item & ILOC::Item::operator =( ILOC::Item o )
-    {
-        swap( *( this ), o );
-
-        return *( this );
-    }
-
-    void swap( ILOC::Item & o1, ILOC::Item & o2 )
-    {
-        using std::swap;
-
-        swap( o1.impl, o2.impl );
-    }
-
-    std::string ILOC::Item::GetName() const
-    {
-        return "Item";
-    }
-
-    uint32_t ILOC::Item::GetItemID() const
-    {
-        return this->impl->_itemID;
-    }
-
-    uint8_t ILOC::Item::GetConstructionMethod() const
-    {
-        return this->impl->_constructionMethod;
-    }
-
-    uint16_t ILOC::Item::GetDataReferenceIndex() const
-    {
-        return this->impl->_dataReferenceIndex;
-    }
-
-    uint64_t ILOC::Item::GetBaseOffset() const
-    {
-        return this->impl->_baseOffset;
-    }
-
-    void ILOC::Item::SetItemID( uint32_t value )
-    {
-        this->impl->_itemID = value;
-    }
-
-    void ILOC::Item::SetConstructionMethod( uint8_t value )
-    {
-        this->impl->_constructionMethod = value;
-    }
-
-    void ILOC::Item::SetDataReferenceIndex( uint16_t value )
-    {
-        this->impl->_dataReferenceIndex = value;
-    }
-
-    void ILOC::Item::SetBaseOffset( uint64_t value )
-    {
-        this->impl->_baseOffset = value;
-    }
-
-    std::vector< std::shared_ptr< ILOC::Item::Extent > > ILOC::Item::GetExtents() const
-    {
-        return this->impl->_extents;
-    }
-
-    void ILOC::Item::AddExtent( std::shared_ptr< Extent > extent )
-    {
-        this->impl->_extents.push_back( extent );
-    }
-
-    void ILOC::Item::WriteDescription( std::ostream & os, std::size_t indentLevel ) const
-    {
-        DisplayableObject::WriteDescription( os, indentLevel );
-        DisplayableObjectContainer::WriteDescription( os, indentLevel );
-    }
-
-    std::vector< std::shared_ptr< DisplayableObject > > ILOC::Item::GetDisplayableObjects() const
-    {
-        auto v( this->GetExtents() );
-
-        return std::vector< std::shared_ptr< DisplayableObject > >( v.begin(), v.end() );
-    }
-
-    std::vector< std::pair< std::string, std::string > > ILOC::Item::GetDisplayableProperties() const
-    {
-        return
-        {
-            { "Item ID",              std::to_string( this->GetItemID() ) },
-            { "Construction method",  std::to_string( this->GetConstructionMethod() ) },
-            { "Data reference index", std::to_string( this->GetDataReferenceIndex() ) },
-            { "Base offset",          std::to_string( this->GetBaseOffset() ) },
-            { "Extent count",         std::to_string( this->GetExtents().size() ) }
-        };
-    }
-
-    ILOC::Item::IMPL::IMPL():
-        _itemID( 0 ),
-        _constructionMethod( 0 ),
-        _dataReferenceIndex( 0 ),
-        _baseOffset( 0 )
-    {}
-
-    ILOC::Item::IMPL::IMPL( const IMPL & o ):
-        _itemID( o._itemID ),
-        _constructionMethod( o._constructionMethod ),
-        _dataReferenceIndex( o._dataReferenceIndex ),
-        _baseOffset( o._baseOffset ),
-        _extents( o._extents )
-    {}
-
-    ILOC::Item::IMPL::~IMPL()
-    {}
+  for (i = 0; i < count; i++) {
+    this->AddExtent(std::make_shared<Extent>(stream, iloc));
+  }
 }
+
+ILOC::Item::Item(const ILOC::Item& o)
+    : impl(std::make_unique<IMPL>(*(o.impl))) {}
+
+ILOC::Item::Item(ILOC::Item&& o) noexcept : impl(std::move(o.impl)) {
+  o.impl = nullptr;
+}
+
+ILOC::Item::~Item() {}
+
+ILOC::Item& ILOC::Item::operator=(ILOC::Item o) {
+  swap(*(this), o);
+
+  return *(this);
+}
+
+void swap(ILOC::Item& o1, ILOC::Item& o2) {
+  using std::swap;
+
+  swap(o1.impl, o2.impl);
+}
+
+std::string ILOC::Item::GetName() const { return "Item"; }
+
+uint32_t ILOC::Item::GetItemID() const { return this->impl->_itemID; }
+
+uint8_t ILOC::Item::GetConstructionMethod() const {
+  return this->impl->_constructionMethod;
+}
+
+uint16_t ILOC::Item::GetDataReferenceIndex() const {
+  return this->impl->_dataReferenceIndex;
+}
+
+uint64_t ILOC::Item::GetBaseOffset() const { return this->impl->_baseOffset; }
+
+void ILOC::Item::SetItemID(uint32_t value) { this->impl->_itemID = value; }
+
+void ILOC::Item::SetConstructionMethod(uint8_t value) {
+  this->impl->_constructionMethod = value;
+}
+
+void ILOC::Item::SetDataReferenceIndex(uint16_t value) {
+  this->impl->_dataReferenceIndex = value;
+}
+
+void ILOC::Item::SetBaseOffset(uint64_t value) {
+  this->impl->_baseOffset = value;
+}
+
+std::vector<std::shared_ptr<ILOC::Item::Extent> > ILOC::Item::GetExtents()
+    const {
+  return this->impl->_extents;
+}
+
+void ILOC::Item::AddExtent(std::shared_ptr<Extent> extent) {
+  this->impl->_extents.push_back(extent);
+}
+
+void ILOC::Item::WriteDescription(std::ostream& os,
+                                  std::size_t indentLevel) const {
+  DisplayableObject::WriteDescription(os, indentLevel);
+  DisplayableObjectContainer::WriteDescription(os, indentLevel);
+}
+
+std::vector<std::shared_ptr<DisplayableObject> >
+ILOC::Item::GetDisplayableObjects() const {
+  auto v(this->GetExtents());
+
+  return std::vector<std::shared_ptr<DisplayableObject> >(v.begin(), v.end());
+}
+
+std::vector<std::pair<std::string, std::string> >
+ILOC::Item::GetDisplayableProperties() const {
+  return {
+      {"Item ID", std::to_string(this->GetItemID())},
+      {"Construction method", std::to_string(this->GetConstructionMethod())},
+      {"Data reference index", std::to_string(this->GetDataReferenceIndex())},
+      {"Base offset", std::to_string(this->GetBaseOffset())},
+      {"Extent count", std::to_string(this->GetExtents().size())}};
+}
+
+ILOC::Item::IMPL::IMPL()
+    : _itemID(0),
+      _constructionMethod(0),
+      _dataReferenceIndex(0),
+      _baseOffset(0) {}
+
+ILOC::Item::IMPL::IMPL(const IMPL& o)
+    : _itemID(o._itemID),
+      _constructionMethod(o._constructionMethod),
+      _dataReferenceIndex(o._dataReferenceIndex),
+      _baseOffset(o._baseOffset),
+      _extents(o._extents) {}
+
+ILOC::Item::IMPL::~IMPL() {}
+}  // namespace ISOBMFF

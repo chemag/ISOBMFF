@@ -32,39 +32,35 @@
 #define ISOBMFF_BINARY_FILE_STREAM_HPP
 
 #include <BinaryStream.hpp>
-#include <string>
-#include <iostream>
-#include <cstdint>
-#include <memory>
 #include <algorithm>
+#include <cstdint>
+#include <iostream>
+#include <memory>
+#include <string>
 
-namespace ISOBMFF
-{
-    class ISOBMFF_EXPORT BinaryFileStream: public BinaryStream
-    {
-        public:
+namespace ISOBMFF {
+class ISOBMFF_EXPORT BinaryFileStream : public BinaryStream {
+ public:
+  BinaryFileStream(const std::string& path);
 
-            BinaryFileStream( const std::string & path );
+  virtual ~BinaryFileStream() override;
 
-            virtual ~BinaryFileStream() override;
+  BinaryFileStream(const BinaryFileStream& o) = delete;
+  BinaryFileStream(BinaryFileStream&& o) = delete;
+  BinaryFileStream& operator=(const BinaryFileStream& o) = delete;
+  BinaryFileStream& operator=(BinaryFileStream&& o) = delete;
 
-            BinaryFileStream( const BinaryFileStream & o )              = delete;
-            BinaryFileStream( BinaryFileStream && o )                   = delete;
-            BinaryFileStream & operator =( const BinaryFileStream & o ) = delete;
-            BinaryFileStream & operator =( BinaryFileStream && o )      = delete;
+  using BinaryStream::Read;
 
-            using BinaryStream::Read;
+  Error Read(uint8_t* buf, size_t size) override;
+  Error Seek(std::streamoff offset, SeekDirection dir) override;
+  size_t Tell() const override;
 
-            Error  Read( uint8_t * buf, size_t size )               override;
-            Error  Seek( std::streamoff offset, SeekDirection dir ) override;
-            size_t Tell()                                     const override;
+ private:
+  class IMPL;
 
-        private:
-
-            class IMPL;
-
-            std::unique_ptr< IMPL > impl;
-    };
-}
+  std::unique_ptr<IMPL> impl;
+};
+}  // namespace ISOBMFF
 
 #endif /* ISOBMFF_BINARY_FILE_STREAM_HPP */

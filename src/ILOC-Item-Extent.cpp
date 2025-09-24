@@ -30,173 +30,121 @@
 
 #include <ILOC.hpp>
 
-namespace ISOBMFF
-{
-    class ILOC::Item::Extent::IMPL
-    {
-        public:
+namespace ISOBMFF {
+class ILOC::Item::Extent::IMPL {
+ public:
+  IMPL();
+  IMPL(const IMPL& o);
+  ~IMPL();
 
-            IMPL();
-            IMPL( const IMPL & o );
-            ~IMPL();
+  uint64_t _index;
+  uint64_t _offset;
+  uint64_t _length;
+};
 
-            uint64_t _index;
-            uint64_t _offset;
-            uint64_t _length;
-    };
+ILOC::Item::Extent::Extent() : impl(std::make_unique<IMPL>()) {}
 
-    ILOC::Item::Extent::Extent():
-        impl( std::make_unique< IMPL >() )
-    {}
-
-    ILOC::Item::Extent::Extent( BinaryStream & stream, const ILOC & iloc ):
-        impl( std::make_unique< IMPL >() )
-    {
-        if( ( iloc.GetVersion() == 1 || iloc.GetVersion() == 2 ) && iloc.GetIndexSize() > 0 )
-        {
-            if( iloc.GetIndexSize() == 2 )
-            {
-                uint16_t temp;
-                Error err = stream.ReadBigEndianUInt16( temp );
-                if( !err ) this->SetIndex( temp );
-            }
-            else if( iloc.GetIndexSize() == 4 )
-            {
-                uint32_t temp;
-                Error err = stream.ReadBigEndianUInt32( temp );
-                if( !err ) this->SetIndex( temp );
-            }
-            else if( iloc.GetIndexSize() == 8 )
-            {
-                uint64_t temp;
-                Error err = stream.ReadBigEndianUInt64( temp );
-                if( !err ) this->SetIndex( temp );
-            }
-        }
-
-        if( iloc.GetOffsetSize() == 2 )
-        {
-            uint16_t temp;
-            Error err = stream.ReadBigEndianUInt16( temp );
-            if( !err ) this->SetOffset( temp );
-        }
-        else if( iloc.GetOffsetSize() == 4 )
-        {
-            uint32_t temp;
-            Error err = stream.ReadBigEndianUInt32( temp );
-            if( !err ) this->SetOffset( temp );
-        }
-        else if( iloc.GetOffsetSize() == 8 )
-        {
-            uint64_t temp;
-            Error err = stream.ReadBigEndianUInt64( temp );
-            if( !err ) this->SetOffset( temp );
-        }
-
-        if( iloc.GetLengthSize() == 2 )
-        {
-            uint16_t temp;
-            Error err = stream.ReadBigEndianUInt16( temp );
-            if( !err ) this->SetLength( temp );
-        }
-        else if( iloc.GetLengthSize() == 4 )
-        {
-            uint32_t temp;
-            Error err = stream.ReadBigEndianUInt32( temp );
-            if( !err ) this->SetLength( temp );
-        }
-        else if( iloc.GetLengthSize() == 8 )
-        {
-            uint64_t temp;
-            Error err = stream.ReadBigEndianUInt64( temp );
-            if( !err ) this->SetLength( temp );
-        }
+ILOC::Item::Extent::Extent(BinaryStream& stream, const ILOC& iloc)
+    : impl(std::make_unique<IMPL>()) {
+  if ((iloc.GetVersion() == 1 || iloc.GetVersion() == 2) &&
+      iloc.GetIndexSize() > 0) {
+    if (iloc.GetIndexSize() == 2) {
+      uint16_t temp;
+      Error err = stream.ReadBigEndianUInt16(temp);
+      if (!err) this->SetIndex(temp);
+    } else if (iloc.GetIndexSize() == 4) {
+      uint32_t temp;
+      Error err = stream.ReadBigEndianUInt32(temp);
+      if (!err) this->SetIndex(temp);
+    } else if (iloc.GetIndexSize() == 8) {
+      uint64_t temp;
+      Error err = stream.ReadBigEndianUInt64(temp);
+      if (!err) this->SetIndex(temp);
     }
+  }
 
-    ILOC::Item::Extent::Extent( const ILOC::Item::Extent & o ):
-        impl( std::make_unique< IMPL >( *( o.impl ) ) )
-    {}
+  if (iloc.GetOffsetSize() == 2) {
+    uint16_t temp;
+    Error err = stream.ReadBigEndianUInt16(temp);
+    if (!err) this->SetOffset(temp);
+  } else if (iloc.GetOffsetSize() == 4) {
+    uint32_t temp;
+    Error err = stream.ReadBigEndianUInt32(temp);
+    if (!err) this->SetOffset(temp);
+  } else if (iloc.GetOffsetSize() == 8) {
+    uint64_t temp;
+    Error err = stream.ReadBigEndianUInt64(temp);
+    if (!err) this->SetOffset(temp);
+  }
 
-    ILOC::Item::Extent::Extent( ILOC::Item::Extent && o ) noexcept:
-        impl( std::move( o.impl ) )
-    {
-        o.impl = nullptr;
-    }
-
-    ILOC::Item::Extent::~Extent()
-    {}
-
-    ILOC::Item::Extent & ILOC::Item::Extent::operator =( ILOC::Item::Extent o )
-    {
-        swap( *( this ), o );
-
-        return *( this );
-    }
-
-    void swap( ILOC::Item::Extent & o1, ILOC::Item::Extent & o2 )
-    {
-        using std::swap;
-
-        swap( o1.impl, o2.impl );
-    }
-
-    std::string ILOC::Item::Extent::GetName() const
-    {
-        return "Extent";
-    }
-
-    uint64_t ILOC::Item::Extent::GetIndex() const
-    {
-        return this->impl->_index;
-    }
-
-    uint64_t ILOC::Item::Extent::GetOffset() const
-    {
-        return this->impl->_offset;
-    }
-
-    uint64_t ILOC::Item::Extent::GetLength() const
-    {
-        return this->impl->_length;
-    }
-
-    void ILOC::Item::Extent::SetIndex( uint64_t value )
-    {
-        this->impl->_index = value;
-    }
-
-    void ILOC::Item::Extent::SetOffset( uint64_t value )
-    {
-        this->impl->_offset = value;
-    }
-
-    void ILOC::Item::Extent::SetLength( uint64_t value )
-    {
-        this->impl->_length = value;
-    }
-
-    std::vector< std::pair< std::string, std::string > > ILOC::Item::Extent::GetDisplayableProperties() const
-    {
-        return
-        {
-            { "Index",  std::to_string( this->GetIndex() ) },
-            { "Offset", std::to_string( this->GetOffset() ) },
-            { "Length", std::to_string( this->GetLength() ) }
-        };
-    }
-
-    ILOC::Item::Extent::IMPL::IMPL():
-        _index( 0 ),
-        _offset( 0 ),
-        _length( 0 )
-    {}
-
-    ILOC::Item::Extent::IMPL::IMPL( const IMPL & o ):
-        _index( o._index ),
-        _offset( o._offset ),
-        _length( o._length )
-    {}
-
-    ILOC::Item::Extent::IMPL::~IMPL()
-    {}
+  if (iloc.GetLengthSize() == 2) {
+    uint16_t temp;
+    Error err = stream.ReadBigEndianUInt16(temp);
+    if (!err) this->SetLength(temp);
+  } else if (iloc.GetLengthSize() == 4) {
+    uint32_t temp;
+    Error err = stream.ReadBigEndianUInt32(temp);
+    if (!err) this->SetLength(temp);
+  } else if (iloc.GetLengthSize() == 8) {
+    uint64_t temp;
+    Error err = stream.ReadBigEndianUInt64(temp);
+    if (!err) this->SetLength(temp);
+  }
 }
+
+ILOC::Item::Extent::Extent(const ILOC::Item::Extent& o)
+    : impl(std::make_unique<IMPL>(*(o.impl))) {}
+
+ILOC::Item::Extent::Extent(ILOC::Item::Extent&& o) noexcept
+    : impl(std::move(o.impl)) {
+  o.impl = nullptr;
+}
+
+ILOC::Item::Extent::~Extent() {}
+
+ILOC::Item::Extent& ILOC::Item::Extent::operator=(ILOC::Item::Extent o) {
+  swap(*(this), o);
+
+  return *(this);
+}
+
+void swap(ILOC::Item::Extent& o1, ILOC::Item::Extent& o2) {
+  using std::swap;
+
+  swap(o1.impl, o2.impl);
+}
+
+std::string ILOC::Item::Extent::GetName() const { return "Extent"; }
+
+uint64_t ILOC::Item::Extent::GetIndex() const { return this->impl->_index; }
+
+uint64_t ILOC::Item::Extent::GetOffset() const { return this->impl->_offset; }
+
+uint64_t ILOC::Item::Extent::GetLength() const { return this->impl->_length; }
+
+void ILOC::Item::Extent::SetIndex(uint64_t value) {
+  this->impl->_index = value;
+}
+
+void ILOC::Item::Extent::SetOffset(uint64_t value) {
+  this->impl->_offset = value;
+}
+
+void ILOC::Item::Extent::SetLength(uint64_t value) {
+  this->impl->_length = value;
+}
+
+std::vector<std::pair<std::string, std::string> >
+ILOC::Item::Extent::GetDisplayableProperties() const {
+  return {{"Index", std::to_string(this->GetIndex())},
+          {"Offset", std::to_string(this->GetOffset())},
+          {"Length", std::to_string(this->GetLength())}};
+}
+
+ILOC::Item::Extent::IMPL::IMPL() : _index(0), _offset(0), _length(0) {}
+
+ILOC::Item::Extent::IMPL::IMPL(const IMPL& o)
+    : _index(o._index), _offset(o._offset), _length(o._length) {}
+
+ILOC::Item::Extent::IMPL::~IMPL() {}
+}  // namespace ISOBMFF

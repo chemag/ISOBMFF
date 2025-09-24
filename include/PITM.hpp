@@ -31,40 +31,37 @@
 #ifndef ISOBMFF_PITM_HPP
 #define ISOBMFF_PITM_HPP
 
-#include <memory>
-#include <algorithm>
-#include <Macros.hpp>
 #include <FullBox.hpp>
+#include <Macros.hpp>
+#include <algorithm>
 #include <cstdint>
+#include <memory>
 
-namespace ISOBMFF
-{
-    class ISOBMFF_EXPORT PITM: public FullBox
-    {
-        public:
+namespace ISOBMFF {
+class ISOBMFF_EXPORT PITM : public FullBox {
+ public:
+  PITM();
+  PITM(const PITM& o);
+  PITM(PITM&& o) noexcept;
+  virtual ~PITM() override;
 
-            PITM();
-            PITM( const PITM & o );
-            PITM( PITM && o ) noexcept;
-            virtual ~PITM() override;
+  PITM& operator=(PITM o);
 
-            PITM & operator =( PITM o );
+  Error ReadData(Parser& parser, BinaryStream& stream) override;
+  std::vector<std::pair<std::string, std::string> > GetDisplayableProperties()
+      const override;
 
-            Error                                                 ReadData( Parser & parser, BinaryStream & stream ) override;
-            std::vector< std::pair< std::string, std::string > > GetDisplayableProperties() const override;
+  uint32_t GetItemID() const;
 
-            uint32_t GetItemID() const;
+  void SetItemID(uint32_t value);
 
-            void SetItemID( uint32_t value );
+  ISOBMFF_EXPORT friend void swap(PITM& o1, PITM& o2);
 
-            ISOBMFF_EXPORT friend void swap( PITM & o1, PITM & o2 );
+ private:
+  class IMPL;
 
-        private:
-
-            class IMPL;
-
-            std::unique_ptr< IMPL > impl;
-    };
-}
+  std::unique_ptr<IMPL> impl;
+};
+}  // namespace ISOBMFF
 
 #endif /* ISOBMFF_PITM_HPP */

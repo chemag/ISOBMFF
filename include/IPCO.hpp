@@ -31,24 +31,23 @@
 #ifndef ISOBMFF_IPCO_HPP
 #define ISOBMFF_IPCO_HPP
 
-#include <Macros.hpp>
 #include <ContainerBox.hpp>
 #include <IPMA.hpp>
+#include <Macros.hpp>
 
-namespace ISOBMFF
-{
-    class ISOBMFF_EXPORT IPCO: public ContainerBox
-    {
-        public:
+namespace ISOBMFF {
+class ISOBMFF_EXPORT IPCO : public ContainerBox {
+ public:
+  IPCO();
 
-            IPCO();
+  using ContainerBox::ContainerBox;
 
-            using ContainerBox::ContainerBox;
-
-            std::shared_ptr< Box >                GetPropertyAtIndex( size_t index ) const;
-            std::shared_ptr< Box >                GetProperty( const IPMA::Entry::Association & association ) const;
-            std::vector< std::shared_ptr< Box > > GetProperties( const IPMA::Entry & entry ) const;
-    };
-}
+  std::shared_ptr<Box> GetPropertyAtIndex(size_t index) const;
+  std::shared_ptr<Box> GetProperty(
+      const IPMA::Entry::Association& association) const;
+  std::vector<std::shared_ptr<Box> > GetProperties(
+      const IPMA::Entry& entry) const;
+};
+}  // namespace ISOBMFF
 
 #endif /* ISOBMFF_IPCO_HPP */

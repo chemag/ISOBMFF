@@ -30,61 +30,45 @@
 
 #include <CDSC.hpp>
 
-namespace ISOBMFF
-{
-    class CDSC::IMPL
-    {
-        public:
+namespace ISOBMFF {
+class CDSC::IMPL {
+ public:
+  IMPL();
+  IMPL(const IMPL& o);
+  ~IMPL();
+};
 
-            IMPL();
-            IMPL( const IMPL & o );
-            ~IMPL();
-    };
+CDSC::CDSC()
+    : SingleItemTypeReferenceBox("cdsc"), impl(std::make_unique<IMPL>()) {}
 
-    CDSC::CDSC():
-        SingleItemTypeReferenceBox( "cdsc" ),
-        impl( std::make_unique< IMPL >() )
-    {}
+CDSC::CDSC(const CDSC& o)
+    : SingleItemTypeReferenceBox(o), impl(std::make_unique<IMPL>(*(o.impl))) {}
 
-    CDSC::CDSC( const CDSC & o ):
-        SingleItemTypeReferenceBox( o ),
-        impl( std::make_unique< IMPL >( *( o.impl ) ) )
-    {}
-
-    CDSC::CDSC( CDSC && o ) noexcept:
-        SingleItemTypeReferenceBox( std::move( o ) ),
-        impl( std::move( o.impl ) )
-    {
-        o.impl = nullptr;
-    }
-
-    CDSC::~CDSC()
-    {}
-
-    CDSC & CDSC::operator =( CDSC o )
-    {
-        SingleItemTypeReferenceBox::operator=( o );
-        swap( *( this ), o );
-
-        return *( this );
-    }
-
-    void swap( CDSC & o1, CDSC & o2 )
-    {
-        using std::swap;
-
-        swap( static_cast< SingleItemTypeReferenceBox & >( o1 ), static_cast< SingleItemTypeReferenceBox & >( o2 ) );
-        swap( o1.impl, o2.impl );
-    }
-
-    CDSC::IMPL::IMPL()
-    {}
-
-    CDSC::IMPL::IMPL( const IMPL & o )
-    {
-        ( void )o;
-    }
-
-    CDSC::IMPL::~IMPL()
-    {}
+CDSC::CDSC(CDSC&& o) noexcept
+    : SingleItemTypeReferenceBox(std::move(o)), impl(std::move(o.impl)) {
+  o.impl = nullptr;
 }
+
+CDSC::~CDSC() {}
+
+CDSC& CDSC::operator=(CDSC o) {
+  SingleItemTypeReferenceBox::operator=(o);
+  swap(*(this), o);
+
+  return *(this);
+}
+
+void swap(CDSC& o1, CDSC& o2) {
+  using std::swap;
+
+  swap(static_cast<SingleItemTypeReferenceBox&>(o1),
+       static_cast<SingleItemTypeReferenceBox&>(o2));
+  swap(o1.impl, o2.impl);
+}
+
+CDSC::IMPL::IMPL() {}
+
+CDSC::IMPL::IMPL(const IMPL& o) { (void)o; }
+
+CDSC::IMPL::~IMPL() {}
+}  // namespace ISOBMFF

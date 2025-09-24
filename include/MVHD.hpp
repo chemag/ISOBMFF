@@ -31,54 +31,51 @@
 #ifndef ISOBMFF_MVHD_HPP
 #define ISOBMFF_MVHD_HPP
 
-#include <memory>
-#include <algorithm>
-#include <Macros.hpp>
 #include <FullBox.hpp>
+#include <Macros.hpp>
 #include <Matrix.hpp>
+#include <algorithm>
+#include <memory>
 
-namespace ISOBMFF
-{
-    class ISOBMFF_EXPORT MVHD: public FullBox
-    {
-        public:
+namespace ISOBMFF {
+class ISOBMFF_EXPORT MVHD : public FullBox {
+ public:
+  MVHD();
+  MVHD(const MVHD& o);
+  MVHD(MVHD&& o) noexcept;
+  virtual ~MVHD() override;
 
-            MVHD();
-            MVHD( const MVHD & o );
-            MVHD( MVHD && o ) noexcept;
-            virtual ~MVHD() override;
+  MVHD& operator=(MVHD o);
 
-            MVHD & operator =( MVHD o );
+  Error ReadData(Parser& parser, BinaryStream& stream) override;
+  std::vector<std::pair<std::string, std::string> > GetDisplayableProperties()
+      const override;
 
-            Error                                                 ReadData( Parser & parser, BinaryStream & stream ) override;
-            std::vector< std::pair< std::string, std::string > > GetDisplayableProperties() const override;
+  uint64_t GetCreationTime() const;
+  uint64_t GetModificationTime() const;
+  uint32_t GetTimescale() const;
+  uint64_t GetDuration() const;
+  uint32_t GetRate() const;
+  uint16_t GetVolume() const;
+  Matrix GetMatrix() const;
+  uint32_t GetNextTrackID() const;
 
-            uint64_t GetCreationTime()     const;
-            uint64_t GetModificationTime() const;
-            uint32_t GetTimescale()        const;
-            uint64_t GetDuration()         const;
-            uint32_t GetRate()             const;
-            uint16_t GetVolume()           const;
-            Matrix   GetMatrix()           const;
-            uint32_t GetNextTrackID()      const;
+  void SetCreationTime(uint64_t value);
+  void SetModificationTime(uint64_t value);
+  void SetTimescale(uint32_t value);
+  void SetDuration(uint64_t value);
+  void SetRate(uint32_t value);
+  void SetVolume(uint16_t value);
+  void SetMatrix(const Matrix& value);
+  void SetNextTrackID(uint32_t value);
 
-            void SetCreationTime( uint64_t value );
-            void SetModificationTime( uint64_t value );
-            void SetTimescale( uint32_t value );
-            void SetDuration( uint64_t value );
-            void SetRate( uint32_t value );
-            void SetVolume( uint16_t value );
-            void SetMatrix( const Matrix & value );
-            void SetNextTrackID( uint32_t value );
+  ISOBMFF_EXPORT friend void swap(MVHD& o1, MVHD& o2);
 
-            ISOBMFF_EXPORT friend void swap( MVHD & o1, MVHD & o2 );
+ private:
+  class IMPL;
 
-        private:
-
-            class IMPL;
-
-            std::unique_ptr< IMPL > impl;
-    };
-}
+  std::unique_ptr<IMPL> impl;
+};
+}  // namespace ISOBMFF
 
 #endif /* ISOBMFF_MVHD_HPP */

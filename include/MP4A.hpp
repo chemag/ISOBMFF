@@ -31,50 +31,48 @@
 #ifndef ISOBMFF_MP4A_HPP
 #define ISOBMFF_MP4A_HPP
 
-#include <memory>
-#include <algorithm>
-#include <Macros.hpp>
-#include <FullBox.hpp>
 #include <Container.hpp>
-#include <string>
+#include <FullBox.hpp>
+#include <Macros.hpp>
+#include <algorithm>
 #include <cstdint>
+#include <memory>
+#include <string>
 
-namespace ISOBMFF
-{
-    class ISOBMFF_EXPORT MP4A: public FullBox, public Container
-    {
-        public:
+namespace ISOBMFF {
+class ISOBMFF_EXPORT MP4A : public FullBox, public Container {
+ public:
+  MP4A();
+  MP4A(const MP4A& o);
+  MP4A(MP4A&& o) noexcept;
+  virtual ~MP4A() override;
 
-            MP4A();
-            MP4A( const MP4A & o );
-            MP4A( MP4A && o ) noexcept;
-            virtual ~MP4A() override;
+  MP4A& operator=(MP4A o);
 
-            MP4A & operator =( MP4A o );
+  Error ReadData(Parser& parser, BinaryStream& stream) override;
+  void WriteDescription(std::ostream& os,
+                        std::size_t indentLevel) const override;
+  std::vector<std::pair<std::string, std::string> > GetDisplayableProperties()
+      const override;
 
-            Error   ReadData( Parser & parser, BinaryStream & stream ) override;
-            void WriteDescription( std::ostream & os, std::size_t indentLevel ) const override;
-            std::vector< std::pair< std::string, std::string > > GetDisplayableProperties() const override;
+  uint16_t GetChannelCount() const;
+  uint16_t GetSampleSize() const;
+  uint32_t GetSampleRateRaw() const;
+  float GetSampleRate() const;
 
-            uint16_t GetChannelCount() const;
-            uint16_t GetSampleSize() const;
-            uint32_t GetSampleRateRaw() const;
-            float GetSampleRate() const;
+  void SetChannelCount(uint16_t value);
+  void SetSampleSize(uint16_t value);
+  void SetSampleRateRaw(uint32_t value);
 
-            void SetChannelCount( uint16_t value );
-            void SetSampleSize( uint16_t value );
-            void SetSampleRateRaw( uint32_t value );
+  void AddBox(std::shared_ptr<Box> box) override;
+  std::vector<std::shared_ptr<Box> > GetBoxes() const override;
+  ISOBMFF_EXPORT friend void swap(MP4A& o1, MP4A& o2);
 
-            void                                  AddBox( std::shared_ptr< Box > box ) override;
-            std::vector< std::shared_ptr< Box > > GetBoxes() const override;
-            ISOBMFF_EXPORT friend void swap( MP4A & o1, MP4A & o2 );
+ private:
+  class IMPL;
 
-        private:
-
-            class IMPL;
-
-            std::unique_ptr< IMPL > impl;
-    };
-}
+  std::unique_ptr<IMPL> impl;
+};
+}  // namespace ISOBMFF
 
 #endif /* ISOBMFF_MP4A_HPP */

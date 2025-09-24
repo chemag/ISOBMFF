@@ -31,278 +31,216 @@
 #include <MVHD.hpp>
 #include <cstring>
 
-namespace ISOBMFF
-{
-    class MVHD::IMPL
-    {
-        public:
+namespace ISOBMFF {
+class MVHD::IMPL {
+ public:
+  IMPL();
+  IMPL(const IMPL& o);
+  ~IMPL();
 
-            IMPL();
-            IMPL( const IMPL & o );
-            ~IMPL();
+  uint64_t _creationTime;
+  uint64_t _modificationTime;
+  uint32_t _timescale;
+  uint64_t _duration;
+  uint32_t _rate;
+  uint16_t _volume;
+  uint16_t _reserved1;
+  uint32_t _reserved2[2];
+  Matrix _matrix;
+  uint32_t _predefined[6];
+  uint32_t _nextTrackID;
+};
 
-            uint64_t _creationTime;
-            uint64_t _modificationTime;
-            uint32_t _timescale;
-            uint64_t _duration;
-            uint32_t _rate;
-            uint16_t _volume;
-            uint16_t _reserved1;
-            uint32_t _reserved2[ 2 ];
-            Matrix   _matrix;
-            uint32_t _predefined[ 6 ];
-            uint32_t _nextTrackID;
-    };
+MVHD::MVHD() : FullBox("mvhd"), impl(std::make_unique<IMPL>()) {}
 
-    MVHD::MVHD():
-        FullBox( "mvhd" ),
-        impl( std::make_unique< IMPL >() )
-    {}
+MVHD::MVHD(const MVHD& o)
+    : FullBox(o), impl(std::make_unique<IMPL>(*(o.impl))) {}
 
-    MVHD::MVHD( const MVHD & o ):
-        FullBox( o ),
-        impl( std::make_unique< IMPL >( *( o.impl ) ) )
-    {}
-
-    MVHD::MVHD( MVHD && o ) noexcept:
-        FullBox( std::move( o ) ),
-        impl( std::move( o.impl ) )
-    {
-        o.impl = nullptr;
-    }
-
-    MVHD::~MVHD()
-    {}
-
-    MVHD & MVHD::operator =( MVHD o )
-    {
-        FullBox::operator=( o );
-        swap( *( this ), o );
-
-        return *( this );
-    }
-
-    void swap( MVHD & o1, MVHD & o2 )
-    {
-        using std::swap;
-
-        swap( static_cast< FullBox & >( o1 ), static_cast< FullBox & >( o2 ) );
-        swap( o1.impl, o2.impl );
-    }
-
-    Error MVHD::ReadData( Parser & parser, BinaryStream & stream )
-    {
-        Error err;
-
-        err = FullBox::ReadData( parser, stream );
-        if( err ) return err;
-
-        if( this->GetVersion() == 1 )
-        {
-            uint64_t temp64;
-            err = stream.ReadBigEndianUInt64( temp64 );
-            if( err ) return err;
-            this->SetCreationTime( temp64 );
-
-            err = stream.ReadBigEndianUInt64( temp64 );
-            if( err ) return err;
-            this->SetModificationTime( temp64 );
-
-            uint32_t temp32;
-            err = stream.ReadBigEndianUInt32( temp32 );
-            if( err ) return err;
-            this->SetTimescale( temp32 );
-
-            err = stream.ReadBigEndianUInt64( temp64 );
-            if( err ) return err;
-            this->SetDuration( temp64 );
-        }
-        else
-        {
-            uint32_t temp32;
-            err = stream.ReadBigEndianUInt32( temp32 );
-            if( err ) return err;
-            this->SetCreationTime( temp32 );
-
-            err = stream.ReadBigEndianUInt32( temp32 );
-            if( err ) return err;
-            this->SetModificationTime( temp32 );
-
-            err = stream.ReadBigEndianUInt32( temp32 );
-            if( err ) return err;
-            this->SetTimescale( temp32 );
-
-            err = stream.ReadBigEndianUInt32( temp32 );
-            if( err ) return err;
-            this->SetDuration( temp32 );
-        }
-
-        uint32_t temp32;
-        err = stream.ReadBigEndianUInt32( temp32 );
-        if( err ) return err;
-        this->SetRate( temp32 );
-
-        uint16_t temp16;
-        err = stream.ReadBigEndianUInt16( temp16 );
-        if( err ) return err;
-        this->SetVolume( temp16 );
-
-        err = stream.ReadBigEndianUInt16( this->impl->_reserved1 );
-        if( err ) return err;
-        err = stream.ReadBigEndianUInt32( this->impl->_reserved2[ 0 ] );
-        if( err ) return err;
-        err = stream.ReadBigEndianUInt32( this->impl->_reserved2[ 1 ] );
-        if( err ) return err;
-
-        Matrix tempMatrix;
-        err = stream.ReadMatrix( tempMatrix );
-        if( err ) return err;
-        this->SetMatrix( tempMatrix );
-
-        err = stream.ReadBigEndianUInt32( this->impl->_predefined[ 0 ] );
-        if( err ) return err;
-        err = stream.ReadBigEndianUInt32( this->impl->_predefined[ 1 ] );
-        if( err ) return err;
-        err = stream.ReadBigEndianUInt32( this->impl->_predefined[ 2 ] );
-        if( err ) return err;
-        err = stream.ReadBigEndianUInt32( this->impl->_predefined[ 3 ] );
-        if( err ) return err;
-        err = stream.ReadBigEndianUInt32( this->impl->_predefined[ 4 ] );
-        if( err ) return err;
-        err = stream.ReadBigEndianUInt32( this->impl->_predefined[ 5 ] );
-        if( err ) return err;
-
-        err = stream.ReadBigEndianUInt32( temp32 );
-        if( err ) return err;
-        this->SetNextTrackID( temp32 );
-        return Error();
-    }
-
-    std::vector< std::pair< std::string, std::string > > MVHD::GetDisplayableProperties() const
-    {
-        auto props( FullBox::GetDisplayableProperties() );
-
-        props.push_back( { "Creation time",     std::to_string( this->GetCreationTime() ) } );
-        props.push_back( { "Modification time", std::to_string( this->GetModificationTime() ) } );
-        props.push_back( { "Timescale",         std::to_string( this->GetTimescale() ) } );
-        props.push_back( { "Duration",          std::to_string( this->GetDuration() ) } );
-        props.push_back( { "Rate",              std::to_string( this->GetRate() ) } );
-        props.push_back( { "Volume",            std::to_string( this->GetVolume() ) } );
-        props.push_back( { "Matrix",            this->GetMatrix().ToString() } );
-        props.push_back( { "Next track ID",     std::to_string( this->GetNextTrackID() ) } );
-
-        return props;
-    }
-
-    uint64_t MVHD::GetCreationTime() const
-    {
-        return this->impl->_creationTime;
-    }
-
-    uint64_t MVHD::GetModificationTime() const
-    {
-        return this->impl->_modificationTime;
-    }
-
-    uint32_t MVHD::GetTimescale() const
-    {
-        return this->impl->_timescale;
-    }
-
-    uint64_t MVHD::GetDuration() const
-    {
-        return this->impl->_duration;
-    }
-
-    uint32_t MVHD::GetRate() const
-    {
-        return this->impl->_rate;
-    }
-
-    uint16_t MVHD::GetVolume() const
-    {
-        return this->impl->_volume;
-    }
-
-    Matrix MVHD::GetMatrix() const
-    {
-        return this->impl->_matrix;
-    }
-
-    uint32_t MVHD::GetNextTrackID() const
-    {
-        return this->impl->_nextTrackID;
-    }
-
-    void MVHD::SetCreationTime( uint64_t value )
-    {
-        this->impl->_creationTime = value;
-    }
-
-    void MVHD::SetModificationTime( uint64_t value )
-    {
-        this->impl->_modificationTime = value;
-    }
-
-    void MVHD::SetTimescale( uint32_t value )
-    {
-        this->impl->_timescale = value;
-    }
-
-    void MVHD::SetDuration( uint64_t value )
-    {
-        this->impl->_duration = value;
-    }
-
-    void MVHD::SetRate( uint32_t value )
-    {
-        this->impl->_rate = value;
-    }
-
-    void MVHD::SetVolume( uint16_t value )
-    {
-        this->impl->_volume = value;
-    }
-
-    void MVHD::SetMatrix( const Matrix & value )
-    {
-        this->impl->_matrix = value;
-    }
-
-    void MVHD::SetNextTrackID( uint32_t value )
-    {
-        this->impl->_nextTrackID = value;
-    }
-
-    MVHD::IMPL::IMPL():
-        _creationTime( 0 ),
-        _modificationTime( 0 ),
-        _timescale( 0 ),
-        _duration( 0 ),
-        _rate( 0 ),
-        _volume( 0 ),
-        _reserved1( 0 ),
-        _nextTrackID( 0 )
-    {
-        memset( this->_reserved2,  0, sizeof( this->_reserved2 ) );
-        memset( this->_predefined, 0, sizeof( this->_predefined ) );
-    }
-
-    MVHD::IMPL::IMPL( const IMPL & o ):
-        _creationTime( o._creationTime ),
-        _modificationTime( o._modificationTime ),
-        _timescale( o._timescale ),
-        _duration( o._duration ),
-        _rate( o._rate ),
-        _volume( o._volume ),
-        _reserved1( o._reserved1 ),
-        _matrix( o._matrix ),
-        _nextTrackID( o._nextTrackID )
-    {
-        memcpy( this->_reserved2,  o._reserved2,  sizeof( this->_reserved2 ) );
-        memcpy( this->_predefined, o._predefined, sizeof( this->_predefined ) );
-    }
-
-    MVHD::IMPL::~IMPL()
-    {}
+MVHD::MVHD(MVHD&& o) noexcept : FullBox(std::move(o)), impl(std::move(o.impl)) {
+  o.impl = nullptr;
 }
+
+MVHD::~MVHD() {}
+
+MVHD& MVHD::operator=(MVHD o) {
+  FullBox::operator=(o);
+  swap(*(this), o);
+
+  return *(this);
+}
+
+void swap(MVHD& o1, MVHD& o2) {
+  using std::swap;
+
+  swap(static_cast<FullBox&>(o1), static_cast<FullBox&>(o2));
+  swap(o1.impl, o2.impl);
+}
+
+Error MVHD::ReadData(Parser& parser, BinaryStream& stream) {
+  Error err;
+
+  err = FullBox::ReadData(parser, stream);
+  if (err) return err;
+
+  if (this->GetVersion() == 1) {
+    uint64_t temp64;
+    err = stream.ReadBigEndianUInt64(temp64);
+    if (err) return err;
+    this->SetCreationTime(temp64);
+
+    err = stream.ReadBigEndianUInt64(temp64);
+    if (err) return err;
+    this->SetModificationTime(temp64);
+
+    uint32_t temp32;
+    err = stream.ReadBigEndianUInt32(temp32);
+    if (err) return err;
+    this->SetTimescale(temp32);
+
+    err = stream.ReadBigEndianUInt64(temp64);
+    if (err) return err;
+    this->SetDuration(temp64);
+  } else {
+    uint32_t temp32;
+    err = stream.ReadBigEndianUInt32(temp32);
+    if (err) return err;
+    this->SetCreationTime(temp32);
+
+    err = stream.ReadBigEndianUInt32(temp32);
+    if (err) return err;
+    this->SetModificationTime(temp32);
+
+    err = stream.ReadBigEndianUInt32(temp32);
+    if (err) return err;
+    this->SetTimescale(temp32);
+
+    err = stream.ReadBigEndianUInt32(temp32);
+    if (err) return err;
+    this->SetDuration(temp32);
+  }
+
+  uint32_t temp32;
+  err = stream.ReadBigEndianUInt32(temp32);
+  if (err) return err;
+  this->SetRate(temp32);
+
+  uint16_t temp16;
+  err = stream.ReadBigEndianUInt16(temp16);
+  if (err) return err;
+  this->SetVolume(temp16);
+
+  err = stream.ReadBigEndianUInt16(this->impl->_reserved1);
+  if (err) return err;
+  err = stream.ReadBigEndianUInt32(this->impl->_reserved2[0]);
+  if (err) return err;
+  err = stream.ReadBigEndianUInt32(this->impl->_reserved2[1]);
+  if (err) return err;
+
+  Matrix tempMatrix;
+  err = stream.ReadMatrix(tempMatrix);
+  if (err) return err;
+  this->SetMatrix(tempMatrix);
+
+  err = stream.ReadBigEndianUInt32(this->impl->_predefined[0]);
+  if (err) return err;
+  err = stream.ReadBigEndianUInt32(this->impl->_predefined[1]);
+  if (err) return err;
+  err = stream.ReadBigEndianUInt32(this->impl->_predefined[2]);
+  if (err) return err;
+  err = stream.ReadBigEndianUInt32(this->impl->_predefined[3]);
+  if (err) return err;
+  err = stream.ReadBigEndianUInt32(this->impl->_predefined[4]);
+  if (err) return err;
+  err = stream.ReadBigEndianUInt32(this->impl->_predefined[5]);
+  if (err) return err;
+
+  err = stream.ReadBigEndianUInt32(temp32);
+  if (err) return err;
+  this->SetNextTrackID(temp32);
+  return Error();
+}
+
+std::vector<std::pair<std::string, std::string> >
+MVHD::GetDisplayableProperties() const {
+  auto props(FullBox::GetDisplayableProperties());
+
+  props.push_back({"Creation time", std::to_string(this->GetCreationTime())});
+  props.push_back(
+      {"Modification time", std::to_string(this->GetModificationTime())});
+  props.push_back({"Timescale", std::to_string(this->GetTimescale())});
+  props.push_back({"Duration", std::to_string(this->GetDuration())});
+  props.push_back({"Rate", std::to_string(this->GetRate())});
+  props.push_back({"Volume", std::to_string(this->GetVolume())});
+  props.push_back({"Matrix", this->GetMatrix().ToString()});
+  props.push_back({"Next track ID", std::to_string(this->GetNextTrackID())});
+
+  return props;
+}
+
+uint64_t MVHD::GetCreationTime() const { return this->impl->_creationTime; }
+
+uint64_t MVHD::GetModificationTime() const {
+  return this->impl->_modificationTime;
+}
+
+uint32_t MVHD::GetTimescale() const { return this->impl->_timescale; }
+
+uint64_t MVHD::GetDuration() const { return this->impl->_duration; }
+
+uint32_t MVHD::GetRate() const { return this->impl->_rate; }
+
+uint16_t MVHD::GetVolume() const { return this->impl->_volume; }
+
+Matrix MVHD::GetMatrix() const { return this->impl->_matrix; }
+
+uint32_t MVHD::GetNextTrackID() const { return this->impl->_nextTrackID; }
+
+void MVHD::SetCreationTime(uint64_t value) {
+  this->impl->_creationTime = value;
+}
+
+void MVHD::SetModificationTime(uint64_t value) {
+  this->impl->_modificationTime = value;
+}
+
+void MVHD::SetTimescale(uint32_t value) { this->impl->_timescale = value; }
+
+void MVHD::SetDuration(uint64_t value) { this->impl->_duration = value; }
+
+void MVHD::SetRate(uint32_t value) { this->impl->_rate = value; }
+
+void MVHD::SetVolume(uint16_t value) { this->impl->_volume = value; }
+
+void MVHD::SetMatrix(const Matrix& value) { this->impl->_matrix = value; }
+
+void MVHD::SetNextTrackID(uint32_t value) { this->impl->_nextTrackID = value; }
+
+MVHD::IMPL::IMPL()
+    : _creationTime(0),
+      _modificationTime(0),
+      _timescale(0),
+      _duration(0),
+      _rate(0),
+      _volume(0),
+      _reserved1(0),
+      _nextTrackID(0) {
+  memset(this->_reserved2, 0, sizeof(this->_reserved2));
+  memset(this->_predefined, 0, sizeof(this->_predefined));
+}
+
+MVHD::IMPL::IMPL(const IMPL& o)
+    : _creationTime(o._creationTime),
+      _modificationTime(o._modificationTime),
+      _timescale(o._timescale),
+      _duration(o._duration),
+      _rate(o._rate),
+      _volume(o._volume),
+      _reserved1(o._reserved1),
+      _matrix(o._matrix),
+      _nextTrackID(o._nextTrackID) {
+  memcpy(this->_reserved2, o._reserved2, sizeof(this->_reserved2));
+  memcpy(this->_predefined, o._predefined, sizeof(this->_predefined));
+}
+
+MVHD::IMPL::~IMPL() {}
+}  // namespace ISOBMFF

@@ -30,115 +30,86 @@
 
 #include <ISPE.hpp>
 
-namespace ISOBMFF
-{
-    class ISPE::IMPL
-    {
-        public:
+namespace ISOBMFF {
+class ISPE::IMPL {
+ public:
+  IMPL();
+  IMPL(const IMPL& o);
+  ~IMPL();
 
-            IMPL();
-            IMPL( const IMPL & o );
-            ~IMPL();
+  uint32_t _displayWidth;
+  uint32_t _displayHeight;
+};
 
-            uint32_t _displayWidth;
-            uint32_t _displayHeight;
-    };
+ISPE::ISPE() : FullBox("ispe"), impl(std::make_unique<IMPL>()) {}
 
-    ISPE::ISPE():
-        FullBox( "ispe" ),
-        impl( std::make_unique< IMPL >() )
-    {}
+ISPE::ISPE(const ISPE& o)
+    : FullBox(o), impl(std::make_unique<IMPL>(*(o.impl))) {}
 
-    ISPE::ISPE( const ISPE & o ):
-        FullBox( o ),
-        impl( std::make_unique< IMPL >( *( o.impl ) ) )
-    {}
-
-    ISPE::ISPE( ISPE && o ) noexcept:
-        FullBox( std::move( o ) ),
-        impl( std::move( o.impl ) )
-    {
-        o.impl = nullptr;
-    }
-
-    ISPE::~ISPE()
-    {}
-
-    ISPE & ISPE::operator =( ISPE o )
-    {
-        FullBox::operator=( o );
-        swap( *( this ), o );
-
-        return *( this );
-    }
-
-    void swap( ISPE & o1, ISPE & o2 )
-    {
-        using std::swap;
-
-        swap( static_cast< FullBox & >( o1 ), static_cast< FullBox & >( o2 ) );
-        swap( o1.impl, o2.impl );
-    }
-
-    Error ISPE::ReadData( Parser & parser, BinaryStream & stream )
-    {
-        Error err;
-
-        err = FullBox::ReadData( parser, stream );
-        if( err ) return err;
-
-        uint32_t displayWidth;
-        err = stream.ReadBigEndianUInt32( displayWidth );
-        if( err ) return err;
-        this->SetDisplayWidth( displayWidth );
-
-        uint32_t displayHeight;
-        err = stream.ReadBigEndianUInt32( displayHeight );
-        if( err ) return err;
-        this->SetDisplayHeight( displayHeight );
-        return Error();
-    }
-
-    std::vector< std::pair< std::string, std::string > > ISPE::GetDisplayableProperties() const
-    {
-        auto props( FullBox::GetDisplayableProperties() );
-
-        props.push_back( { "Display width",  std::to_string( this->GetDisplayWidth() ) } );
-        props.push_back( { "Display height", std::to_string( this->GetDisplayHeight() ) } );
-
-        return props;
-    }
-
-    uint32_t ISPE::GetDisplayWidth() const
-    {
-        return this->impl->_displayWidth;
-    }
-
-    uint32_t ISPE::GetDisplayHeight() const
-    {
-        return this->impl->_displayHeight;
-    }
-
-    void ISPE::SetDisplayWidth( uint32_t value )
-    {
-        this->impl->_displayWidth = value;
-    }
-
-    void ISPE::SetDisplayHeight( uint32_t value )
-    {
-        this->impl->_displayHeight = value;
-    }
-
-    ISPE::IMPL::IMPL():
-        _displayWidth( 0 ),
-        _displayHeight( 0 )
-    {}
-
-    ISPE::IMPL::IMPL( const IMPL & o ):
-        _displayWidth( o._displayWidth ),
-        _displayHeight( o._displayHeight )
-    {}
-
-    ISPE::IMPL::~IMPL()
-    {}
+ISPE::ISPE(ISPE&& o) noexcept : FullBox(std::move(o)), impl(std::move(o.impl)) {
+  o.impl = nullptr;
 }
+
+ISPE::~ISPE() {}
+
+ISPE& ISPE::operator=(ISPE o) {
+  FullBox::operator=(o);
+  swap(*(this), o);
+
+  return *(this);
+}
+
+void swap(ISPE& o1, ISPE& o2) {
+  using std::swap;
+
+  swap(static_cast<FullBox&>(o1), static_cast<FullBox&>(o2));
+  swap(o1.impl, o2.impl);
+}
+
+Error ISPE::ReadData(Parser& parser, BinaryStream& stream) {
+  Error err;
+
+  err = FullBox::ReadData(parser, stream);
+  if (err) return err;
+
+  uint32_t displayWidth;
+  err = stream.ReadBigEndianUInt32(displayWidth);
+  if (err) return err;
+  this->SetDisplayWidth(displayWidth);
+
+  uint32_t displayHeight;
+  err = stream.ReadBigEndianUInt32(displayHeight);
+  if (err) return err;
+  this->SetDisplayHeight(displayHeight);
+  return Error();
+}
+
+std::vector<std::pair<std::string, std::string> >
+ISPE::GetDisplayableProperties() const {
+  auto props(FullBox::GetDisplayableProperties());
+
+  props.push_back({"Display width", std::to_string(this->GetDisplayWidth())});
+  props.push_back({"Display height", std::to_string(this->GetDisplayHeight())});
+
+  return props;
+}
+
+uint32_t ISPE::GetDisplayWidth() const { return this->impl->_displayWidth; }
+
+uint32_t ISPE::GetDisplayHeight() const { return this->impl->_displayHeight; }
+
+void ISPE::SetDisplayWidth(uint32_t value) {
+  this->impl->_displayWidth = value;
+}
+
+void ISPE::SetDisplayHeight(uint32_t value) {
+  this->impl->_displayHeight = value;
+}
+
+ISPE::IMPL::IMPL() : _displayWidth(0), _displayHeight(0) {}
+
+ISPE::IMPL::IMPL(const IMPL& o)
+    : _displayWidth(o._displayWidth), _displayHeight(o._displayHeight) {}
+
+ISPE::IMPL::~IMPL() {}
+}  // namespace ISOBMFF

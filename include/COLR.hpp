@@ -31,52 +31,49 @@
 #ifndef ISOBMFF_COLR_HPP
 #define ISOBMFF_COLR_HPP
 
-#include <memory>
-#include <algorithm>
-#include <Macros.hpp>
 #include <Box.hpp>
-#include <string>
+#include <Macros.hpp>
+#include <algorithm>
 #include <cstdint>
+#include <memory>
+#include <string>
 #include <vector>
 
-namespace ISOBMFF
-{
-    class ISOBMFF_EXPORT COLR: public Box
-    {
-        public:
+namespace ISOBMFF {
+class ISOBMFF_EXPORT COLR : public Box {
+ public:
+  COLR();
+  COLR(const COLR& o);
+  COLR(COLR&& o) noexcept;
+  virtual ~COLR() override;
 
-            COLR();
-            COLR( const COLR & o );
-            COLR( COLR && o ) noexcept;
-            virtual ~COLR() override;
+  COLR& operator=(COLR o);
 
-            COLR & operator =( COLR o );
+  Error ReadData(Parser& parser, BinaryStream& stream) override;
+  std::vector<std::pair<std::string, std::string> > GetDisplayableProperties()
+      const override;
 
-            Error                                                 ReadData( Parser & parser, BinaryStream & stream ) override;
-            std::vector< std::pair< std::string, std::string > > GetDisplayableProperties() const override;
+  std::string GetColourType() const;
+  uint16_t GetColourPrimaries() const;
+  uint16_t GetTransferCharacteristics() const;
+  uint16_t GetMatrixCoefficients() const;
+  bool GetFullRangeFlag() const;
+  std::vector<uint8_t> GetICCProfile() const;
 
-            std::string            GetColourType()              const;
-            uint16_t               GetColourPrimaries()         const;
-            uint16_t               GetTransferCharacteristics() const;
-            uint16_t               GetMatrixCoefficients()      const;
-            bool                   GetFullRangeFlag()           const;
-            std::vector< uint8_t > GetICCProfile()              const;
+  void SetColourType(const std::string& value);
+  void SetColourPrimaries(uint16_t value);
+  void SetTransferCharacteristics(uint16_t value);
+  void SetMatrixCoefficients(uint16_t value);
+  void SetFullRangeFlag(bool value);
+  void SetICCProfile(const std::vector<uint8_t>& value);
 
-            void SetColourType( const std::string & value );
-            void SetColourPrimaries( uint16_t value );
-            void SetTransferCharacteristics( uint16_t value );
-            void SetMatrixCoefficients( uint16_t value );
-            void SetFullRangeFlag( bool value );
-            void SetICCProfile( const std::vector< uint8_t > & value );
+  ISOBMFF_EXPORT friend void swap(COLR& o1, COLR& o2);
 
-            ISOBMFF_EXPORT friend void swap( COLR & o1, COLR & o2 );
+ private:
+  class IMPL;
 
-        private:
-
-            class IMPL;
-
-            std::unique_ptr< IMPL > impl;
-    };
-}
+  std::unique_ptr<IMPL> impl;
+};
+}  // namespace ISOBMFF
 
 #endif /* ISOBMFF_COLR_HPP */

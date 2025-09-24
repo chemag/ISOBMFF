@@ -31,61 +31,60 @@
 #ifndef ISOBMFF_MDHD_HPP
 #define ISOBMFF_MDHD_HPP
 
-#include <memory>
-#include <algorithm>
-#include <Macros.hpp>
-#include <FullBox.hpp>
 #include <DisplayableObjectContainer.hpp>
+#include <FullBox.hpp>
+#include <Macros.hpp>
+#include <algorithm>
 #include <cstdint>
+#include <memory>
 #include <vector>
 
-namespace ISOBMFF
-{
-    class ISOBMFF_EXPORT MDHD: public FullBox, public DisplayableObjectContainer
-    {
-        public:
+namespace ISOBMFF {
+class ISOBMFF_EXPORT MDHD : public FullBox, public DisplayableObjectContainer {
+ public:
+  MDHD();
+  MDHD(const MDHD& o);
+  MDHD(MDHD&& o) noexcept;
+  virtual ~MDHD() override;
 
-            MDHD();
-            MDHD( const MDHD & o );
-            MDHD( MDHD && o ) noexcept;
-            virtual ~MDHD() override;
+  MDHD& operator=(MDHD o);
 
-            MDHD & operator =( MDHD o );
+  Error ReadData(Parser& parser, BinaryStream& stream) override;
+  void WriteDescription(std::ostream& os,
+                        std::size_t indentLevel) const override;
 
-            Error ReadData( Parser & parser, BinaryStream & stream ) override;
-            void WriteDescription( std::ostream & os, std::size_t indentLevel ) const override;
+  virtual std::vector<std::shared_ptr<DisplayableObject> >
+  GetDisplayableObjects() const override;
+  virtual std::vector<std::pair<std::string, std::string> >
+  GetDisplayableProperties() const override;
 
-            virtual std::vector< std::shared_ptr< DisplayableObject > >  GetDisplayableObjects()    const override;
-            virtual std::vector< std::pair< std::string, std::string > > GetDisplayableProperties() const override;
+  uint64_t GetCreationTime() const;
+  uint64_t GetModificationTime() const;
+  uint32_t GetTimescale() const;
+  uint64_t GetDuration() const;
+  uint8_t GetPad() const;
+  uint8_t GetLanguage0() const;
+  uint8_t GetLanguage1() const;
+  uint8_t GetLanguage2() const;
+  uint16_t GetPredefined() const;
 
-            uint64_t GetCreationTime()     const;
-            uint64_t GetModificationTime() const;
-            uint32_t GetTimescale()        const;
-            uint64_t GetDuration()         const;
-            uint8_t  GetPad()              const;
-            uint8_t  GetLanguage0()        const;
-            uint8_t  GetLanguage1()        const;
-            uint8_t  GetLanguage2()        const;
-            uint16_t GetPredefined()       const;
+  void SetCreationTime(uint64_t value);
+  void SetModificationTime(uint64_t value);
+  void SetTimescale(uint32_t value);
+  void SetDuration(uint64_t value);
+  void SetPad(uint8_t value);
+  void SetLanguage0(uint8_t value);
+  void SetLanguage1(uint8_t value);
+  void SetLanguage2(uint8_t value);
+  void SetPredefined(uint16_t value);
 
-            void SetCreationTime( uint64_t value );
-            void SetModificationTime( uint64_t value );
-            void SetTimescale( uint32_t value );
-            void SetDuration( uint64_t value );
-            void SetPad( uint8_t value );
-            void SetLanguage0( uint8_t value );
-            void SetLanguage1( uint8_t value );
-            void SetLanguage2( uint8_t value );
-            void SetPredefined( uint16_t value );
+  ISOBMFF_EXPORT friend void swap(MDHD& o1, MDHD& o2);
 
-            ISOBMFF_EXPORT friend void swap( MDHD & o1, MDHD & o2 );
+ private:
+  class IMPL;
 
-        private:
-
-            class IMPL;
-
-            std::unique_ptr< IMPL > impl;
-    };
-}
+  std::unique_ptr<IMPL> impl;
+};
+}  // namespace ISOBMFF
 
 #endif /* ISOBMFF_MDHD_HPP */

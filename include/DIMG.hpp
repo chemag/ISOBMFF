@@ -31,32 +31,28 @@
 #ifndef ISOBMFF_DIMG_HPP
 #define ISOBMFF_DIMG_HPP
 
-#include <memory>
-#include <algorithm>
 #include <Macros.hpp>
 #include <SingleItemTypeReferenceBox.hpp>
+#include <algorithm>
+#include <memory>
 
-namespace ISOBMFF
-{
-    class ISOBMFF_EXPORT DIMG: public SingleItemTypeReferenceBox
-    {
-        public:
+namespace ISOBMFF {
+class ISOBMFF_EXPORT DIMG : public SingleItemTypeReferenceBox {
+ public:
+  DIMG();
+  DIMG(const DIMG& o);
+  DIMG(DIMG&& o) noexcept;
+  virtual ~DIMG() override;
 
-            DIMG();
-            DIMG( const DIMG & o );
-            DIMG( DIMG && o ) noexcept;
-            virtual ~DIMG() override;
+  DIMG& operator=(DIMG o);
 
-            DIMG & operator =( DIMG o );
+  ISOBMFF_EXPORT friend void swap(DIMG& o1, DIMG& o2);
 
-            ISOBMFF_EXPORT friend void swap( DIMG & o1, DIMG & o2 );
+ private:
+  class IMPL;
 
-        private:
-
-            class IMPL;
-
-            std::unique_ptr< IMPL > impl;
-    };
-}
+  std::unique_ptr<IMPL> impl;
+};
+}  // namespace ISOBMFF
 
 #endif /* ISOBMFF_DIMG_HPP */

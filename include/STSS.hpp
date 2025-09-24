@@ -31,39 +31,36 @@
 #ifndef ISOBMFF_STSS_HPP
 #define ISOBMFF_STSS_HPP
 
-#include <memory>
-#include <algorithm>
-#include <Macros.hpp>
 #include <FullBox.hpp>
+#include <Macros.hpp>
+#include <algorithm>
+#include <memory>
 #include <string>
 
-namespace ISOBMFF
-{
-    class ISOBMFF_EXPORT STSS: public FullBox
-    {
-        public:
+namespace ISOBMFF {
+class ISOBMFF_EXPORT STSS : public FullBox {
+ public:
+  STSS();
+  STSS(const STSS& o);
+  STSS(STSS&& o) noexcept;
+  virtual ~STSS() override;
 
-            STSS();
-            STSS( const STSS & o );
-            STSS( STSS && o ) noexcept;
-            virtual ~STSS() override;
+  STSS& operator=(STSS o);
 
-            STSS & operator =( STSS o );
+  Error ReadData(Parser& parser, BinaryStream& stream) override;
+  std::vector<std::pair<std::string, std::string> > GetDisplayableProperties()
+      const override;
 
-            Error                                                 ReadData( Parser & parser, BinaryStream & stream ) override;
-            std::vector< std::pair< std::string, std::string > > GetDisplayableProperties() const override;
+  size_t GetEntryCount() const;
+  uint32_t GetSampleNumber(size_t index) const;
 
-            size_t   GetEntryCount()                 const;
-            uint32_t GetSampleNumber(  size_t index ) const;
+  ISOBMFF_EXPORT friend void swap(STSS& o1, STSS& o2);
 
-            ISOBMFF_EXPORT friend void swap( STSS & o1, STSS & o2 );
+ private:
+  class IMPL;
 
-        private:
-
-            class IMPL;
-
-            std::unique_ptr< IMPL > impl;
-    };
-}
+  std::unique_ptr<IMPL> impl;
+};
+}  // namespace ISOBMFF
 
 #endif /* ISOBMFF_STSS_HPP */

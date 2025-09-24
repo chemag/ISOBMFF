@@ -31,96 +31,69 @@
 #include <IROT.hpp>
 #include <Parser.hpp>
 
-namespace ISOBMFF
-{
-    class IROT::IMPL
-    {
-        public:
+namespace ISOBMFF {
+class IROT::IMPL {
+ public:
+  IMPL();
+  IMPL(const IMPL& o);
+  ~IMPL();
 
-            IMPL();
-            IMPL( const IMPL & o );
-            ~IMPL();
+  uint8_t _angle;
+};
 
-            uint8_t _angle;
-    };
+IROT::IROT() : Box("irot"), impl(std::make_unique<IMPL>()) {}
 
-    IROT::IROT():
-        Box( "irot" ),
-        impl( std::make_unique< IMPL >() )
-    {}
+IROT::IROT(const IROT& o) : Box(o), impl(std::make_unique<IMPL>(*(o.impl))) {}
 
-    IROT::IROT( const IROT & o ):
-        Box( o ),
-        impl( std::make_unique< IMPL >( *( o.impl ) ) )
-    {}
-
-    IROT::IROT( IROT && o ) noexcept:
-        Box( std::move( o ) ),
-        impl( std::move( o.impl ) )
-    {
-        o.impl = nullptr;
-    }
-
-    IROT::~IROT()
-    {}
-
-    IROT & IROT::operator =( IROT o )
-    {
-        Box::operator=( o );
-        swap( *( this ), o );
-
-        return *( this );
-    }
-
-    void swap( IROT & o1, IROT & o2 )
-    {
-        using std::swap;
-
-        swap( static_cast< Box & >( o1 ), static_cast< Box & >( o2 ) );
-        swap( o1.impl, o2.impl );
-    }
-
-    Error IROT::ReadData( Parser & parser, BinaryStream & stream )
-    {
-        Error err;
-        uint8_t u8;
-
-        ( void )parser;
-
-        err = stream.ReadUInt8( u8 );
-        if( err ) return err;
-
-        this->SetAngle( u8 & 0x3 );
-        return Error();
-    }
-
-    std::vector< std::pair< std::string, std::string > > IROT::GetDisplayableProperties() const
-    {
-        auto props( Box::GetDisplayableProperties() );
-
-        props.push_back( { "Angle", std::to_string( this->GetAngle() ) } );
-
-        return props;
-    }
-
-    uint8_t IROT::GetAngle() const
-    {
-        return this->impl->_angle;
-    }
-
-    void IROT::SetAngle( uint8_t value )
-    {
-        this->impl->_angle = value;
-    }
-
-    IROT::IMPL::IMPL():
-        _angle( 0 )
-    {}
-
-    IROT::IMPL::IMPL( const IMPL & o ):
-        _angle( o._angle )
-    {}
-
-    IROT::IMPL::~IMPL()
-    {}
+IROT::IROT(IROT&& o) noexcept : Box(std::move(o)), impl(std::move(o.impl)) {
+  o.impl = nullptr;
 }
+
+IROT::~IROT() {}
+
+IROT& IROT::operator=(IROT o) {
+  Box::operator=(o);
+  swap(*(this), o);
+
+  return *(this);
+}
+
+void swap(IROT& o1, IROT& o2) {
+  using std::swap;
+
+  swap(static_cast<Box&>(o1), static_cast<Box&>(o2));
+  swap(o1.impl, o2.impl);
+}
+
+Error IROT::ReadData(Parser& parser, BinaryStream& stream) {
+  Error err;
+  uint8_t u8;
+
+  (void)parser;
+
+  err = stream.ReadUInt8(u8);
+  if (err) return err;
+
+  this->SetAngle(u8 & 0x3);
+  return Error();
+}
+
+std::vector<std::pair<std::string, std::string> >
+IROT::GetDisplayableProperties() const {
+  auto props(Box::GetDisplayableProperties());
+
+  props.push_back({"Angle", std::to_string(this->GetAngle())});
+
+  return props;
+}
+
+uint8_t IROT::GetAngle() const { return this->impl->_angle; }
+
+void IROT::SetAngle(uint8_t value) { this->impl->_angle = value; }
+
+IROT::IMPL::IMPL() : _angle(0) {}
+
+IROT::IMPL::IMPL(const IMPL& o) : _angle(o._angle) {}
+
+IROT::IMPL::~IMPL() {}
+}  // namespace ISOBMFF

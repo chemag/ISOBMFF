@@ -31,59 +31,56 @@
 #ifndef ISOBMFF_TKHD_HPP
 #define ISOBMFF_TKHD_HPP
 
-#include <memory>
-#include <algorithm>
-#include <Macros.hpp>
 #include <FullBox.hpp>
+#include <Macros.hpp>
 #include <Matrix.hpp>
+#include <algorithm>
 #include <cstdint>
+#include <memory>
 
-namespace ISOBMFF
-{
-    class ISOBMFF_EXPORT TKHD: public FullBox
-    {
-        public:
+namespace ISOBMFF {
+class ISOBMFF_EXPORT TKHD : public FullBox {
+ public:
+  TKHD();
+  TKHD(const TKHD& o);
+  TKHD(TKHD&& o) noexcept;
+  virtual ~TKHD() override;
 
-            TKHD();
-            TKHD( const TKHD & o );
-            TKHD( TKHD && o ) noexcept;
-            virtual ~TKHD() override;
+  TKHD& operator=(TKHD o);
 
-            TKHD & operator =( TKHD o );
+  Error ReadData(Parser& parser, BinaryStream& stream) override;
+  std::vector<std::pair<std::string, std::string> > GetDisplayableProperties()
+      const override;
 
-            Error                                                 ReadData( Parser & parser, BinaryStream & stream ) override;
-            std::vector< std::pair< std::string, std::string > > GetDisplayableProperties() const override;
+  uint64_t GetCreationTime() const;
+  uint64_t GetModificationTime() const;
+  uint32_t GetTrackID() const;
+  uint64_t GetDuration() const;
+  uint16_t GetLayer() const;
+  uint16_t GetAlternateGroup() const;
+  uint16_t GetVolume() const;
+  Matrix GetMatrix() const;
+  float GetWidth() const;
+  float GetHeight() const;
 
-            uint64_t GetCreationTime()     const;
-            uint64_t GetModificationTime() const;
-            uint32_t GetTrackID()          const;
-            uint64_t GetDuration()         const;
-            uint16_t GetLayer()            const;
-            uint16_t GetAlternateGroup()   const;
-            uint16_t GetVolume()           const;
-            Matrix   GetMatrix()           const;
-            float    GetWidth()            const;
-            float    GetHeight()           const;
+  void SetCreationTime(uint64_t value);
+  void SetModificationTime(uint64_t value);
+  void SetTrackID(uint32_t value);
+  void SetDuration(uint64_t value);
+  void SetLayer(uint16_t value);
+  void SetAlternateGroup(uint16_t value);
+  void SetVolume(uint16_t value);
+  void SetMatrix(Matrix value);
+  void SetWidth(float value);
+  void SetHeight(float value);
 
-            void SetCreationTime( uint64_t value );
-            void SetModificationTime( uint64_t value );
-            void SetTrackID( uint32_t value );
-            void SetDuration( uint64_t value );
-            void SetLayer( uint16_t value );
-            void SetAlternateGroup( uint16_t value );
-            void SetVolume( uint16_t value );
-            void SetMatrix( Matrix value );
-            void SetWidth( float value );
-            void SetHeight( float value );
+  ISOBMFF_EXPORT friend void swap(TKHD& o1, TKHD& o2);
 
-            ISOBMFF_EXPORT friend void swap( TKHD & o1, TKHD & o2 );
+ private:
+  class IMPL;
 
-        private:
-
-            class IMPL;
-
-            std::unique_ptr< IMPL > impl;
-    };
-}
+  std::unique_ptr<IMPL> impl;
+};
+}  // namespace ISOBMFF
 
 #endif /* ISOBMFF_TKHD_HPP */

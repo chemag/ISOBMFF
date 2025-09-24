@@ -30,28 +30,24 @@
 
 #include <DisplayableObjectContainer.hpp>
 
-namespace ISOBMFF
-{
-    DisplayableObjectContainer::~DisplayableObjectContainer()
-    {}
+namespace ISOBMFF {
+DisplayableObjectContainer::~DisplayableObjectContainer() {}
 
-    void DisplayableObjectContainer::WriteDescription( std::ostream & os, std::size_t indentLevel ) const
-    {
-        std::string i( indentLevel * 4, ' ' );
-        auto        objects( this->GetDisplayableObjects() );
+void DisplayableObjectContainer::WriteDescription(
+    std::ostream& os, std::size_t indentLevel) const {
+  std::string i(indentLevel * 4, ' ');
+  auto objects(this->GetDisplayableObjects());
 
-        if( objects.size() > 0 )
-        {
-            os << std::endl << i << "{" << std::endl;
+  if (objects.size() > 0) {
+    os << std::endl << i << "{" << std::endl;
 
-            for( const auto & o: objects )
-            {
-                o->WriteDescription( os, indentLevel + 1 );
+    for (const auto& o : objects) {
+      o->WriteDescription(os, indentLevel + 1);
 
-                os << std::endl;
-            }
-
-            os << i << "}";
-        }
+      os << std::endl;
     }
+
+    os << i << "}";
+  }
 }
+}  // namespace ISOBMFF

@@ -31,146 +31,144 @@
 #ifndef ISOBMFF_HVCC_HPP
 #define ISOBMFF_HVCC_HPP
 
-#include <memory>
-#include <algorithm>
-#include <Macros.hpp>
-#include <FullBox.hpp>
 #include <DisplayableObject.hpp>
 #include <DisplayableObjectContainer.hpp>
-#include <vector>
+#include <FullBox.hpp>
+#include <Macros.hpp>
+#include <algorithm>
 #include <cstdint>
+#include <memory>
+#include <vector>
 
-namespace ISOBMFF
-{
-    class ISOBMFF_EXPORT HVCC: public Box, public DisplayableObjectContainer
-    {
-        public:
+namespace ISOBMFF {
+class ISOBMFF_EXPORT HVCC : public Box, public DisplayableObjectContainer {
+ public:
+  HVCC();
+  HVCC(const HVCC& o);
+  HVCC(HVCC&& o) noexcept;
+  virtual ~HVCC() override;
 
-            HVCC();
-            HVCC( const HVCC & o );
-            HVCC( HVCC && o ) noexcept;
-            virtual ~HVCC() override;
+  HVCC& operator=(HVCC o);
 
-            HVCC & operator =( HVCC o );
+  Error ReadData(Parser& parser, BinaryStream& stream) override;
+  void WriteDescription(std::ostream& os,
+                        std::size_t indentLevel) const override;
 
-            Error ReadData( Parser & parser, BinaryStream & stream ) override;
-            void WriteDescription( std::ostream & os, std::size_t indentLevel ) const override;
+  virtual std::vector<std::shared_ptr<DisplayableObject> >
+  GetDisplayableObjects() const override;
+  virtual std::vector<std::pair<std::string, std::string> >
+  GetDisplayableProperties() const override;
 
-            virtual std::vector< std::shared_ptr< DisplayableObject > >  GetDisplayableObjects()    const override;
-            virtual std::vector< std::pair< std::string, std::string > > GetDisplayableProperties() const override;
+  uint8_t GetConfigurationVersion() const;
+  uint8_t GetGeneralProfileSpace() const;
+  uint8_t GetGeneralTierFlag() const;
+  uint8_t GetGeneralProfileIDC() const;
+  uint32_t GetGeneralProfileCompatibilityFlags() const;
+  uint64_t GetGeneralConstraintIndicatorFlags() const;
+  uint8_t GetGeneralLevelIDC() const;
+  uint16_t GetMinSpatialSegmentationIDC() const;
+  uint8_t GetParallelismType() const;
+  uint8_t GetChromaFormat() const;
+  uint8_t GetBitDepthLumaMinus8() const;
+  uint8_t GetBitDepthChromaMinus8() const;
+  uint16_t GetAvgFrameRate() const;
+  uint8_t GetConstantFrameRate() const;
+  uint8_t GetNumTemporalLayers() const;
+  uint8_t GetTemporalIdNested() const;
+  uint8_t GetLengthSizeMinusOne() const;
 
-            uint8_t  GetConfigurationVersion()             const;
-            uint8_t  GetGeneralProfileSpace()              const;
-            uint8_t  GetGeneralTierFlag()                  const;
-            uint8_t  GetGeneralProfileIDC()                const;
-            uint32_t GetGeneralProfileCompatibilityFlags() const;
-            uint64_t GetGeneralConstraintIndicatorFlags()  const;
-            uint8_t  GetGeneralLevelIDC()                  const;
-            uint16_t GetMinSpatialSegmentationIDC()        const;
-            uint8_t  GetParallelismType()                  const;
-            uint8_t  GetChromaFormat()                     const;
-            uint8_t  GetBitDepthLumaMinus8()               const;
-            uint8_t  GetBitDepthChromaMinus8()             const;
-            uint16_t GetAvgFrameRate()                     const;
-            uint8_t  GetConstantFrameRate()                const;
-            uint8_t  GetNumTemporalLayers()                const;
-            uint8_t  GetTemporalIdNested()                 const;
-            uint8_t  GetLengthSizeMinusOne()               const;
+  void SetConfigurationVersion(uint8_t value);
+  void SetGeneralProfileSpace(uint8_t value);
+  void SetGeneralTierFlag(uint8_t value);
+  void SetGeneralProfileIDC(uint8_t value);
+  void SetGeneralProfileCompatibilityFlags(uint32_t value);
+  void SetGeneralConstraintIndicatorFlags(uint64_t value);
+  void SetGeneralLevelIDC(uint8_t value);
+  void SetMinSpatialSegmentationIDC(uint16_t value);
+  void SetParallelismType(uint8_t value);
+  void SetChromaFormat(uint8_t value);
+  void SetBitDepthLumaMinus8(uint8_t value);
+  void SetBitDepthChromaMinus8(uint8_t value);
+  void SetAvgFrameRate(uint16_t value);
+  void SetConstantFrameRate(uint8_t value);
+  void SetNumTemporalLayers(uint8_t value);
+  void SetTemporalIdNested(uint8_t value);
+  void SetLengthSizeMinusOne(uint8_t value);
 
-            void SetConfigurationVersion( uint8_t value );
-            void SetGeneralProfileSpace( uint8_t value );
-            void SetGeneralTierFlag( uint8_t value );
-            void SetGeneralProfileIDC( uint8_t value );
-            void SetGeneralProfileCompatibilityFlags( uint32_t value );
-            void SetGeneralConstraintIndicatorFlags( uint64_t value );
-            void SetGeneralLevelIDC( uint8_t value );
-            void SetMinSpatialSegmentationIDC( uint16_t value );
-            void SetParallelismType( uint8_t value );
-            void SetChromaFormat( uint8_t value );
-            void SetBitDepthLumaMinus8( uint8_t value );
-            void SetBitDepthChromaMinus8( uint8_t value );
-            void SetAvgFrameRate( uint16_t value );
-            void SetConstantFrameRate( uint8_t value );
-            void SetNumTemporalLayers( uint8_t value );
-            void SetTemporalIdNested( uint8_t value );
-            void SetLengthSizeMinusOne( uint8_t value );
+  class ISOBMFF_EXPORT Array : public DisplayableObject,
+                               public DisplayableObjectContainer {
+   public:
+    Array();
+    Array(BinaryStream& stream);
+    Array(const Array& o);
+    Array(Array&& o) noexcept;
+    virtual ~Array() override;
 
-            class ISOBMFF_EXPORT Array: public DisplayableObject, public DisplayableObjectContainer
-            {
-                public:
+    Array& operator=(Array o);
 
-                    Array();
-                    Array( BinaryStream & stream );
-                    Array( const Array & o );
-                    Array( Array && o ) noexcept;
-                    virtual ~Array() override;
+    std::string GetName() const override;
 
-                    Array & operator =( Array o );
+    bool GetArrayCompleteness() const;
+    uint8_t GetNALUnitType() const;
 
-                    std::string GetName() const override;
+    void SetArrayCompleteness(bool value);
+    void SetNALUnitType(uint8_t value);
 
-                    bool    GetArrayCompleteness() const;
-                    uint8_t GetNALUnitType()       const;
+    void WriteDescription(std::ostream& os,
+                          std::size_t indentLevel) const override;
 
-                    void SetArrayCompleteness( bool value );
-                    void SetNALUnitType( uint8_t value );
+    virtual std::vector<std::shared_ptr<DisplayableObject> >
+    GetDisplayableObjects() const override;
+    virtual std::vector<std::pair<std::string, std::string> >
+    GetDisplayableProperties() const override;
 
-                    void WriteDescription( std::ostream & os, std::size_t indentLevel ) const override;
+    class ISOBMFF_EXPORT NALUnit : public DisplayableObject {
+     public:
+      NALUnit();
+      NALUnit(BinaryStream& stream);
+      NALUnit(const NALUnit& o);
+      NALUnit(NALUnit&& o) noexcept;
+      virtual ~NALUnit() override;
 
-                    virtual std::vector< std::shared_ptr< DisplayableObject > >  GetDisplayableObjects()    const override;
-                    virtual std::vector< std::pair< std::string, std::string > > GetDisplayableProperties() const override;
+      NALUnit& operator=(NALUnit o);
 
-                    class ISOBMFF_EXPORT NALUnit: public DisplayableObject
-                    {
-                        public:
+      std::string GetName() const override;
 
-                            NALUnit();
-                            NALUnit( BinaryStream & stream );
-                            NALUnit( const NALUnit & o );
-                            NALUnit( NALUnit && o ) noexcept;
-                            virtual ~NALUnit() override;
+      std::vector<uint8_t> GetData() const;
+      void SetData(const std::vector<uint8_t>& value);
 
-                            NALUnit & operator =( NALUnit o );
+      virtual std::vector<std::pair<std::string, std::string> >
+      GetDisplayableProperties() const override;
 
-                            std::string GetName() const override;
+      ISOBMFF_EXPORT friend void swap(NALUnit& o1, NALUnit& o2);
 
-                            std::vector< uint8_t > GetData() const;
-                            void                   SetData( const std::vector< uint8_t > & value );
+     private:
+      class IMPL;
 
-                            virtual std::vector< std::pair< std::string, std::string > > GetDisplayableProperties() const override;
-
-                            ISOBMFF_EXPORT friend void swap( NALUnit & o1, NALUnit & o2 );
-
-                        private:
-
-                            class IMPL;
-
-                            std::unique_ptr< IMPL > impl;
-                    };
-
-                    std::vector< std::shared_ptr< NALUnit > > GetNALUnits() const;
-                    void                                      AddNALUnit( std::shared_ptr< NALUnit > unit );
-
-                    ISOBMFF_EXPORT friend void swap( Array & o1, Array & o2 );
-
-                private:
-
-                    class IMPL;
-
-                    std::unique_ptr< IMPL > impl;
-            };
-
-            std::vector< std::shared_ptr< Array > > GetArrays() const;
-            void                                    AddArray( std::shared_ptr< Array > array );
-
-            ISOBMFF_EXPORT friend void swap( HVCC & o1, HVCC & o2 );
-
-        private:
-
-            class IMPL;
-
-            std::unique_ptr< IMPL > impl;
+      std::unique_ptr<IMPL> impl;
     };
-}
+
+    std::vector<std::shared_ptr<NALUnit> > GetNALUnits() const;
+    void AddNALUnit(std::shared_ptr<NALUnit> unit);
+
+    ISOBMFF_EXPORT friend void swap(Array& o1, Array& o2);
+
+   private:
+    class IMPL;
+
+    std::unique_ptr<IMPL> impl;
+  };
+
+  std::vector<std::shared_ptr<Array> > GetArrays() const;
+  void AddArray(std::shared_ptr<Array> array);
+
+  ISOBMFF_EXPORT friend void swap(HVCC& o1, HVCC& o2);
+
+ private:
+  class IMPL;
+
+  std::unique_ptr<IMPL> impl;
+};
+}  // namespace ISOBMFF
 
 #endif /* ISOBMFF_HVCC_HPP */

@@ -31,38 +31,35 @@
 #ifndef ISOBMFF_FRMA_HPP
 #define ISOBMFF_FRMA_HPP
 
-#include <memory>
-#include <algorithm>
-#include <Macros.hpp>
 #include <Box.hpp>
+#include <Macros.hpp>
+#include <algorithm>
+#include <memory>
 
-namespace ISOBMFF
-{
-    class ISOBMFF_EXPORT FRMA: public Box
-    {
-        public:
+namespace ISOBMFF {
+class ISOBMFF_EXPORT FRMA : public Box {
+ public:
+  FRMA();
+  FRMA(const FRMA& o);
+  FRMA(FRMA&& o) noexcept;
+  virtual ~FRMA() override;
 
-            FRMA();
-            FRMA( const FRMA & o );
-            FRMA( FRMA && o ) noexcept;
-            virtual ~FRMA() override;
+  FRMA& operator=(FRMA o);
 
-            FRMA & operator =( FRMA o );
+  Error ReadData(Parser& parser, BinaryStream& stream) override;
+  std::vector<std::pair<std::string, std::string> > GetDisplayableProperties()
+      const override;
 
-            Error                                                 ReadData( Parser & parser, BinaryStream & stream ) override;
-            std::vector< std::pair< std::string, std::string > > GetDisplayableProperties() const override;
+  std::string GetDataFormat() const;
+  void SetDataFormat(const std::string& value);
 
-            std::string GetDataFormat() const;
-            void        SetDataFormat( const std::string & value );
+  ISOBMFF_EXPORT friend void swap(FRMA& o1, FRMA& o2);
 
-            ISOBMFF_EXPORT friend void swap( FRMA & o1, FRMA & o2 );
+ private:
+  class IMPL;
 
-        private:
-
-            class IMPL;
-
-            std::unique_ptr< IMPL > impl;
-    };
-}
+  std::unique_ptr<IMPL> impl;
+};
+}  // namespace ISOBMFF
 
 #endif /* ISOBMFF_FRMA_HPP */

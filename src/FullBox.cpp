@@ -29,115 +29,83 @@
  */
 
 #include <FullBox.hpp>
-#include <Utils.hpp>
 #include <Parser.hpp>
+#include <Utils.hpp>
 
-namespace ISOBMFF
-{
-    class FullBox::IMPL
-    {
-        public:
+namespace ISOBMFF {
+class FullBox::IMPL {
+ public:
+  IMPL();
+  IMPL(const IMPL& o);
+  ~IMPL();
 
-            IMPL();
-            IMPL( const IMPL & o );
-            ~IMPL();
+  uint8_t _version;
+  uint32_t _flags;
+};
 
-            uint8_t  _version;
-            uint32_t _flags;
-    };
+FullBox::FullBox(const std::string& name)
+    : Box(name), impl(std::make_unique<IMPL>()) {}
 
-    FullBox::FullBox( const std::string & name ):
-        Box( name ),
-        impl( std::make_unique< IMPL >() )
-    {}
+FullBox::FullBox(const FullBox& o)
+    : Box(o), impl(std::make_unique<IMPL>(*(o.impl))) {}
 
-    FullBox::FullBox( const FullBox & o ):
-        Box( o ),
-        impl( std::make_unique< IMPL >( *( o.impl ) ) )
-    {}
-
-    FullBox::FullBox( FullBox && o ) noexcept:
-        Box( std::move( o ) ),
-        impl( std::move( o.impl ) )
-    {
-        o.impl = nullptr;
-    }
-
-    FullBox::~FullBox()
-    {}
-
-    FullBox & FullBox::operator =( FullBox o )
-    {
-        Box::operator=( o );
-        swap( *( this ), o );
-
-        return *( this );
-    }
-
-    void swap( FullBox & o1, FullBox & o2 )
-    {
-        using std::swap;
-
-        swap( static_cast< Box & >( o1 ), static_cast< Box & >( o2 ) );
-        swap( o1.impl, o2.impl );
-    }
-
-    Error FullBox::ReadData( Parser & parser, BinaryStream & stream )
-    {
-        uint32_t vf;
-
-        ( void )parser;
-
-        Error err;
-        err = stream.ReadBigEndianUInt32( vf );
-        if( err ) return err;
-
-        this->SetVersion( static_cast< uint8_t >( vf >> 24 ) );
-        this->SetFlags( vf & 0x00FFFFFF );
-
-        return Error();
-    }
-
-    std::vector< std::pair< std::string, std::string > > FullBox::GetDisplayableProperties() const
-    {
-        auto props( Box::GetDisplayableProperties() );
-
-        props.push_back( { "Version", std::to_string( this->GetVersion() ) } );
-        props.push_back( { "Flags",   Utils::ToHexString( this->GetFlags() ) } );
-
-        return props;
-    }
-
-    uint8_t FullBox::GetVersion() const
-    {
-        return this->impl->_version;
-    }
-
-    uint32_t FullBox::GetFlags() const
-    {
-        return this->impl->_flags;
-    }
-
-    void FullBox::SetVersion( uint8_t value )
-    {
-        this->impl->_version = value;
-    }
-
-    void FullBox::SetFlags( uint32_t value )
-    {
-        this->impl->_flags = value;
-    }
-
-    FullBox::IMPL::IMPL():
-        _version( 0 ),
-        _flags( 0 )
-    {}
-
-    FullBox::IMPL::IMPL( const IMPL & o ):
-        _version( o._version ),
-        _flags( o._flags )
-    {}
-
-    FullBox::IMPL::~IMPL()
-    {}
+FullBox::FullBox(FullBox&& o) noexcept
+    : Box(std::move(o)), impl(std::move(o.impl)) {
+  o.impl = nullptr;
 }
+
+FullBox::~FullBox() {}
+
+FullBox& FullBox::operator=(FullBox o) {
+  Box::operator=(o);
+  swap(*(this), o);
+
+  return *(this);
+}
+
+void swap(FullBox& o1, FullBox& o2) {
+  using std::swap;
+
+  swap(static_cast<Box&>(o1), static_cast<Box&>(o2));
+  swap(o1.impl, o2.impl);
+}
+
+Error FullBox::ReadData(Parser& parser, BinaryStream& stream) {
+  uint32_t vf;
+
+  (void)parser;
+
+  Error err;
+  err = stream.ReadBigEndianUInt32(vf);
+  if (err) return err;
+
+  this->SetVersion(static_cast<uint8_t>(vf >> 24));
+  this->SetFlags(vf & 0x00FFFFFF);
+
+  return Error();
+}
+
+std::vector<std::pair<std::string, std::string> >
+FullBox::GetDisplayableProperties() const {
+  auto props(Box::GetDisplayableProperties());
+
+  props.push_back({"Version", std::to_string(this->GetVersion())});
+  props.push_back({"Flags", Utils::ToHexString(this->GetFlags())});
+
+  return props;
+}
+
+uint8_t FullBox::GetVersion() const { return this->impl->_version; }
+
+uint32_t FullBox::GetFlags() const { return this->impl->_flags; }
+
+void FullBox::SetVersion(uint8_t value) { this->impl->_version = value; }
+
+void FullBox::SetFlags(uint32_t value) { this->impl->_flags = value; }
+
+FullBox::IMPL::IMPL() : _version(0), _flags(0) {}
+
+FullBox::IMPL::IMPL(const IMPL& o) : _version(o._version), _flags(o._flags) {}
+
+FullBox::IMPL::~IMPL() {}
+}  // namespace ISOBMFF

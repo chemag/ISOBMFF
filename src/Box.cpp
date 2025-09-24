@@ -29,94 +29,66 @@
  */
 
 #include <Box.hpp>
-#include <Utils.hpp>
 #include <DisplayableObjectContainer.hpp>
 #include <Parser.hpp>
+#include <Utils.hpp>
 
-namespace ISOBMFF
-{
-    class Box::IMPL
-    {
-        public:
+namespace ISOBMFF {
+class Box::IMPL {
+ public:
+  IMPL(const std::string& name = "????");
+  IMPL(const IMPL& o);
+  ~IMPL();
 
-            IMPL( const std::string & name = "????" );
-            IMPL( const IMPL & o );
-            ~IMPL();
+  std::string _name;
+  std::vector<uint8_t> _data;
+  bool _hasData;
+};
 
-            std::string            _name;
-            std::vector< uint8_t > _data;
-            bool                   _hasData;
-    };
+Box::Box(const std::string& name) : impl(std::make_unique<IMPL>(name)) {}
 
-    Box::Box( const std::string & name ):
-        impl( std::make_unique< IMPL >( name ) )
-    {}
+Box::Box(const Box& o) : impl(std::make_unique<IMPL>(*(o.impl))) {}
 
-    Box::Box( const Box & o ):
-        impl( std::make_unique< IMPL >( *( o.impl ) ) )
-    {}
+Box::Box(Box&& o) noexcept : impl(std::move(o.impl)) { o.impl = nullptr; }
 
-    Box::Box( Box && o ) noexcept:
-        impl( std::move( o.impl ) )
-    {
-        o.impl = nullptr;
-    }
+Box::~Box() {}
 
-    Box::~Box()
-    {}
+Box& Box::operator=(Box o) {
+  swap(*(this), o);
 
-    Box & Box::operator =( Box o )
-    {
-        swap( *( this ), o );
-
-        return *( this );
-    }
-
-    void swap( Box & o1, Box & o2 )
-    {
-        using std::swap;
-
-        swap( o1.impl, o2.impl );
-    }
-
-    std::string Box::GetName() const
-    {
-        return this->impl->_name;
-    }
-
-    Error Box::ReadData( Parser & parser, BinaryStream & stream )
-    {
-        ( void )parser;
-
-        Error err = stream.ReadAllData( this->impl->_data );
-        if( err ) return err;
-
-        this->impl->_hasData = true;
-
-        return Error();
-    }
-
-    std::vector< uint8_t > Box::GetData() const
-    {
-        return this->impl->_data;
-    }
-
-    std::vector< std::pair< std::string, std::string > > Box::GetDisplayableProperties() const
-    {
-        return {};
-    }
-
-    Box::IMPL::IMPL( const std::string & name ):
-        _name( name ),
-        _hasData( false )
-    {}
-
-    Box::IMPL::IMPL( const IMPL & o ):
-        _name( o._name ),
-        _data( o._data ),
-        _hasData( o._hasData )
-    {}
-
-    Box::IMPL::~IMPL()
-    {}
+  return *(this);
 }
+
+void swap(Box& o1, Box& o2) {
+  using std::swap;
+
+  swap(o1.impl, o2.impl);
+}
+
+std::string Box::GetName() const { return this->impl->_name; }
+
+Error Box::ReadData(Parser& parser, BinaryStream& stream) {
+  (void)parser;
+
+  Error err = stream.ReadAllData(this->impl->_data);
+  if (err) return err;
+
+  this->impl->_hasData = true;
+
+  return Error();
+}
+
+std::vector<uint8_t> Box::GetData() const { return this->impl->_data; }
+
+std::vector<std::pair<std::string, std::string> >
+Box::GetDisplayableProperties() const {
+  return {};
+}
+
+Box::IMPL::IMPL(const std::string& name) : _name(name), _hasData(false) {}
+
+Box::IMPL::IMPL(const IMPL& o)
+    : _name(o._name), _data(o._data), _hasData(o._hasData) {}
+
+Box::IMPL::~IMPL() {}
+}  // namespace ISOBMFF

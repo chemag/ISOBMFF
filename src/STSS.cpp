@@ -28,111 +28,86 @@
  * @author      Jean-David Gadina - www.digidna.net
  */
 
-#include <STSS.hpp>
 #include <Parser.hpp>
+#include <STSS.hpp>
 #include <cstdint>
 #include <cstring>
 
-namespace ISOBMFF
-{
-    class STSS::IMPL
-    {
-        public:
+namespace ISOBMFF {
+class STSS::IMPL {
+ public:
+  IMPL();
+  IMPL(const IMPL& o);
+  ~IMPL();
 
-            IMPL();
-            IMPL( const IMPL & o );
-            ~IMPL();
+  std::vector<uint32_t> _sample_number;
+};
 
-            std::vector< uint32_t > _sample_number;
-    };
+STSS::STSS() : FullBox("stss"), impl(std::make_unique<IMPL>()) {}
 
-    STSS::STSS():
-        FullBox( "stss" ),
-        impl( std::make_unique< IMPL >() )
-    {}
+STSS::STSS(const STSS& o)
+    : FullBox(o), impl(std::make_unique<IMPL>(*(o.impl))) {}
 
-    STSS::STSS( const STSS & o ):
-        FullBox( o ),
-        impl( std::make_unique< IMPL >( *( o.impl ) ) )
-    {}
-
-    STSS::STSS( STSS && o ) noexcept:
-        FullBox( std::move( o ) ),
-        impl( std::move( o.impl ) )
-    {
-        o.impl = nullptr;
-    }
-
-    STSS::~STSS()
-    {}
-
-    STSS & STSS::operator =( STSS o )
-    {
-        FullBox::operator=( o );
-        swap( *( this ), o );
-
-        return *( this );
-    }
-
-    void swap( STSS & o1, STSS & o2 )
-    {
-        using std::swap;
-
-        swap( static_cast< FullBox & >( o1 ), static_cast< FullBox & >( o2 ) );
-        swap( o1.impl, o2.impl );
-    }
-
-    Error STSS::ReadData( Parser & parser, BinaryStream & stream )
-    {
-        Error err;
-
-        err = FullBox::ReadData( parser, stream );
-        if( err ) return err;
-
-        uint32_t entry_count;
-        err = stream.ReadBigEndianUInt32( entry_count );
-        if( err ) return err;
-
-        for( uint32_t i = 0; i < entry_count; i++ )
-        {
-            uint32_t temp;
-            err = stream.ReadBigEndianUInt32( temp );
-            if( err ) return err;
-            this->impl->_sample_number.push_back( temp );
-        }
-        return Error();
-    }
-
-    std::vector< std::pair< std::string, std::string > > STSS::GetDisplayableProperties() const
-    {
-        auto props( FullBox::GetDisplayableProperties() );
-
-        for( unsigned int index = 0; index < this->GetEntryCount(); index++ )
-        {
-            props.push_back( { "Sample Number",  std::to_string( this->GetSampleNumber(  index) ) } );
-        }
-
-        return props;
-    }
-
-    size_t STSS::GetEntryCount() const
-    {
-        return this->impl->_sample_number.size();
-    }
-
-    uint32_t STSS::GetSampleNumber( size_t index ) const
-    {
-        return this->impl->_sample_number[ index ];
-    }
-
-    STSS::IMPL::IMPL()
-    {}
-
-    STSS::IMPL::IMPL( const IMPL & o )
-    {
-        this->_sample_number  = o._sample_number;
-    }
-
-    STSS::IMPL::~IMPL()
-    {}
+STSS::STSS(STSS&& o) noexcept : FullBox(std::move(o)), impl(std::move(o.impl)) {
+  o.impl = nullptr;
 }
+
+STSS::~STSS() {}
+
+STSS& STSS::operator=(STSS o) {
+  FullBox::operator=(o);
+  swap(*(this), o);
+
+  return *(this);
+}
+
+void swap(STSS& o1, STSS& o2) {
+  using std::swap;
+
+  swap(static_cast<FullBox&>(o1), static_cast<FullBox&>(o2));
+  swap(o1.impl, o2.impl);
+}
+
+Error STSS::ReadData(Parser& parser, BinaryStream& stream) {
+  Error err;
+
+  err = FullBox::ReadData(parser, stream);
+  if (err) return err;
+
+  uint32_t entry_count;
+  err = stream.ReadBigEndianUInt32(entry_count);
+  if (err) return err;
+
+  for (uint32_t i = 0; i < entry_count; i++) {
+    uint32_t temp;
+    err = stream.ReadBigEndianUInt32(temp);
+    if (err) return err;
+    this->impl->_sample_number.push_back(temp);
+  }
+  return Error();
+}
+
+std::vector<std::pair<std::string, std::string> >
+STSS::GetDisplayableProperties() const {
+  auto props(FullBox::GetDisplayableProperties());
+
+  for (unsigned int index = 0; index < this->GetEntryCount(); index++) {
+    props.push_back(
+        {"Sample Number", std::to_string(this->GetSampleNumber(index))});
+  }
+
+  return props;
+}
+
+size_t STSS::GetEntryCount() const { return this->impl->_sample_number.size(); }
+
+uint32_t STSS::GetSampleNumber(size_t index) const {
+  return this->impl->_sample_number[index];
+}
+
+STSS::IMPL::IMPL() {}
+
+STSS::IMPL::IMPL(const IMPL& o) { this->_sample_number = o._sample_number; }
+
+STSS::IMPL::~IMPL() {}
+}  // namespace ISOBMFF

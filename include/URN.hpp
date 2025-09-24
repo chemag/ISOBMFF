@@ -31,32 +31,28 @@
 #ifndef ISOBMFF_URN_HPP
 #define ISOBMFF_URN_HPP
 
-#include <memory>
-#include <algorithm>
-#include <Macros.hpp>
 #include <FullBox.hpp>
+#include <Macros.hpp>
+#include <algorithm>
+#include <memory>
 
-namespace ISOBMFF
-{
-    class ISOBMFF_EXPORT URN: public FullBox
-    {
-        public:
+namespace ISOBMFF {
+class ISOBMFF_EXPORT URN : public FullBox {
+ public:
+  URN();
+  URN(const URN& o);
+  URN(URN&& o) noexcept;
+  virtual ~URN() override;
 
-            URN();
-            URN( const URN & o );
-            URN( URN && o ) noexcept;
-            virtual ~URN() override;
+  URN& operator=(URN o);
 
-            URN & operator =( URN o );
+  ISOBMFF_EXPORT friend void swap(URN& o1, URN& o2);
 
-            ISOBMFF_EXPORT friend void swap( URN & o1, URN & o2 );
+ private:
+  class IMPL;
 
-        private:
-
-            class IMPL;
-
-            std::unique_ptr< IMPL > impl;
-    };
-}
+  std::unique_ptr<IMPL> impl;
+};
+}  // namespace ISOBMFF
 
 #endif /* ISOBMFF_URN_HPP */

@@ -30,61 +30,41 @@
 
 #include <URL.hpp>
 
-namespace ISOBMFF
-{
-    class URL::IMPL
-    {
-        public:
+namespace ISOBMFF {
+class URL::IMPL {
+ public:
+  IMPL();
+  IMPL(const IMPL& o);
+  ~IMPL();
+};
 
-            IMPL();
-            IMPL( const IMPL & o );
-            ~IMPL();
-    };
+URL::URL() : FullBox("url "), impl(std::make_unique<IMPL>()) {}
 
-    URL::URL():
-        FullBox( "url " ),
-        impl( std::make_unique< IMPL>() )
-    {}
+URL::URL(const URL& o) : FullBox(o), impl(std::make_unique<IMPL>(*(o.impl))) {}
 
-    URL::URL( const URL & o ):
-        FullBox( o ),
-        impl( std::make_unique< IMPL >( *( o.impl ) ) )
-    {}
-
-    URL::URL( URL && o ) noexcept:
-        FullBox( std::move( o ) ),
-        impl( std::move( o.impl ) )
-    {
-        o.impl = nullptr;
-    }
-
-    URL::~URL()
-    {}
-
-    URL & URL::operator =( URL o )
-    {
-        FullBox::operator=( o );
-        swap( *( this ), o );
-
-        return *( this );
-    }
-
-    void swap( URL & o1, URL & o2 )
-    {
-        using std::swap;
-
-        swap( static_cast< FullBox & >( o1 ), static_cast< FullBox & >( o2 ) );
-        swap( o1.impl, o2.impl );
-    }
-
-    URL::IMPL::IMPL()
-    {}
-
-    URL::IMPL::IMPL( const IMPL & o )
-    {
-        ( void )o;
-    }
-
-    URL::IMPL::~IMPL()
-    {}
+URL::URL(URL&& o) noexcept : FullBox(std::move(o)), impl(std::move(o.impl)) {
+  o.impl = nullptr;
 }
+
+URL::~URL() {}
+
+URL& URL::operator=(URL o) {
+  FullBox::operator=(o);
+  swap(*(this), o);
+
+  return *(this);
+}
+
+void swap(URL& o1, URL& o2) {
+  using std::swap;
+
+  swap(static_cast<FullBox&>(o1), static_cast<FullBox&>(o2));
+  swap(o1.impl, o2.impl);
+}
+
+URL::IMPL::IMPL() {}
+
+URL::IMPL::IMPL(const IMPL& o) { (void)o; }
+
+URL::IMPL::~IMPL() {}
+}  // namespace ISOBMFF

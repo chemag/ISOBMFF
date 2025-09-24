@@ -30,60 +30,53 @@
 
 #include <DisplayableObject.hpp>
 
-namespace ISOBMFF
-{
-    DisplayableObject::~DisplayableObject()
-    {}
+namespace ISOBMFF {
+DisplayableObject::~DisplayableObject() {}
 
-    void DisplayableObject::WriteDescription( std::ostream & os, std::size_t indentLevel ) const
-    {
-        std::string i( indentLevel * 4, ' ' );
-        size_t      length;
-        auto        props( this->GetDisplayableProperties() );
+void DisplayableObject::WriteDescription(std::ostream& os,
+                                         std::size_t indentLevel) const {
+  std::string i(indentLevel * 4, ' ');
+  size_t length;
+  auto props(this->GetDisplayableProperties());
 
-        os << i << "[ " << this->GetName() << " ]";
+  os << i << "[ " << this->GetName() << " ]";
 
-        length = 0;
+  length = 0;
 
-        for( const auto & p: props )
-        {
-            length = ( p.first.size() > length ) ? p.first.size() : length;
-        }
+  for (const auto& p : props) {
+    length = (p.first.size() > length) ? p.first.size() : length;
+  }
 
-        if( props.size() )
-        {
-            os << std::endl << i << "{";
-        }
+  if (props.size()) {
+    os << std::endl << i << "{";
+  }
 
-        for( const auto & p: props )
-        {
-            os << std::endl << i << "    - " << Utils::Pad( p.first + ": ", length + 2 ) << p.second;
-        }
+  for (const auto& p : props) {
+    os << std::endl
+       << i << "    - " << Utils::Pad(p.first + ": ", length + 2) << p.second;
+  }
 
-        if( props.size() )
-        {
-            os << std::endl << i << "}";
-        }
-    }
-
-    std::string DisplayableObject::ToString() const
-    {
-        std::stringstream ss;
-
-        this->WriteDescription( ss, 0 );
-
-        return ss.str();
-    }
-
-    std::vector< std::pair< std::string, std::string > > DisplayableObject::GetDisplayableProperties() const
-    {
-        return {};
-    }
-
-    std::ostream & operator << ( std::ostream & os, const DisplayableObject & o )
-    {
-        o.WriteDescription( os, 0 );
-
-        return os;
-    }
+  if (props.size()) {
+    os << std::endl << i << "}";
+  }
 }
+
+std::string DisplayableObject::ToString() const {
+  std::stringstream ss;
+
+  this->WriteDescription(ss, 0);
+
+  return ss.str();
+}
+
+std::vector<std::pair<std::string, std::string> >
+DisplayableObject::GetDisplayableProperties() const {
+  return {};
+}
+
+std::ostream& operator<<(std::ostream& os, const DisplayableObject& o) {
+  o.WriteDescription(os, 0);
+
+  return os;
+}
+}  // namespace ISOBMFF

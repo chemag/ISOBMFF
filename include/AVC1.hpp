@@ -31,60 +31,58 @@
 #ifndef ISOBMFF_AVC1_HPP
 #define ISOBMFF_AVC1_HPP
 
-#include <memory>
-#include <algorithm>
-#include <Macros.hpp>
-#include <FullBox.hpp>
 #include <Container.hpp>
+#include <FullBox.hpp>
+#include <Macros.hpp>
+#include <algorithm>
 #include <cstdint>
+#include <memory>
 
-namespace ISOBMFF
-{
-    class ISOBMFF_EXPORT AVC1: public FullBox, public Container
-    {
-        public:
+namespace ISOBMFF {
+class ISOBMFF_EXPORT AVC1 : public FullBox, public Container {
+ public:
+  AVC1();
+  AVC1(const AVC1& o);
+  AVC1(AVC1&& o) noexcept;
+  virtual ~AVC1() override;
 
-            AVC1();
-            AVC1( const AVC1 & o );
-            AVC1( AVC1 && o ) noexcept;
-            virtual ~AVC1() override;
+  AVC1& operator=(AVC1 o);
 
-            AVC1 & operator =( AVC1 o );
+  Error ReadData(Parser& parser, BinaryStream& stream) override;
+  void WriteDescription(std::ostream& os,
+                        std::size_t indentLevel) const override;
 
-            Error ReadData( Parser & parser, BinaryStream & stream ) override;
-            void WriteDescription( std::ostream & os, std::size_t indentLevel ) const override;
+  std::vector<std::pair<std::string, std::string> > GetDisplayableProperties()
+      const override;
 
-            std::vector< std::pair< std::string, std::string > > GetDisplayableProperties() const override;
+  uint16_t GetDataReferenceIndex() const;
+  uint16_t GetWidth() const;
+  uint16_t GetHeight() const;
+  uint32_t GetHorizResolution() const;
+  uint32_t GetVertResolution() const;
+  uint16_t GetFrameCount() const;
+  std::string GetCompressorName() const;
+  uint16_t GetDepth() const;
 
-            uint16_t    GetDataReferenceIndex() const;
-            uint16_t    GetWidth()              const;
-            uint16_t    GetHeight()             const;
-            uint32_t    GetHorizResolution()    const;
-            uint32_t    GetVertResolution()     const;
-            uint16_t    GetFrameCount()         const;
-            std::string GetCompressorName()     const;
-            uint16_t    GetDepth()              const;
+  void SetDataReferenceIndex(uint16_t value);
+  void SetWidth(uint16_t value);
+  void SetHeight(uint16_t value);
+  void SetHorizResolution(uint32_t value);
+  void SetVertResolution(uint32_t value);
+  void SetFrameCount(uint16_t value);
+  void SetCompressorName(std::string value);
+  void SetDepth(uint16_t value);
 
-            void SetDataReferenceIndex( uint16_t value );
-            void SetWidth( uint16_t value );
-            void SetHeight( uint16_t value );
-            void SetHorizResolution( uint32_t value );
-            void SetVertResolution( uint32_t value );
-            void SetFrameCount( uint16_t value );
-            void SetCompressorName( std::string value );
-            void SetDepth( uint16_t value );
+  void AddBox(std::shared_ptr<Box> box) override;
+  std::vector<std::shared_ptr<Box> > GetBoxes() const override;
 
-            void                                  AddBox( std::shared_ptr< Box > box ) override;
-            std::vector< std::shared_ptr< Box > > GetBoxes() const override;
+  ISOBMFF_EXPORT friend void swap(AVC1& o1, AVC1& o2);
 
-            ISOBMFF_EXPORT friend void swap( AVC1 & o1, AVC1 & o2 );
+ private:
+  class IMPL;
 
-        private:
-
-            class IMPL;
-
-            std::unique_ptr< IMPL > impl;
-    };
-}
+  std::unique_ptr<IMPL> impl;
+};
+}  // namespace ISOBMFF
 
 #endif /* ISOBMFF_AVC1_HPP */

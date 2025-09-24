@@ -31,23 +31,22 @@
 #ifndef ISOBMFF_DISPLAYABLE_OBJECT_CONTAINER_HPP
 #define ISOBMFF_DISPLAYABLE_OBJECT_CONTAINER_HPP
 
-#include <Macros.hpp>
 #include <DisplayableObject.hpp>
+#include <Macros.hpp>
 #include <memory>
 #include <vector>
 
-namespace ISOBMFF
-{
-    class ISOBMFF_EXPORT DisplayableObjectContainer
-    {
-        public:
+namespace ISOBMFF {
+class ISOBMFF_EXPORT DisplayableObjectContainer {
+ public:
+  virtual ~DisplayableObjectContainer();
 
-            virtual ~DisplayableObjectContainer();
+  virtual std::vector<std::shared_ptr<DisplayableObject> >
+  GetDisplayableObjects() const = 0;
 
-            virtual std::vector< std::shared_ptr< DisplayableObject > > GetDisplayableObjects() const = 0;
-
-            virtual void WriteDescription( std::ostream & os, std::size_t indentLevel ) const;
-    };
-}
+  virtual void WriteDescription(std::ostream& os,
+                                std::size_t indentLevel) const;
+};
+}  // namespace ISOBMFF
 
 #endif /* ISOBMFF_DISPLAYABLE_OBJECT_CONTAINER_HPP */

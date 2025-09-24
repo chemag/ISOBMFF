@@ -31,41 +31,38 @@
 #ifndef ISOBMFF_FULL_BOX_HPP
 #define ISOBMFF_FULL_BOX_HPP
 
-#include <memory>
-#include <algorithm>
-#include <Macros.hpp>
 #include <Box.hpp>
+#include <Macros.hpp>
+#include <algorithm>
+#include <memory>
 
-namespace ISOBMFF
-{
-    class ISOBMFF_EXPORT FullBox: public Box
-    {
-        public:
+namespace ISOBMFF {
+class ISOBMFF_EXPORT FullBox : public Box {
+ public:
+  FullBox(const std::string& name);
+  FullBox(const FullBox& o);
+  FullBox(FullBox&& o) noexcept;
+  virtual ~FullBox() override;
 
-            FullBox( const std::string & name );
-            FullBox( const FullBox & o );
-            FullBox( FullBox && o ) noexcept;
-            virtual ~FullBox() override;
+  FullBox& operator=(FullBox o);
 
-            FullBox & operator =( FullBox o );
+  Error ReadData(Parser& parser, BinaryStream& stream) override;
+  std::vector<std::pair<std::string, std::string> > GetDisplayableProperties()
+      const override;
 
-            Error                                                ReadData( Parser & parser, BinaryStream & stream ) override;
-            std::vector< std::pair< std::string, std::string > > GetDisplayableProperties() const override;
+  uint8_t GetVersion() const;
+  uint32_t GetFlags() const;
 
-            uint8_t  GetVersion() const;
-            uint32_t GetFlags()   const;
+  void SetVersion(uint8_t value);
+  void SetFlags(uint32_t value);
 
-            void SetVersion( uint8_t value );
-            void SetFlags( uint32_t value );
+  ISOBMFF_EXPORT friend void swap(FullBox& o1, FullBox& o2);
 
-            ISOBMFF_EXPORT friend void swap( FullBox & o1, FullBox & o2 );
+ private:
+  class IMPL;
 
-        private:
-
-            class IMPL;
-
-            std::unique_ptr< IMPL > impl;
-    };
-}
+  std::unique_ptr<IMPL> impl;
+};
+}  // namespace ISOBMFF
 
 #endif /* ISOBMFF_FULL_BOX_HPP */

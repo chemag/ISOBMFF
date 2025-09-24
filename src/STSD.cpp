@@ -28,104 +28,81 @@
  * @author      Jean-David Gadina - www.digidna.net
  */
 
-#include <STSD.hpp>
 #include <ContainerBox.hpp>
+#include <STSD.hpp>
 
-namespace ISOBMFF
-{
-    class STSD::IMPL
-    {
-        public:
+namespace ISOBMFF {
+class STSD::IMPL {
+ public:
+  IMPL();
+  IMPL(const IMPL& o);
+  ~IMPL();
 
-            IMPL();
-            IMPL( const IMPL & o );
-            ~IMPL();
+  std::vector<std::shared_ptr<Box> > _boxes;
+};
 
-            std::vector< std::shared_ptr< Box > > _boxes;
-    };
+STSD::STSD() : FullBox("stsd"), impl(std::make_unique<IMPL>()) {}
 
-    STSD::STSD():
-        FullBox( "stsd" ),
-        impl( std::make_unique< IMPL >() )
-    {}
+STSD::STSD(const STSD& o)
+    : FullBox(o), impl(std::make_unique<IMPL>(*(o.impl))) {}
 
-    STSD::STSD( const STSD & o ):
-        FullBox( o ),
-        impl( std::make_unique< IMPL >( *( o.impl ) ) )
-    {}
-
-    STSD::STSD( STSD && o ) noexcept:
-        FullBox( std::move( o ) ),
-        impl( std::move( o.impl ) )
-    {
-        o.impl = nullptr;
-    }
-
-    STSD::~STSD()
-    {}
-
-    STSD & STSD::operator =( STSD o )
-    {
-        FullBox::operator=( o );
-        swap( *( this ), o );
-
-        return *( this );
-    }
-
-    void swap( STSD & o1, STSD & o2 )
-    {
-        using std::swap;
-
-        swap( static_cast< FullBox & >( o1 ), static_cast< FullBox & >( o2 ) );
-        swap( o1.impl, o2.impl );
-    }
-
-    Error STSD::ReadData( Parser & parser, BinaryStream & stream )
-    {
-        ContainerBox container( "????" );
-        Error err;
-
-        err = FullBox::ReadData( parser, stream );
-        if( err ) return err;
-
-        uint32_t temp;
-        err = stream.ReadBigEndianUInt32( temp );
-        if( err ) return err;
-
-        err = container.ReadData( parser, stream );
-        if( err ) return err;
-
-        this->impl->_boxes = container.GetBoxes();
-
-        return Error();
-    }
-
-    void STSD::WriteDescription( std::ostream & os, std::size_t indentLevel ) const
-    {
-        FullBox::WriteDescription( os, indentLevel );
-        Container::WriteBoxes( os, indentLevel );
-    }
-
-    void STSD::AddBox( std::shared_ptr< Box > box )
-    {
-        if( box != nullptr )
-        {
-            this->impl->_boxes.push_back( box );
-        }
-    }
-
-    std::vector< std::shared_ptr< Box > > STSD::GetBoxes() const
-    {
-        return this->impl->_boxes;
-    }
-
-    STSD::IMPL::IMPL()
-    {}
-
-    STSD::IMPL::IMPL( const IMPL & o ):
-        _boxes( o._boxes )
-    {}
-
-    STSD::IMPL::~IMPL()
-    {}
+STSD::STSD(STSD&& o) noexcept : FullBox(std::move(o)), impl(std::move(o.impl)) {
+  o.impl = nullptr;
 }
+
+STSD::~STSD() {}
+
+STSD& STSD::operator=(STSD o) {
+  FullBox::operator=(o);
+  swap(*(this), o);
+
+  return *(this);
+}
+
+void swap(STSD& o1, STSD& o2) {
+  using std::swap;
+
+  swap(static_cast<FullBox&>(o1), static_cast<FullBox&>(o2));
+  swap(o1.impl, o2.impl);
+}
+
+Error STSD::ReadData(Parser& parser, BinaryStream& stream) {
+  ContainerBox container("????");
+  Error err;
+
+  err = FullBox::ReadData(parser, stream);
+  if (err) return err;
+
+  uint32_t temp;
+  err = stream.ReadBigEndianUInt32(temp);
+  if (err) return err;
+
+  err = container.ReadData(parser, stream);
+  if (err) return err;
+
+  this->impl->_boxes = container.GetBoxes();
+
+  return Error();
+}
+
+void STSD::WriteDescription(std::ostream& os, std::size_t indentLevel) const {
+  FullBox::WriteDescription(os, indentLevel);
+  Container::WriteBoxes(os, indentLevel);
+}
+
+void STSD::AddBox(std::shared_ptr<Box> box) {
+  if (box != nullptr) {
+    this->impl->_boxes.push_back(box);
+  }
+}
+
+std::vector<std::shared_ptr<Box> > STSD::GetBoxes() const {
+  return this->impl->_boxes;
+}
+
+STSD::IMPL::IMPL() {}
+
+STSD::IMPL::IMPL(const IMPL& o) : _boxes(o._boxes) {}
+
+STSD::IMPL::~IMPL() {}
+}  // namespace ISOBMFF

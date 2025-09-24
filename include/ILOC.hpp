@@ -31,129 +31,127 @@
 #ifndef ISOBMFF_ILOC_HPP
 #define ISOBMFF_ILOC_HPP
 
-#include <memory>
-#include <algorithm>
-#include <Macros.hpp>
-#include <FullBox.hpp>
 #include <DisplayableObjectContainer.hpp>
+#include <FullBox.hpp>
+#include <Macros.hpp>
+#include <algorithm>
 #include <cstdint>
+#include <memory>
 #include <vector>
 
-namespace ISOBMFF
-{
-    class ISOBMFF_EXPORT ILOC: public FullBox, public DisplayableObjectContainer
-    {
-        public:
+namespace ISOBMFF {
+class ISOBMFF_EXPORT ILOC : public FullBox, public DisplayableObjectContainer {
+ public:
+  ILOC();
+  ILOC(const ILOC& o);
+  ILOC(ILOC&& o) noexcept;
+  virtual ~ILOC() override;
 
-            ILOC();
-            ILOC( const ILOC & o );
-            ILOC( ILOC && o ) noexcept;
-            virtual ~ILOC() override;
+  ILOC& operator=(ILOC o);
 
-            ILOC & operator =( ILOC o );
+  Error ReadData(Parser& parser, BinaryStream& stream) override;
+  void WriteDescription(std::ostream& os,
+                        std::size_t indentLevel) const override;
 
-            Error ReadData( Parser & parser, BinaryStream & stream ) override;
-            void WriteDescription( std::ostream & os, std::size_t indentLevel ) const override;
+  virtual std::vector<std::shared_ptr<DisplayableObject> >
+  GetDisplayableObjects() const override;
+  virtual std::vector<std::pair<std::string, std::string> >
+  GetDisplayableProperties() const override;
 
-            virtual std::vector< std::shared_ptr< DisplayableObject > >  GetDisplayableObjects()    const override;
-            virtual std::vector< std::pair< std::string, std::string > > GetDisplayableProperties() const override;
+  uint8_t GetOffsetSize() const;
+  uint8_t GetLengthSize() const;
+  uint8_t GetBaseOffsetSize() const;
+  uint8_t GetIndexSize() const;
 
-            uint8_t GetOffsetSize()     const;
-            uint8_t GetLengthSize()     const;
-            uint8_t GetBaseOffsetSize() const;
-            uint8_t GetIndexSize()      const;
+  void SetOffsetSize(uint8_t value);
+  void SetLengthSize(uint8_t value);
+  void SetBaseOffsetSize(uint8_t value);
+  void SetIndexSize(uint8_t value);
 
-            void SetOffsetSize( uint8_t value );
-            void SetLengthSize( uint8_t value );
-            void SetBaseOffsetSize( uint8_t value );
-            void SetIndexSize( uint8_t value );
+  class ISOBMFF_EXPORT Item : public DisplayableObject,
+                              public DisplayableObjectContainer {
+   public:
+    Item();
+    Item(BinaryStream& stream, const ILOC& iloc);
+    Item(const Item& o);
+    Item(Item&& o) noexcept;
+    virtual ~Item() override;
 
-            class ISOBMFF_EXPORT Item: public DisplayableObject, public DisplayableObjectContainer
-            {
-                public:
+    Item& operator=(Item o);
 
-                    Item();
-                    Item( BinaryStream & stream, const ILOC & iloc );
-                    Item( const Item & o );
-                    Item( Item && o ) noexcept;
-                    virtual ~Item() override;
+    std::string GetName() const override;
 
-                    Item & operator =( Item o );
+    uint32_t GetItemID() const;
+    uint8_t GetConstructionMethod() const;
+    uint16_t GetDataReferenceIndex() const;
+    uint64_t GetBaseOffset() const;
 
-                    std::string GetName() const override;
+    void SetItemID(uint32_t value);
+    void SetConstructionMethod(uint8_t value);
+    void SetDataReferenceIndex(uint16_t value);
+    void SetBaseOffset(uint64_t value);
 
-                    uint32_t GetItemID()             const;
-                    uint8_t  GetConstructionMethod() const;
-                    uint16_t GetDataReferenceIndex() const;
-                    uint64_t GetBaseOffset()         const;
+    void WriteDescription(std::ostream& os,
+                          std::size_t indentLevel) const override;
 
-                    void SetItemID( uint32_t value );
-                    void SetConstructionMethod( uint8_t value );
-                    void SetDataReferenceIndex( uint16_t value );
-                    void SetBaseOffset( uint64_t value );
+    std::vector<std::shared_ptr<DisplayableObject> > GetDisplayableObjects()
+        const override;
+    std::vector<std::pair<std::string, std::string> > GetDisplayableProperties()
+        const override;
 
-                    void WriteDescription( std::ostream & os, std::size_t indentLevel ) const override;
+    class ISOBMFF_EXPORT Extent : public DisplayableObject {
+     public:
+      Extent();
+      Extent(BinaryStream& stream, const ILOC& iloc);
+      Extent(const Extent& o);
+      Extent(Extent&& o) noexcept;
+      virtual ~Extent() override;
 
-                    std::vector< std::shared_ptr< DisplayableObject > >  GetDisplayableObjects()    const override;
-                    std::vector< std::pair< std::string, std::string > > GetDisplayableProperties() const override;
+      Extent& operator=(Extent o);
 
-                    class ISOBMFF_EXPORT Extent: public DisplayableObject
-                    {
-                        public:
+      std::string GetName() const override;
 
-                            Extent();
-                            Extent( BinaryStream & stream, const ILOC & iloc );
-                            Extent( const Extent & o );
-                            Extent( Extent && o ) noexcept;
-                            virtual ~Extent() override;
+      uint64_t GetIndex() const;
+      uint64_t GetOffset() const;
+      uint64_t GetLength() const;
 
-                            Extent & operator =( Extent o );
+      void SetIndex(uint64_t value);
+      void SetOffset(uint64_t value);
+      void SetLength(uint64_t value);
 
-                            std::string GetName() const override;
+      virtual std::vector<std::pair<std::string, std::string> >
+      GetDisplayableProperties() const override;
 
-                            uint64_t GetIndex()  const;
-                            uint64_t GetOffset() const;
-                            uint64_t GetLength() const;
+      ISOBMFF_EXPORT friend void swap(Extent& o1, Extent& o2);
 
-                            void SetIndex( uint64_t value );
-                            void SetOffset( uint64_t value );
-                            void SetLength( uint64_t value );
+     private:
+      class IMPL;
 
-                            virtual std::vector< std::pair< std::string, std::string > > GetDisplayableProperties() const override;
-
-                            ISOBMFF_EXPORT friend void swap( Extent & o1, Extent & o2 );
-
-                        private:
-
-                            class IMPL;
-
-                            std::unique_ptr< IMPL > impl;
-                    };
-
-                    std::vector< std::shared_ptr< Extent > > GetExtents() const;
-                    void                                     AddExtent( std::shared_ptr< Extent > extent );
-
-                    ISOBMFF_EXPORT friend void swap( Item & o1, Item & o2 );
-
-                private:
-
-                    class IMPL;
-
-                    std::unique_ptr< IMPL > impl;
-            };
-
-            std::vector< std::shared_ptr< Item > > GetItems()                 const;
-            std::shared_ptr< Item >                GetItem( uint32_t itemID ) const;
-            void                                   AddItem( std::shared_ptr< Item > item );
-
-            ISOBMFF_EXPORT friend void swap( ILOC & o1, ILOC & o2 );
-
-        private:
-
-            class IMPL;
-
-            std::unique_ptr< IMPL > impl;
+      std::unique_ptr<IMPL> impl;
     };
-}
+
+    std::vector<std::shared_ptr<Extent> > GetExtents() const;
+    void AddExtent(std::shared_ptr<Extent> extent);
+
+    ISOBMFF_EXPORT friend void swap(Item& o1, Item& o2);
+
+   private:
+    class IMPL;
+
+    std::unique_ptr<IMPL> impl;
+  };
+
+  std::vector<std::shared_ptr<Item> > GetItems() const;
+  std::shared_ptr<Item> GetItem(uint32_t itemID) const;
+  void AddItem(std::shared_ptr<Item> item);
+
+  ISOBMFF_EXPORT friend void swap(ILOC& o1, ILOC& o2);
+
+ private:
+  class IMPL;
+
+  std::unique_ptr<IMPL> impl;
+};
+}  // namespace ISOBMFF
 
 #endif /* ISOBMFF_ILOC_HPP */

@@ -31,53 +31,50 @@
 #ifndef ISOBMFF_INFE_HPP
 #define ISOBMFF_INFE_HPP
 
-#include <memory>
-#include <algorithm>
-#include <Macros.hpp>
 #include <FullBox.hpp>
-#include <string>
+#include <Macros.hpp>
+#include <algorithm>
 #include <cstdint>
+#include <memory>
+#include <string>
 
-namespace ISOBMFF
-{
-    class ISOBMFF_EXPORT INFE: public FullBox
-    {
-        public:
+namespace ISOBMFF {
+class ISOBMFF_EXPORT INFE : public FullBox {
+ public:
+  INFE();
+  INFE(const INFE& o);
+  INFE(INFE&& o) noexcept;
+  virtual ~INFE() override;
 
-            INFE();
-            INFE( const INFE & o );
-            INFE( INFE && o ) noexcept;
-            virtual ~INFE() override;
+  INFE& operator=(INFE o);
 
-            INFE & operator =( INFE o );
+  Error ReadData(Parser& parser, BinaryStream& stream) override;
+  std::vector<std::pair<std::string, std::string> > GetDisplayableProperties()
+      const override;
 
-            Error                                                 ReadData( Parser & parser, BinaryStream & stream ) override;
-            std::vector< std::pair< std::string, std::string > > GetDisplayableProperties() const override;
+  uint32_t GetItemID() const;
+  uint16_t GetItemProtectionIndex() const;
+  std::string GetItemType() const;
+  std::string GetItemName() const;
+  std::string GetContentType() const;
+  std::string GetContentEncoding() const;
+  std::string GetItemURIType() const;
 
-            uint32_t    GetItemID()              const;
-            uint16_t    GetItemProtectionIndex() const;
-            std::string GetItemType()            const;
-            std::string GetItemName()            const;
-            std::string GetContentType()         const;
-            std::string GetContentEncoding()     const;
-            std::string GetItemURIType()         const;
+  void SetItemID(uint32_t value);
+  void SetItemProtectionIndex(uint16_t value);
+  void SetItemType(const std::string& value);
+  void SetItemName(const std::string& value);
+  void SetContentType(const std::string& value);
+  void SetContentEncoding(const std::string& value);
+  void SetItemURIType(const std::string& value);
 
-            void SetItemID( uint32_t value );
-            void SetItemProtectionIndex( uint16_t value );
-            void SetItemType( const std::string & value );
-            void SetItemName( const std::string & value );
-            void SetContentType( const std::string & value );
-            void SetContentEncoding( const std::string & value );
-            void SetItemURIType( const std::string & value );
+  ISOBMFF_EXPORT friend void swap(INFE& o1, INFE& o2);
 
-            ISOBMFF_EXPORT friend void swap( INFE & o1, INFE & o2 );
+ private:
+  class IMPL;
 
-        private:
-
-            class IMPL;
-
-            std::unique_ptr< IMPL > impl;
-    };
-}
+  std::unique_ptr<IMPL> impl;
+};
+}  // namespace ISOBMFF
 
 #endif /* ISOBMFF_INFE_HPP */

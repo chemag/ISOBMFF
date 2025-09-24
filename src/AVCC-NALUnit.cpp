@@ -29,122 +29,89 @@
  */
 
 #include <AVCC.hpp>
-#include <sstream>
 #include <iomanip>
+#include <sstream>
 
-namespace ISOBMFF
-{
-    class AVCC::NALUnit::IMPL
-    {
-        public:
+namespace ISOBMFF {
+class AVCC::NALUnit::IMPL {
+ public:
+  IMPL();
+  IMPL(const IMPL& o);
+  ~IMPL();
 
-            IMPL();
-            IMPL( const IMPL & o );
-            ~IMPL();
+  std::vector<uint8_t> _data;
+};
 
-            std::vector< uint8_t > _data;
-    };
+AVCC::NALUnit::NALUnit() : impl(std::make_unique<IMPL>()) {}
 
-    AVCC::NALUnit::NALUnit():
-        impl( std::make_unique< IMPL >() )
-    {}
+AVCC::NALUnit::NALUnit(BinaryStream& stream) : impl(std::make_unique<IMPL>()) {
+  std::vector<uint8_t> data;
+  uint16_t nal_unit_length;
 
-    AVCC::NALUnit::NALUnit( BinaryStream & stream ):
-        impl( std::make_unique< IMPL >() )
-    {
-        std::vector< uint8_t > data;
-        uint16_t               nal_unit_length;
+  Error err = stream.ReadBigEndianUInt16(nal_unit_length);
+  if (!err && nal_unit_length > 0) {
+    data = std::vector<uint8_t>(nal_unit_length);
+    err = stream.Read(&(data[0]), nal_unit_length);
+  }
 
-        Error err = stream.ReadBigEndianUInt16( nal_unit_length );
-        if( !err && nal_unit_length > 0 )
-        {
-            data = std::vector< uint8_t >( nal_unit_length );
-            err = stream.Read( &( data[ 0 ] ), nal_unit_length );
-        }
-
-        this->SetData( data );
-    }
-
-    AVCC::NALUnit::NALUnit( const AVCC::NALUnit & o ):
-        impl( std::make_unique< IMPL >( *( o.impl ) ) )
-    {}
-
-    AVCC::NALUnit::NALUnit( AVCC::NALUnit && o ) noexcept:
-        impl( std::move( o.impl ) )
-    {
-        o.impl = nullptr;
-    }
-
-    AVCC::NALUnit::~NALUnit()
-    {}
-
-    AVCC::NALUnit & AVCC::NALUnit::operator =( AVCC::NALUnit o )
-    {
-        swap( *( this ), o );
-
-        return *( this );
-    }
-
-    void swap( AVCC::NALUnit & o1, AVCC::NALUnit & o2 )
-    {
-        using std::swap;
-
-        swap( o1.impl, o2.impl );
-    }
-
-    std::string AVCC::NALUnit::GetName() const
-    {
-        return "NALUnit";
-    }
-
-    std::vector< uint8_t > AVCC::NALUnit::GetData() const
-    {
-        return this->impl->_data;
-    }
-
-    void AVCC::NALUnit::SetData( const std::vector< uint8_t > & value )
-    {
-        this->impl->_data = value;
-    }
-
-    std::vector< std::pair< std::string, std::string > > AVCC::NALUnit::GetDisplayableProperties() const
-    {
-        std::vector< uint8_t > data;
-        std::stringstream      ss;
-        std::string            s;
-
-        data = this->GetData();
-
-        if( data.size() > 0 )
-        {
-            for( auto byte: data )
-            {
-                ss << std::hex
-                   << std::uppercase
-                   << std::setfill( '0' )
-                   << std::setw( 2 )
-                   << static_cast< uint32_t >( byte )
-                   << " ";
-            }
-
-            s = ss.str();
-            s = s.substr( 0, s.length() - 1 );
-        }
-
-        return
-        {
-            { "Length", std::to_string( data.size() ) },
-            { "Data", s }
-        };
-    }
-
-    AVCC::NALUnit::IMPL::IMPL()
-    {}
-
-    AVCC::NALUnit::IMPL::IMPL( const IMPL & o ):
-        _data( o._data )
-    {}
-
-    AVCC::NALUnit::IMPL::~IMPL()
-    {}
+  this->SetData(data);
 }
+
+AVCC::NALUnit::NALUnit(const AVCC::NALUnit& o)
+    : impl(std::make_unique<IMPL>(*(o.impl))) {}
+
+AVCC::NALUnit::NALUnit(AVCC::NALUnit&& o) noexcept : impl(std::move(o.impl)) {
+  o.impl = nullptr;
+}
+
+AVCC::NALUnit::~NALUnit() {}
+
+AVCC::NALUnit& AVCC::NALUnit::operator=(AVCC::NALUnit o) {
+  swap(*(this), o);
+
+  return *(this);
+}
+
+void swap(AVCC::NALUnit& o1, AVCC::NALUnit& o2) {
+  using std::swap;
+
+  swap(o1.impl, o2.impl);
+}
+
+std::string AVCC::NALUnit::GetName() const { return "NALUnit"; }
+
+std::vector<uint8_t> AVCC::NALUnit::GetData() const {
+  return this->impl->_data;
+}
+
+void AVCC::NALUnit::SetData(const std::vector<uint8_t>& value) {
+  this->impl->_data = value;
+}
+
+std::vector<std::pair<std::string, std::string> >
+AVCC::NALUnit::GetDisplayableProperties() const {
+  std::vector<uint8_t> data;
+  std::stringstream ss;
+  std::string s;
+
+  data = this->GetData();
+
+  if (data.size() > 0) {
+    for (auto byte : data) {
+      ss << std::hex << std::uppercase << std::setfill('0') << std::setw(2)
+         << static_cast<uint32_t>(byte) << " ";
+    }
+
+    s = ss.str();
+    s = s.substr(0, s.length() - 1);
+  }
+
+  return {{"Length", std::to_string(data.size())}, {"Data", s}};
+}
+
+AVCC::NALUnit::IMPL::IMPL() {}
+
+AVCC::NALUnit::IMPL::IMPL(const IMPL& o) : _data(o._data) {}
+
+AVCC::NALUnit::IMPL::~IMPL() {}
+}  // namespace ISOBMFF

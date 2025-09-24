@@ -29,94 +29,67 @@
  */
 
 #include <Utils.hpp>
-#include <sstream>
 #include <iomanip>
+#include <sstream>
 
-namespace ISOBMFF
-{
-    namespace Utils
-    {
-        std::string Pad( const std::string & s, size_t length )
-        {
-            if( length <= s.size() )
-            {
-                return s;
-            }
+namespace ISOBMFF {
+namespace Utils {
+std::string Pad(const std::string& s, size_t length) {
+  if (length <= s.size()) {
+    return s;
+  }
 
-            return s + std::string( length - s.size(), ' ' );
-        }
-
-        std::string ToString( const std::vector< std::string > & v )
-        {
-            std::string s;
-
-            for( const auto & i: v )
-            {
-                s += i + ", ";
-            }
-
-            if( s.length() )
-            {
-                s = s.substr( 0, s.length() - 2 );
-            }
-
-            return s;
-        }
-
-        std::string ToHexString( uint8_t u )
-        {
-            std::stringstream ss;
-
-            ss << "0x"
-               << std::hex
-               << std::uppercase
-               << std::setfill( '0' )
-               << std::setw( 2 )
-               << static_cast< uint32_t >( u );
-
-            return ss.str();
-        }
-
-        std::string ToHexString( uint16_t u )
-        {
-            std::stringstream ss;
-
-            ss << "0x"
-               << std::hex
-               << std::uppercase
-               << std::setfill( '0' )
-               << std::setw( 4 )
-               << static_cast< uint32_t >( u );
-
-            return ss.str();
-        }
-
-        std::string ToHexString( uint32_t u )
-        {
-            std::stringstream ss;
-
-            ss << "0x"
-               << std::hex
-               << std::uppercase
-               << std::setfill( '0' )
-               << std::setw( 8 )
-               << static_cast< uint32_t >( u );
-
-            return ss.str();
-        }
-
-        std::string ToHexString( uint64_t u )
-        {
-            std::stringstream ss;
-
-            ss << "0x"
-               << std::hex
-               << std::uppercase
-               << std::setfill( '0' )
-               << std::setw( 16 )
-               << static_cast< uint32_t >( u );
-
-            return ss.str();
-        }
-    }
+  return s + std::string(length - s.size(), ' ');
 }
+
+std::string ToString(const std::vector<std::string>& v) {
+  std::string s;
+
+  for (const auto& i : v) {
+    s += i + ", ";
+  }
+
+  if (s.length()) {
+    s = s.substr(0, s.length() - 2);
+  }
+
+  return s;
+}
+
+std::string ToHexString(uint8_t u) {
+  std::stringstream ss;
+
+  ss << "0x" << std::hex << std::uppercase << std::setfill('0') << std::setw(2)
+     << static_cast<uint32_t>(u);
+
+  return ss.str();
+}
+
+std::string ToHexString(uint16_t u) {
+  std::stringstream ss;
+
+  ss << "0x" << std::hex << std::uppercase << std::setfill('0') << std::setw(4)
+     << static_cast<uint32_t>(u);
+
+  return ss.str();
+}
+
+std::string ToHexString(uint32_t u) {
+  std::stringstream ss;
+
+  ss << "0x" << std::hex << std::uppercase << std::setfill('0') << std::setw(8)
+     << static_cast<uint32_t>(u);
+
+  return ss.str();
+}
+
+std::string ToHexString(uint64_t u) {
+  std::stringstream ss;
+
+  ss << "0x" << std::hex << std::uppercase << std::setfill('0') << std::setw(16)
+     << static_cast<uint32_t>(u);
+
+  return ss.str();
+}
+}  // namespace Utils
+}  // namespace ISOBMFF

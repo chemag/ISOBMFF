@@ -30,58 +30,50 @@
 
 #include <IPCO.hpp>
 
-namespace ISOBMFF
-{
-    IPCO::IPCO(): ContainerBox( "ipco" )
-    {}
+namespace ISOBMFF {
+IPCO::IPCO() : ContainerBox("ipco") {}
 
-    std::shared_ptr< Box > IPCO::GetPropertyAtIndex( size_t index ) const
-    {
-        auto boxes( this->GetBoxes() );
+std::shared_ptr<Box> IPCO::GetPropertyAtIndex(size_t index) const {
+  auto boxes(this->GetBoxes());
 
-        if( index >= boxes.size() )
-        {
-            return nullptr;
-        }
+  if (index >= boxes.size()) {
+    return nullptr;
+  }
 
-        return boxes[ index ];
-    }
-
-    std::shared_ptr< Box > IPCO::GetProperty( const IPMA::Entry::Association & association ) const
-    {
-        auto     boxes( this->GetBoxes() );
-        uint16_t index;
-
-        index = association.GetPropertyIndex();
-
-        if( index == 0 )
-        {
-            return nullptr;
-        }
-
-        if( boxes.size() < index )
-        {
-            return nullptr;
-        }
-
-        return boxes[ index - 1 ];
-    }
-
-    std::vector< std::shared_ptr< Box > > IPCO::GetProperties( const IPMA::Entry & entry ) const
-    {
-        std::vector< std::shared_ptr< Box > > boxes;
-        std::shared_ptr< Box >                box;
-
-        for( const auto & b: entry.GetAssociations() )
-        {
-            box = this->GetProperty( *( b ) );
-
-            if( box != nullptr )
-            {
-                boxes.push_back( box );
-            }
-        }
-
-        return boxes;
-    }
+  return boxes[index];
 }
+
+std::shared_ptr<Box> IPCO::GetProperty(
+    const IPMA::Entry::Association& association) const {
+  auto boxes(this->GetBoxes());
+  uint16_t index;
+
+  index = association.GetPropertyIndex();
+
+  if (index == 0) {
+    return nullptr;
+  }
+
+  if (boxes.size() < index) {
+    return nullptr;
+  }
+
+  return boxes[index - 1];
+}
+
+std::vector<std::shared_ptr<Box> > IPCO::GetProperties(
+    const IPMA::Entry& entry) const {
+  std::vector<std::shared_ptr<Box> > boxes;
+  std::shared_ptr<Box> box;
+
+  for (const auto& b : entry.GetAssociations()) {
+    box = this->GetProperty(*(b));
+
+    if (box != nullptr) {
+      boxes.push_back(box);
+    }
+  }
+
+  return boxes;
+}
+}  // namespace ISOBMFF

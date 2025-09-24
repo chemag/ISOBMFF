@@ -31,40 +31,37 @@
 #ifndef ISOBMFF_STTS_HPP
 #define ISOBMFF_STTS_HPP
 
-#include <memory>
-#include <algorithm>
-#include <Macros.hpp>
 #include <FullBox.hpp>
+#include <Macros.hpp>
+#include <algorithm>
+#include <memory>
 #include <string>
 
-namespace ISOBMFF
-{
-    class ISOBMFF_EXPORT STTS: public FullBox
-    {
-        public:
+namespace ISOBMFF {
+class ISOBMFF_EXPORT STTS : public FullBox {
+ public:
+  STTS();
+  STTS(const STTS& o);
+  STTS(STTS&& o) noexcept;
+  virtual ~STTS() override;
 
-            STTS();
-            STTS( const STTS & o );
-            STTS( STTS && o ) noexcept;
-            virtual ~STTS() override;
+  STTS& operator=(STTS o);
 
-            STTS & operator =( STTS o );
+  Error ReadData(Parser& parser, BinaryStream& stream) override;
+  std::vector<std::pair<std::string, std::string> > GetDisplayableProperties()
+      const override;
 
-            Error                                                 ReadData( Parser & parser, BinaryStream & stream ) override;
-            std::vector< std::pair< std::string, std::string > > GetDisplayableProperties() const override;
+  size_t GetEntryCount() const;
+  uint32_t GetSampleCount(size_t index) const;
+  uint32_t GetSampleOffset(size_t index) const;
 
-            size_t   GetEntryCount()                 const;
-            uint32_t GetSampleCount(  size_t index ) const;
-            uint32_t GetSampleOffset( size_t index ) const;
+  ISOBMFF_EXPORT friend void swap(STTS& o1, STTS& o2);
 
-            ISOBMFF_EXPORT friend void swap( STTS & o1, STTS & o2 );
+ private:
+  class IMPL;
 
-        private:
-
-            class IMPL;
-
-            std::unique_ptr< IMPL > impl;
-    };
-}
+  std::unique_ptr<IMPL> impl;
+};
+}  // namespace ISOBMFF
 
 #endif /* ISOBMFF_STTS_HPP */

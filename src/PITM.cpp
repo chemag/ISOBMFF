@@ -30,106 +30,77 @@
 
 #include <PITM.hpp>
 
-namespace ISOBMFF
-{
-    class PITM::IMPL
-    {
-        public:
+namespace ISOBMFF {
+class PITM::IMPL {
+ public:
+  IMPL();
+  IMPL(const IMPL& o);
+  ~IMPL();
 
-            IMPL();
-            IMPL( const IMPL & o );
-            ~IMPL();
+  uint32_t _itemID;
+};
 
-            uint32_t _itemID;
-    };
+PITM::PITM() : FullBox("pitm"), impl(std::make_unique<IMPL>()) {}
 
-    PITM::PITM():
-        FullBox( "pitm" ),
-        impl( std::make_unique< IMPL >() )
-    {}
+PITM::PITM(const PITM& o)
+    : FullBox(o), impl(std::make_unique<IMPL>(*(o.impl))) {}
 
-    PITM::PITM( const PITM & o ):
-        FullBox( o ),
-        impl( std::make_unique< IMPL >( *( o.impl ) ) )
-    {}
-
-    PITM::PITM( PITM && o ) noexcept:
-        FullBox( std::move( o ) ),
-        impl( std::move( o.impl ) )
-    {
-        o.impl = nullptr;
-    }
-
-    PITM::~PITM()
-    {}
-
-    PITM & PITM::operator =( PITM o )
-    {
-        FullBox::operator=( o );
-        swap( *( this ), o );
-
-        return *( this );
-    }
-
-    void swap( PITM & o1, PITM & o2 )
-    {
-        using std::swap;
-
-        swap( static_cast< FullBox & >( o1 ), static_cast< FullBox & >( o2 ) );
-        swap( o1.impl, o2.impl );
-    }
-
-    Error PITM::ReadData( Parser & parser, BinaryStream & stream )
-    {
-        Error err;
-
-        err = FullBox::ReadData( parser, stream );
-        if( err ) return err;
-
-        if( this->GetVersion() == 0 )
-        {
-            uint16_t itemID;
-            err = stream.ReadBigEndianUInt16( itemID );
-            if( err ) return err;
-            this->SetItemID( itemID );
-        }
-        else
-        {
-            uint32_t itemID;
-            err = stream.ReadBigEndianUInt32( itemID );
-            if( err ) return err;
-            this->SetItemID( itemID );
-        }
-        return Error();
-    }
-
-    std::vector< std::pair< std::string, std::string > > PITM::GetDisplayableProperties() const
-    {
-        auto props( FullBox::GetDisplayableProperties() );
-
-        props.push_back( { "Item ID", std::to_string( this->GetItemID() ) } );
-
-        return props;
-    }
-
-    uint32_t PITM::GetItemID() const
-    {
-        return this->impl->_itemID;
-    }
-
-    void PITM::SetItemID( uint32_t value )
-    {
-        this->impl->_itemID = value;
-    }
-
-    PITM::IMPL::IMPL():
-        _itemID( 0 )
-    {}
-
-    PITM::IMPL::IMPL( const IMPL & o ):
-        _itemID( o._itemID )
-    {}
-
-    PITM::IMPL::~IMPL()
-    {}
+PITM::PITM(PITM&& o) noexcept : FullBox(std::move(o)), impl(std::move(o.impl)) {
+  o.impl = nullptr;
 }
+
+PITM::~PITM() {}
+
+PITM& PITM::operator=(PITM o) {
+  FullBox::operator=(o);
+  swap(*(this), o);
+
+  return *(this);
+}
+
+void swap(PITM& o1, PITM& o2) {
+  using std::swap;
+
+  swap(static_cast<FullBox&>(o1), static_cast<FullBox&>(o2));
+  swap(o1.impl, o2.impl);
+}
+
+Error PITM::ReadData(Parser& parser, BinaryStream& stream) {
+  Error err;
+
+  err = FullBox::ReadData(parser, stream);
+  if (err) return err;
+
+  if (this->GetVersion() == 0) {
+    uint16_t itemID;
+    err = stream.ReadBigEndianUInt16(itemID);
+    if (err) return err;
+    this->SetItemID(itemID);
+  } else {
+    uint32_t itemID;
+    err = stream.ReadBigEndianUInt32(itemID);
+    if (err) return err;
+    this->SetItemID(itemID);
+  }
+  return Error();
+}
+
+std::vector<std::pair<std::string, std::string> >
+PITM::GetDisplayableProperties() const {
+  auto props(FullBox::GetDisplayableProperties());
+
+  props.push_back({"Item ID", std::to_string(this->GetItemID())});
+
+  return props;
+}
+
+uint32_t PITM::GetItemID() const { return this->impl->_itemID; }
+
+void PITM::SetItemID(uint32_t value) { this->impl->_itemID = value; }
+
+PITM::IMPL::IMPL() : _itemID(0) {}
+
+PITM::IMPL::IMPL(const IMPL& o) : _itemID(o._itemID) {}
+
+PITM::IMPL::~IMPL() {}
+}  // namespace ISOBMFF

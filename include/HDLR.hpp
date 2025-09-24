@@ -31,42 +31,39 @@
 #ifndef ISOBMFF_HDLR_HPP
 #define ISOBMFF_HDLR_HPP
 
-#include <memory>
-#include <algorithm>
-#include <Macros.hpp>
 #include <FullBox.hpp>
+#include <Macros.hpp>
+#include <algorithm>
+#include <memory>
 #include <string>
 
-namespace ISOBMFF
-{
-    class ISOBMFF_EXPORT HDLR: public FullBox
-    {
-        public:
+namespace ISOBMFF {
+class ISOBMFF_EXPORT HDLR : public FullBox {
+ public:
+  HDLR();
+  HDLR(const HDLR& o);
+  HDLR(HDLR&& o) noexcept;
+  virtual ~HDLR() override;
 
-            HDLR();
-            HDLR( const HDLR & o );
-            HDLR( HDLR && o ) noexcept;
-            virtual ~HDLR() override;
+  HDLR& operator=(HDLR o);
 
-            HDLR & operator =( HDLR o );
+  Error ReadData(Parser& parser, BinaryStream& stream) override;
+  std::vector<std::pair<std::string, std::string> > GetDisplayableProperties()
+      const override;
 
-            Error                                                 ReadData( Parser & parser, BinaryStream & stream ) override;
-            std::vector< std::pair< std::string, std::string > > GetDisplayableProperties() const override;
+  std::string GetHandlerType() const;
+  std::string GetHandlerName() const;
 
-            std::string GetHandlerType() const;
-            std::string GetHandlerName() const;
+  void SetHandlerType(const std::string& value);
+  void SetHandlerName(const std::string& value);
 
-            void SetHandlerType( const std::string & value );
-            void SetHandlerName( const std::string & value );
+  ISOBMFF_EXPORT friend void swap(HDLR& o1, HDLR& o2);
 
-            ISOBMFF_EXPORT friend void swap( HDLR & o1, HDLR & o2 );
+ private:
+  class IMPL;
 
-        private:
-
-            class IMPL;
-
-            std::unique_ptr< IMPL > impl;
-    };
-}
+  std::unique_ptr<IMPL> impl;
+};
+}  // namespace ISOBMFF
 
 #endif /* ISOBMFF_HDLR_HPP */

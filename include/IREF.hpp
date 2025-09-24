@@ -31,39 +31,36 @@
 #ifndef ISOBMFF_IREF_HPP
 #define ISOBMFF_IREF_HPP
 
-#include <memory>
-#include <algorithm>
-#include <Macros.hpp>
 #include <Container.hpp>
 #include <FullBox.hpp>
+#include <Macros.hpp>
+#include <algorithm>
+#include <memory>
 
-namespace ISOBMFF
-{
-    class ISOBMFF_EXPORT IREF: public FullBox, public Container
-    {
-        public:
+namespace ISOBMFF {
+class ISOBMFF_EXPORT IREF : public FullBox, public Container {
+ public:
+  IREF();
+  IREF(const IREF& o);
+  IREF(IREF&& o) noexcept;
+  virtual ~IREF() override;
 
-            IREF();
-            IREF( const IREF & o );
-            IREF( IREF && o ) noexcept;
-            virtual ~IREF() override;
+  IREF& operator=(IREF o);
 
-            IREF & operator =( IREF o );
+  Error ReadData(Parser& parser, BinaryStream& stream) override;
+  void WriteDescription(std::ostream& os,
+                        std::size_t indentLevel) const override;
 
-            Error ReadData( Parser & parser, BinaryStream & stream ) override;
-            void WriteDescription( std::ostream & os, std::size_t indentLevel ) const override;
+  void AddBox(std::shared_ptr<Box> box) override;
+  std::vector<std::shared_ptr<Box> > GetBoxes() const override;
 
-            void                                  AddBox( std::shared_ptr< Box > box ) override;
-            std::vector< std::shared_ptr< Box > > GetBoxes() const override;
+  ISOBMFF_EXPORT friend void swap(IREF& o1, IREF& o2);
 
-            ISOBMFF_EXPORT friend void swap( IREF & o1, IREF & o2 );
+ private:
+  class IMPL;
 
-        private:
-
-            class IMPL;
-
-            std::unique_ptr< IMPL > impl;
-    };
-}
+  std::unique_ptr<IMPL> impl;
+};
+}  // namespace ISOBMFF
 
 #endif /* ISOBMFF_IREF_HPP */

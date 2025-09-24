@@ -28,149 +28,114 @@
  * @author      Jean-David Gadina - www.digidna.net
  */
 
-#include <SCHM.hpp>
 #include <Parser.hpp>
+#include <SCHM.hpp>
 #include <cstdint>
 
-namespace ISOBMFF
-{
-    class SCHM::IMPL
-    {
-        public:
+namespace ISOBMFF {
+class SCHM::IMPL {
+ public:
+  IMPL();
+  IMPL(const IMPL& o);
+  ~IMPL();
 
-            IMPL();
-            IMPL( const IMPL & o );
-            ~IMPL();
+  std::string _schemeType;
+  uint32_t _schemeVersion;
+  std::string _schemeURI;
+};
 
-            std::string _schemeType;
-            uint32_t    _schemeVersion;
-            std::string _schemeURI;
-    };
+SCHM::SCHM() : FullBox("schm"), impl(std::make_unique<IMPL>()) {}
 
-    SCHM::SCHM():
-        FullBox( "schm" ),
-        impl( std::make_unique< IMPL >() )
-    {}
+SCHM::SCHM(const SCHM& o)
+    : FullBox(o), impl(std::make_unique<IMPL>(*(o.impl))) {}
 
-    SCHM::SCHM( const SCHM & o ):
-        FullBox( o ),
-        impl( std::make_unique< IMPL >( *( o.impl ) ) )
-    {}
-
-    SCHM::SCHM( SCHM && o ) noexcept:
-        FullBox( std::move( o ) ),
-        impl( std::move( o.impl ) )
-    {
-        o.impl = nullptr;
-    }
-
-    SCHM::~SCHM()
-    {}
-
-    SCHM & SCHM::operator =( SCHM o )
-    {
-        FullBox::operator=( o );
-        swap( *( this ), o );
-
-        return *( this );
-    }
-
-    void swap( SCHM & o1, SCHM & o2 )
-    {
-        using std::swap;
-
-        swap( static_cast< FullBox & >( o1 ), static_cast< FullBox & >( o2 ) );
-        swap( o1.impl, o2.impl );
-    }
-
-    Error SCHM::ReadData( Parser & parser, BinaryStream & stream )
-    {
-        Error err;
-
-        err = FullBox::ReadData( parser, stream );
-        if( err ) return err;
-
-        std::string schemeType;
-        err = stream.ReadFourCC( schemeType );
-        if( err ) return err;
-        this->SetSchemeType( schemeType );
-
-        uint32_t schemeVersion;
-        err = stream.ReadBigEndianUInt32( schemeVersion );
-        if( err ) return err;
-        this->SetSchemeVersion( schemeVersion );
-
-        if( this->GetFlags() & 0x000001 )
-        {
-            if( parser.GetPreferredStringType() == Parser::StringType::Pascal )
-            {
-                std::string schemeURI;
-                err = stream.ReadPascalString( schemeURI );
-                if( err ) return err;
-                this->SetSchemeURI( schemeURI );
-            }
-            else
-            {
-                std::string schemeURI;
-                err = stream.ReadNULLTerminatedString( schemeURI );
-                if( err ) return err;
-                this->SetSchemeURI( schemeURI );
-            }
-        }
-        return Error();
-    }
-
-    std::vector< std::pair< std::string, std::string > > SCHM::GetDisplayableProperties() const
-    {
-        auto props( FullBox::GetDisplayableProperties() );
-
-        props.push_back( { "Scheme type",    this->GetSchemeType() } );
-        props.push_back( { "Scheme version", std::to_string( this->GetSchemeVersion() ) } );
-        props.push_back( { "Scheme URI",     this->GetSchemeURI() } );
-
-        return props;
-    }
-
-    std::string SCHM::GetSchemeType() const
-    {
-        return this->impl->_schemeType;
-    }
-
-    uint32_t SCHM::GetSchemeVersion() const
-    {
-        return this->impl->_schemeVersion;
-    }
-
-    std::string SCHM::GetSchemeURI() const
-    {
-        return this->impl->_schemeURI;
-    }
-
-    void SCHM::SetSchemeType( const std::string & value )
-    {
-        this->impl->_schemeType = value;
-    }
-
-    void SCHM::SetSchemeVersion( uint32_t value )
-    {
-        this->impl->_schemeVersion = value;
-    }
-
-    void SCHM::SetSchemeURI( const std::string & value )
-    {
-        this->impl->_schemeURI = value;
-    }
-
-    SCHM::IMPL::IMPL():
-        _schemeVersion( 0 )
-    {}
-
-    SCHM::IMPL::IMPL( const IMPL & o ):
-        _schemeType( o._schemeType ),
-        _schemeVersion( o._schemeVersion ),
-        _schemeURI( o._schemeURI )
-    {}
-
-    SCHM::IMPL::~IMPL()
-    {}
+SCHM::SCHM(SCHM&& o) noexcept : FullBox(std::move(o)), impl(std::move(o.impl)) {
+  o.impl = nullptr;
 }
+
+SCHM::~SCHM() {}
+
+SCHM& SCHM::operator=(SCHM o) {
+  FullBox::operator=(o);
+  swap(*(this), o);
+
+  return *(this);
+}
+
+void swap(SCHM& o1, SCHM& o2) {
+  using std::swap;
+
+  swap(static_cast<FullBox&>(o1), static_cast<FullBox&>(o2));
+  swap(o1.impl, o2.impl);
+}
+
+Error SCHM::ReadData(Parser& parser, BinaryStream& stream) {
+  Error err;
+
+  err = FullBox::ReadData(parser, stream);
+  if (err) return err;
+
+  std::string schemeType;
+  err = stream.ReadFourCC(schemeType);
+  if (err) return err;
+  this->SetSchemeType(schemeType);
+
+  uint32_t schemeVersion;
+  err = stream.ReadBigEndianUInt32(schemeVersion);
+  if (err) return err;
+  this->SetSchemeVersion(schemeVersion);
+
+  if (this->GetFlags() & 0x000001) {
+    if (parser.GetPreferredStringType() == Parser::StringType::Pascal) {
+      std::string schemeURI;
+      err = stream.ReadPascalString(schemeURI);
+      if (err) return err;
+      this->SetSchemeURI(schemeURI);
+    } else {
+      std::string schemeURI;
+      err = stream.ReadNULLTerminatedString(schemeURI);
+      if (err) return err;
+      this->SetSchemeURI(schemeURI);
+    }
+  }
+  return Error();
+}
+
+std::vector<std::pair<std::string, std::string> >
+SCHM::GetDisplayableProperties() const {
+  auto props(FullBox::GetDisplayableProperties());
+
+  props.push_back({"Scheme type", this->GetSchemeType()});
+  props.push_back({"Scheme version", std::to_string(this->GetSchemeVersion())});
+  props.push_back({"Scheme URI", this->GetSchemeURI()});
+
+  return props;
+}
+
+std::string SCHM::GetSchemeType() const { return this->impl->_schemeType; }
+
+uint32_t SCHM::GetSchemeVersion() const { return this->impl->_schemeVersion; }
+
+std::string SCHM::GetSchemeURI() const { return this->impl->_schemeURI; }
+
+void SCHM::SetSchemeType(const std::string& value) {
+  this->impl->_schemeType = value;
+}
+
+void SCHM::SetSchemeVersion(uint32_t value) {
+  this->impl->_schemeVersion = value;
+}
+
+void SCHM::SetSchemeURI(const std::string& value) {
+  this->impl->_schemeURI = value;
+}
+
+SCHM::IMPL::IMPL() : _schemeVersion(0) {}
+
+SCHM::IMPL::IMPL(const IMPL& o)
+    : _schemeType(o._schemeType),
+      _schemeVersion(o._schemeVersion),
+      _schemeURI(o._schemeURI) {}
+
+SCHM::IMPL::~IMPL() {}
+}  // namespace ISOBMFF

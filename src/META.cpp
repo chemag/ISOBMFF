@@ -28,121 +28,92 @@
  * @author      Jean-David Gadina - www.digidna.net
  */
 
-#include <META.hpp>
 #include <ContainerBox.hpp>
+#include <META.hpp>
 #include <cstring>
 
-namespace ISOBMFF
-{
-    class META::IMPL
-    {
-        public:
+namespace ISOBMFF {
+class META::IMPL {
+ public:
+  IMPL();
+  IMPL(const IMPL& o);
+  ~IMPL();
 
-            IMPL();
-            IMPL( const IMPL & o );
-            ~IMPL();
+  bool _isFullBox;
+  std::vector<std::shared_ptr<Box> > _boxes;
+};
 
-            bool                                  _isFullBox;
-            std::vector< std::shared_ptr< Box > > _boxes;
-    };
+META::META() : FullBox("meta"), impl(std::make_unique<IMPL>()) {}
 
-    META::META():
-        FullBox( "meta" ),
-        impl( std::make_unique< IMPL >() )
-    {}
+META::META(const META& o)
+    : FullBox(o), impl(std::make_unique<IMPL>(*(o.impl))) {}
 
-    META::META( const META & o ):
-        FullBox( o ),
-        impl( std::make_unique< IMPL >( *( o.impl ) ) )
-    {}
-
-    META::META( META && o ) noexcept:
-        FullBox( std::move( o ) ),
-        impl( std::move( o.impl ) )
-    {
-        o.impl = nullptr;
-    }
-
-    META::~META()
-    {}
-
-    META & META::operator =( META o )
-    {
-        FullBox::operator=( o );
-        swap( *( this ), o );
-
-        return *( this );
-    }
-
-    void swap( META & o1, META & o2 )
-    {
-        using std::swap;
-
-        swap( static_cast< FullBox & >( o1 ), static_cast< FullBox & >( o2 ) );
-        swap( o1.impl, o2.impl );
-    }
-
-    Error META::ReadData( Parser & parser, BinaryStream & stream )
-    {
-        char         n[ 4 ];
-        ContainerBox container( "????" );
-        Error err;
-
-        err = stream.Get( reinterpret_cast< uint8_t * >( n ), 4, 4 );
-        if( err ) return err;
-
-        this->impl->_isFullBox = strncmp( n, "hdlr", 4 ) != 0;
-
-        if( this->impl->_isFullBox )
-        {
-            err = FullBox::ReadData( parser, stream );
-            if( err ) return err;
-        }
-
-        err = container.ReadData( parser, stream );
-        if( err ) return err;
-
-        this->impl->_boxes = container.GetBoxes();
-
-        return Error();
-    }
-
-    void META::WriteDescription( std::ostream & os, std::size_t indentLevel ) const
-    {
-        if( this->impl->_isFullBox )
-        {
-            FullBox::WriteDescription( os, indentLevel );
-        }
-        else
-        {
-            Box::WriteDescription( os, indentLevel );
-        }
-
-        Container::WriteBoxes( os, indentLevel );
-    }
-
-    void META::AddBox( std::shared_ptr< Box > box )
-    {
-        if( box != nullptr )
-        {
-            this->impl->_boxes.push_back( box );
-        }
-    }
-
-    std::vector< std::shared_ptr< Box > > META::GetBoxes() const
-    {
-        return this->impl->_boxes;
-    }
-
-    META::IMPL::IMPL():
-        _isFullBox( true )
-    {}
-
-    META::IMPL::IMPL( const IMPL & o ):
-        _isFullBox( o._isFullBox ),
-        _boxes( o._boxes )
-    {}
-
-    META::IMPL::~IMPL()
-    {}
+META::META(META&& o) noexcept : FullBox(std::move(o)), impl(std::move(o.impl)) {
+  o.impl = nullptr;
 }
+
+META::~META() {}
+
+META& META::operator=(META o) {
+  FullBox::operator=(o);
+  swap(*(this), o);
+
+  return *(this);
+}
+
+void swap(META& o1, META& o2) {
+  using std::swap;
+
+  swap(static_cast<FullBox&>(o1), static_cast<FullBox&>(o2));
+  swap(o1.impl, o2.impl);
+}
+
+Error META::ReadData(Parser& parser, BinaryStream& stream) {
+  char n[4];
+  ContainerBox container("????");
+  Error err;
+
+  err = stream.Get(reinterpret_cast<uint8_t*>(n), 4, 4);
+  if (err) return err;
+
+  this->impl->_isFullBox = strncmp(n, "hdlr", 4) != 0;
+
+  if (this->impl->_isFullBox) {
+    err = FullBox::ReadData(parser, stream);
+    if (err) return err;
+  }
+
+  err = container.ReadData(parser, stream);
+  if (err) return err;
+
+  this->impl->_boxes = container.GetBoxes();
+
+  return Error();
+}
+
+void META::WriteDescription(std::ostream& os, std::size_t indentLevel) const {
+  if (this->impl->_isFullBox) {
+    FullBox::WriteDescription(os, indentLevel);
+  } else {
+    Box::WriteDescription(os, indentLevel);
+  }
+
+  Container::WriteBoxes(os, indentLevel);
+}
+
+void META::AddBox(std::shared_ptr<Box> box) {
+  if (box != nullptr) {
+    this->impl->_boxes.push_back(box);
+  }
+}
+
+std::vector<std::shared_ptr<Box> > META::GetBoxes() const {
+  return this->impl->_boxes;
+}
+
+META::IMPL::IMPL() : _isFullBox(true) {}
+
+META::IMPL::IMPL(const IMPL& o) : _isFullBox(o._isFullBox), _boxes(o._boxes) {}
+
+META::IMPL::~IMPL() {}
+}  // namespace ISOBMFF
