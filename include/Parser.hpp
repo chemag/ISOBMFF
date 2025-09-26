@@ -129,7 +129,7 @@ class ISOBMFF_EXPORT Parser {
    *              object of the correct type.
    */
   Error RegisterBox(const std::string& type,
-                     const std::function<std::shared_ptr<Box>()>& createBox);
+                    const std::function<std::shared_ptr<Box>()>& createBox);
 
   /*!
    * @function    RegisterContainerBox

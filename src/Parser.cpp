@@ -258,7 +258,8 @@ Error Parser::IMPL::RegisterBox(
     const std::string& type,
     const std::function<std::shared_ptr<Box>()>& createBox) {
   if (type.size() != 4) {
-    return Error(ErrorCode::InvalidBoxData, "Box name should be 4 characters long");
+    return Error(ErrorCode::InvalidBoxData,
+                 "Box name should be 4 characters long");
   }
 
   this->_types[type] = createBox;
