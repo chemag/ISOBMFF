@@ -43,7 +43,7 @@ elseif(UNIX AND NOT APPLE)
 endif()
 
 # Set debug flags for both C and C++
-set(COMMON_DEBUG_FLAGS "-g -O0 -Wall -Wextra -Wunused-parameter -Wshadow -Werror")
+set(COMMON_DEBUG_FLAGS "-g -O0 -Wall -Wextra -Wunused-parameter -Wshadow -Wformat -Werror")
 set(CMAKE_C_FLAGS_DEBUG "${COMMON_DEBUG_FLAGS}")
 set(CMAKE_CXX_FLAGS_DEBUG "${COMMON_DEBUG_FLAGS}")
 
