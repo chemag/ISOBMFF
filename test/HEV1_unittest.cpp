@@ -1,0 +1,119 @@
+/*
+ *  Copyright (c) Meta Platforms, Inc. and its affiliates.
+ */
+
+#include <ISOBMFF.hpp>                  // for various
+#include <BinaryDataStream.hpp> // for BinaryDataStream
+#include <Parser.hpp>           // for Parser
+
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
+
+namespace ISOBMFF {
+
+class ISOBMFFHEV1Test : public ::testing::Test {
+public:
+  ISOBMFFHEV1Test() {}
+  ~ISOBMFFHEV1Test() override {}
+};
+
+TEST_F(ISOBMFFHEV1Test, TestHEV1Parser) {
+  // fuzzer::conv: data
+  const std::vector<uint8_t> &buffer = {
+      // following example input is from a sample .mp4 video file
+      // hev1 size: 221 bytes (same data as hvc1 test since they're identical)
+      // 0x00, 0x00, 0x00, 0xdd,
+      // hev1
+      // 0x68, 0x65, 0x76, 0x31,
+      // hev1 content:
+      0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01,
+      0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+      0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+      0x06, 0xc0, 0x09, 0x00, 0x00, 0x48, 0x00, 0x00,
+      0x00, 0x48, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+      0x00, 0x01, 0x00, 0x20, 0x20, 0x20, 0x20, 0x20,
+      0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20,
+      0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20,
+      0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20,
+      0x20, 0x20, 0x00, 0x18, 0xff, 0xff, 0x00, 0x00,
+      0x00, 0x87, 0x68, 0x76, 0x63, 0x43, 0x01, 0x01,
+      0x60, 0x00, 0x00, 0x00, 0xb0, 0x00, 0x00, 0x00,
+      0x00, 0x00, 0x99, 0xf0, 0x00, 0xfc, 0xfd, 0xf8,
+      0xf8, 0x00, 0x00, 0x03, 0x03, 0xa0, 0x00, 0x01,
+      0x00, 0x20, 0x40, 0x01, 0x0c, 0x01, 0xff, 0xff,
+      0x01, 0x60, 0x00, 0x00, 0x03, 0x00, 0xb0, 0x00,
+      0x00, 0x03, 0x00, 0x00, 0x03, 0x00, 0x99, 0xac,
+      0x0c, 0x07, 0xf2, 0x81, 0x54, 0xee, 0x6b, 0x28,
+      0x01, 0x40, 0xa1, 0x00, 0x01, 0x00, 0x2e, 0x42,
+      0x01, 0x01, 0x01, 0x60, 0x00, 0x00, 0x03, 0x00,
+      0xb0, 0x00, 0x00, 0x03, 0x00, 0x00, 0x03, 0x00,
+      0x99, 0xa0, 0x03, 0x60, 0x80, 0x09, 0x01, 0x65,
+      0xae, 0xe4, 0xc9, 0x2e, 0xa6, 0xa1, 0x22, 0x41,
+      0x20, 0x80, 0xfe, 0x50, 0x2a, 0x9d, 0xcd, 0x65,
+      0x00, 0x17, 0x68, 0x50, 0x94, 0xa2, 0x00, 0x01,
+      0x00, 0x0b, 0x44, 0x01, 0xc0, 0xe3, 0x0f, 0x09,
+      0xc1, 0x50, 0xaf, 0xb0, 0x84
+  };
+
+  // fuzzer::conv: begin
+  ISOBMFF::BinaryDataStream stream(buffer);
+  ISOBMFF::Parser parser;
+  std::shared_ptr<ISOBMFF::Box> box = parser.CreateBox("hev1");
+
+  ISOBMFF::Error error;
+  if (box != nullptr) {
+    error = box->ReadData(parser, stream);
+  }
+  if (error) {
+    fprintf(stderr, "Parse error: %s\n", error.GetMessage().c_str());
+  }
+  // fuzzer::conv: end
+
+  // Validate HEV1 box
+  auto hev1 = std::dynamic_pointer_cast<ISOBMFF::HEV1>(box);
+  ASSERT_NE(hev1, nullptr) << "Failed to cast to HEV1";
+
+    // Validate Version and Flags
+  EXPECT_EQ(hev1->GetVersion(), 0) << "Unexpected version";
+  EXPECT_EQ(hev1->GetFlags(), 0) << "Unexpected flags";
+
+  // Validate properties (should be identical to HVC1 since they share implementation)
+  EXPECT_EQ(hev1->GetDataReferenceIndex(), 1);
+  EXPECT_EQ(hev1->GetWidth(), 1728);
+  EXPECT_EQ(hev1->GetHeight(), 2304);
+  EXPECT_EQ(hev1->GetHorizResolution(), 0x00480000);
+  EXPECT_EQ(hev1->GetVertResolution(), 0x00480000);
+  EXPECT_EQ(hev1->GetFrameCount(), 1);
+  EXPECT_EQ(hev1->GetCompressorName(), "");
+  EXPECT_EQ(hev1->GetDepth(), 24);
+
+  // Validate sub-boxes inside HEV1
+  std::vector<std::shared_ptr<Box>> boxes = hev1->GetBoxes();
+  ASSERT_EQ(boxes.size(), 1) << "Expected 1 sub-box, but found " << boxes.size();
+  for (const auto &subbox : boxes) {
+    const std::string type = subbox->GetName();
+    if (type == "hvcC") {
+      SUCCEED() << "Found expected hvcC box";
+  } else {
+      FAIL() << "Unexpected sub-box type: " << type;
+  }
+  }
+}
+
+TEST_F(ISOBMFFHEV1Test, TestHEV1BoxType) {
+  // Test that HEV1 box is created with correct name
+  ISOBMFF::Parser parser;
+  std::shared_ptr<ISOBMFF::Box> box = parser.CreateBox("hev1");
+
+  ASSERT_NE(box, nullptr) << "Failed to create hev1 box";
+  EXPECT_EQ(box->GetName(), "hev1") << "Box name should be hev1";
+
+  // Test that it can be cast to HEV1
+  auto hev1 = std::dynamic_pointer_cast<ISOBMFF::HEV1>(box);
+  ASSERT_NE(hev1, nullptr) << "Failed to cast to HEV1";
+
+  // Test that it can also be cast to HVC1 (since HEV1 inherits from HVC1)
+  auto hvc1 = std::dynamic_pointer_cast<ISOBMFF::HVC1>(box);
+  ASSERT_NE(hvc1, nullptr) << "Failed to cast to HVC1 (inheritance test)";
+}
+} // namespace ISOBMFF

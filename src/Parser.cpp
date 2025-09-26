@@ -42,6 +42,7 @@
 #include <FRMA.hpp>
 #include <FTYP.hpp>
 #include <HDLR.hpp>
+#include <HEV1.hpp>
 #include <HVC1.hpp>
 #include <HVCC.hpp>
 #include <IINF.hpp>
@@ -387,6 +388,9 @@ void Parser::IMPL::RegisterDefaultBoxes() {
   });
   this->RegisterBox("hvc1", [=]() -> std::shared_ptr<Box> {
     return std::make_shared<HVC1>();
+  });
+  this->RegisterBox("hev1", [=]() -> std::shared_ptr<Box> {
+    return std::make_shared<HEV1>();
   });
   this->RegisterBox("avc1", [=]() -> std::shared_ptr<Box> {
     return std::make_shared<AVC1>();

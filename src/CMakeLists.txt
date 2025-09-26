@@ -25,6 +25,7 @@ add_library(isobmff
     FTYP.cpp
     FullBox.cpp
     HDLR.cpp
+    HEV1.cpp
     HVC1.cpp
     HVCC-Array-NALUnit.cpp
     HVCC-Array.cpp
