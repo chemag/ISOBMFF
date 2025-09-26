@@ -70,6 +70,7 @@ void swap(MP4A& o1, MP4A& o2) {
 }
 
 Error MP4A::ReadData(Parser& parser, BinaryStream& stream) {
+  (void)parser;
   Error err;
   ContainerBox container("????");
 
