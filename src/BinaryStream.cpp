@@ -195,7 +195,7 @@ Error BinaryStream::ReadBigEndianInt32(int32_t& value) {
     return err;
   }
   int32_t sign_bit = (uint_value & 0x80000000) ? -1 : 0;
-  int32_t int_value = (int32_t)(uint_value & 0x7FFFFFFF);
+  int32_t int_value = static_cast<int32_t>(uint_value & 0x7FFFFFFF);
   if (sign_bit == -1) {
     int_value = -int_value;
   }

@@ -45,7 +45,7 @@ typedef struct arg_options {
 } arg_options;
 
 /* default option values */
-arg_options DEFAULT_OPTIONS{
+static arg_options DEFAULT_OPTIONS{
     .debug = 0,
     .analyze_flag = true,
     .infiles = std::vector<char *>(),

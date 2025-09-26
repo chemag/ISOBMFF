@@ -164,7 +164,7 @@ float MP4A::GetSampleRate() const {
   float sampleRate = (sampleRateFixed >> 16);
   // The fractional part is obtained by masking the lower 16 bits
   // (& 0xFFFF) and dividing by 65536.0.
-  sampleRate += ((sampleRateFixed & 0xffff) / 65536.0);
+  sampleRate += ((sampleRateFixed & 0xffff) / 65536.0f);
   return sampleRate;
 }
 
