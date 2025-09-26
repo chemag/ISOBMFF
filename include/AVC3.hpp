@@ -23,70 +23,32 @@
  ******************************************************************************/
 
 /*!
- * @header      ISOBMFF.hpp
+ * @header      AVC3.hpp
  * @copyright   (c) 2017, DigiDNA - www.digidna.net
  * @author      Jean-David Gadina - www.digidna.net
  */
 
-#ifndef ISOBMFF_HPP
-#define ISOBMFF_HPP
+#ifndef ISOBMFF_AVC3_HPP
+#define ISOBMFF_AVC3_HPP
 
-#include <AV01.hpp>
 #include <AVC1.hpp>
-#include <AVC3.hpp>
-#include <AVCC.hpp>
-#include <BinaryDataStream.hpp>
-#include <BinaryFileStream.hpp>
-#include <BinaryStream.hpp>
-#include <Box.hpp>
-#include <CDSC.hpp>
-#include <COLR.hpp>
-#include <CTTS.hpp>
-#include <Container.hpp>
-#include <ContainerBox.hpp>
-#include <DIMG.hpp>
-#include <DREF.hpp>
-#include <DisplayableObject.hpp>
-#include <DisplayableObjectContainer.hpp>
-#include <FRMA.hpp>
-#include <FTYP.hpp>
-#include <File.hpp>
-#include <FullBox.hpp>
-#include <HDLR.hpp>
-#include <HEV1.hpp>
-#include <HVC1.hpp>
-#include <HVCC.hpp>
-#include <IINF.hpp>
-#include <ILOC.hpp>
-#include <INFE.hpp>
-#include <IPCO.hpp>
-#include <IPMA.hpp>
-#include <IREF.hpp>
-#include <IROT.hpp>
-#include <ISPE.hpp>
-#include <ImageGrid.hpp>
-#include <MDHD.hpp>
-#include <META.hpp>
-#include <MP4A.hpp>
-#include <MVHD.hpp>
 #include <Macros.hpp>
-#include <Matrix.hpp>
-#include <PITM.hpp>
-#include <PIXI.hpp>
-#include <Parser.hpp>
-#include <SCHM.hpp>
-#include <STSD.hpp>
-#include <STSS.hpp>
-#include <STTS.hpp>
-#include <SingleItemTypeReferenceBox.hpp>
-#include <THMB.hpp>
-#include <TKHD.hpp>
-#include <URL.hpp>
-#include <URN.hpp>
-#include <Utils.hpp>
+#include <memory>
 
-#ifdef _WIN32
-#include <WIN32.hpp>
-#endif
+namespace ISOBMFF {
+class ISOBMFF_EXPORT AVC3 : public AVC1 {
+ public:
+  AVC3();
+  AVC3(const AVC3& o);
+  AVC3(AVC3&& o) noexcept;
+  virtual ~AVC3() override;
 
-#endif /* ISOBMFF_HPP */
+  AVC3& operator=(AVC3 o);
+
+  std::string GetName() const override;
+
+  ISOBMFF_EXPORT friend void swap(AVC3& o1, AVC3& o2);
+};
+}  // namespace ISOBMFF
+
+#endif /* ISOBMFF_AVC3_HPP */

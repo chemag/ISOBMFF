@@ -23,70 +23,34 @@
  ******************************************************************************/
 
 /*!
- * @header      ISOBMFF.hpp
+ * @file        AVC3.cpp
  * @copyright   (c) 2017, DigiDNA - www.digidna.net
  * @author      Jean-David Gadina - www.digidna.net
  */
 
-#ifndef ISOBMFF_HPP
-#define ISOBMFF_HPP
-
-#include <AV01.hpp>
-#include <AVC1.hpp>
 #include <AVC3.hpp>
-#include <AVCC.hpp>
-#include <BinaryDataStream.hpp>
-#include <BinaryFileStream.hpp>
-#include <BinaryStream.hpp>
-#include <Box.hpp>
-#include <CDSC.hpp>
-#include <COLR.hpp>
-#include <CTTS.hpp>
-#include <Container.hpp>
-#include <ContainerBox.hpp>
-#include <DIMG.hpp>
-#include <DREF.hpp>
-#include <DisplayableObject.hpp>
-#include <DisplayableObjectContainer.hpp>
-#include <FRMA.hpp>
-#include <FTYP.hpp>
-#include <File.hpp>
-#include <FullBox.hpp>
-#include <HDLR.hpp>
-#include <HEV1.hpp>
-#include <HVC1.hpp>
-#include <HVCC.hpp>
-#include <IINF.hpp>
-#include <ILOC.hpp>
-#include <INFE.hpp>
-#include <IPCO.hpp>
-#include <IPMA.hpp>
-#include <IREF.hpp>
-#include <IROT.hpp>
-#include <ISPE.hpp>
-#include <ImageGrid.hpp>
-#include <MDHD.hpp>
-#include <META.hpp>
-#include <MP4A.hpp>
-#include <MVHD.hpp>
-#include <Macros.hpp>
-#include <Matrix.hpp>
-#include <PITM.hpp>
-#include <PIXI.hpp>
-#include <Parser.hpp>
-#include <SCHM.hpp>
-#include <STSD.hpp>
-#include <STSS.hpp>
-#include <STTS.hpp>
-#include <SingleItemTypeReferenceBox.hpp>
-#include <THMB.hpp>
-#include <TKHD.hpp>
-#include <URL.hpp>
-#include <URN.hpp>
-#include <Utils.hpp>
 
-#ifdef _WIN32
-#include <WIN32.hpp>
-#endif
+namespace ISOBMFF {
+AVC3::AVC3() : AVC1() {}
 
-#endif /* ISOBMFF_HPP */
+AVC3::AVC3(const AVC3& o) : AVC1(o) {}
+
+AVC3::AVC3(AVC3&& o) noexcept : AVC1(std::move(o)) {}
+
+AVC3::~AVC3() {}
+
+AVC3& AVC3::operator=(AVC3 o) {
+  AVC1::operator=(o);
+  swap(*(this), o);
+
+  return *(this);
+}
+
+std::string AVC3::GetName() const { return "avc3"; }
+
+void swap(AVC3& o1, AVC3& o2) {
+  using std::swap;
+
+  swap(static_cast<AVC1&>(o1), static_cast<AVC1&>(o2));
+}
+}  // namespace ISOBMFF

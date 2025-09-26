@@ -30,6 +30,7 @@
 
 #include <AV01.hpp>
 #include <AVC1.hpp>
+#include <AVC3.hpp>
 #include <AVCC.hpp>
 #include <BinaryDataStream.hpp>
 #include <BinaryFileStream.hpp>
@@ -394,6 +395,9 @@ void Parser::IMPL::RegisterDefaultBoxes() {
   });
   this->RegisterBox("avc1", [=]() -> std::shared_ptr<Box> {
     return std::make_shared<AVC1>();
+  });
+  this->RegisterBox("avc3", [=]() -> std::shared_ptr<Box> {
+    return std::make_shared<AVC3>();
   });
   this->RegisterBox("av01", [=]() -> std::shared_ptr<Box> {
     return std::make_shared<AV01>();

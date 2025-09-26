@@ -4,6 +4,7 @@
 add_library(isobmff
     AV01.cpp
     AVC1.cpp
+    AVC3.cpp
     AVCC-NALUnit.cpp
     AVCC.cpp
     BinaryDataStream.cpp
