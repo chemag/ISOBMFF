@@ -85,9 +85,27 @@ Error CTTS::ReadData(Parser& parser, BinaryStream& stream) {
     if (err) return err;
     this->impl->_sample_count.push_back(temp);
 
+    // CTTS.sample_offset changed sign in version 1, from uint32_t to int32_t.
+    // Using both unsigned and signed values is cumbersome to operate.
+    // Moreover, it may not be accurate anyway: Apple MOV files are known to
+    // use negative numbers with version == 0
+    // [link](https://trac.ffmpeg.org/ticket/7497).
+    // ```
+    // if (version==0) {
+    //   for (i=0; i < entry_count; i++) {
+    //     unsigned int(32) sample_count;
+    //     unsigned int(32) sample_offset;
+    //   }
+    // } else if (version == 1) {
+    //   for (i=0; i < entry_count; i++) {
+    //     unsigned int(32) sample_count;
+    //     signed int(32) sample_offset;
+    //   }
+    // }
+    // ```
     err = stream.ReadBigEndianUInt32(temp);
     if (err) return err;
-    this->impl->_sample_offset.push_back(temp);
+    this->impl->_sample_offset.push_back(static_cast<int32_t>(temp));
   }
   return Error();
 }
