@@ -1,0 +1,3 @@
+[submodule "fuzz/corpus"]
+	path = fuzz/corpus
+	url = https://github.com/chemag/isobmff-fuzzcorpus
