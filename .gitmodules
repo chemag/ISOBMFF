@@ -1,3 +1,5 @@
 [submodule "fuzz/corpus"]
 	path = fuzz/corpus
 	url = https://github.com/chemag/isobmff-fuzzcorpus
+	update = none   # do NOT populate on default/recursive updates
+	active = false  # exclude from default submodule ops
