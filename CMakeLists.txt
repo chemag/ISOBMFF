@@ -43,7 +43,13 @@ elseif(UNIX AND NOT APPLE)
 endif()
 
 # Set debug flags for both C and C++
-set(COMMON_DEBUG_FLAGS "-g -O0 -Wall -Wextra -Wunused-parameter -Wshadow -Wformat -Wextra-semi -Wextra-semi-stmt -Wsign-conversion -Wtautological-unsigned-zero-compare -Wold-style-cast -Wshorten-64-to-32 -Wimplicit-int-conversion -Wfloat-conversion -Wdouble-promotion -Wimplicit-float-conversion -Wmissing-variable-declarations -Winvalid-utf8 -Wcast-qual -Wcast-align -Wunreachable-code-break -Wno-covered-switch-default -Werror")
+set(COMMON_DEBUG_FLAGS "-g -O0 -Wall -Wextra -Wunused-parameter -Wshadow -Wformat -Wextra-semi -Wsign-conversion -Wtautological-unsigned-zero-compare -Wold-style-cast -Wshorten-64-to-32 -Wimplicit-int-conversion -Wfloat-conversion -Wdouble-promotion -Wimplicit-float-conversion -Wmissing-variable-declarations -Winvalid-utf8 -Wcast-qual -Wcast-align -Wunreachable-code-break -Wno-covered-switch-default -Werror")
+# Only Clang (incl. AppleClang) has -Wextra-semi-stmt
+if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  list(APPEND COMMON_DEBUG_FLAGS -Wextra-semi-stmt)
+endif()
+
+
 
 set(CMAKE_C_FLAGS_DEBUG "${COMMON_DEBUG_FLAGS}")
 set(CMAKE_CXX_FLAGS_DEBUG "${COMMON_DEBUG_FLAGS}")
