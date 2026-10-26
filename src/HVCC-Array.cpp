@@ -60,7 +60,19 @@ HVCC::Array::Array(BinaryStream& stream) : impl(std::make_unique<IMPL>()) {
   if (err) count = 0;
 
   for (i = 0; i < count; i++) {
-    this->AddNALUnit(std::make_shared<NALUnit>(stream));
+    // NALUnit cannot report read errors. The NAL unit count comes from the
+    // file (up to 65535), so stop at the end of the data, or at the first
+    // NAL unit that consumes no data (a truncated one), instead of adding
+    // empty NAL units until the count is reached.
+    if (!stream.HasBytesAvailable()) {
+      break;
+    }
+    size_t start = stream.Tell();
+    auto nal_unit = std::make_shared<NALUnit>(stream);
+    if (stream.Tell() == start) {
+      break;
+    }
+    this->AddNALUnit(nal_unit);
   }
 }
 

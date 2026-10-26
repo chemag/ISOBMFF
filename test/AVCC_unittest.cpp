@@ -82,4 +82,42 @@ TEST_F(ISOBMFFAVCCTest, TestAVCCParser) {
   EXPECT_EQ(avcc->GetPictureParameterSetNALUnits().size(), 1);
   EXPECT_EQ(avcc->GetPictureParameterSetNALUnits()[0]->GetData().size(), 6);
 }
+// A synthetic avcC whose only SPS declares 256 bytes, but only 6 are left.
+// The SPS used to be kept as a 256-byte zero-filled buffer.
+TEST_F(ISOBMFFAVCCTest, TestAVCCTruncatedNALUnit) {
+  // fuzzer::conv: data
+  const std::vector<uint8_t> &buffer = {
+      // configurationVersion, profile, compatibility, level
+      0x01, 0x64, 0x00, 0x1f,
+      // lengthSizeMinusOne: 3
+      0xff,
+      // numOfSequenceParameterSets: 1
+      0xe1,
+      // SPS: length 256, truncated (6 bytes left)
+      0x01, 0x00, 0x67, 0x64, 0x00, 0x1f, 0xac, 0xd9
+  };
+
+  // fuzzer::conv: begin
+  ISOBMFF::BinaryDataStream stream(buffer);
+  ISOBMFF::Parser parser;
+  std::shared_ptr<ISOBMFF::Box> box = parser.CreateBox("avcC");
+
+  ISOBMFF::Error error;
+  if (box != nullptr) {
+    error = box->ReadData(parser, stream);
+  }
+  // fuzzer::conv: end
+
+  auto avcc = std::dynamic_pointer_cast<ISOBMFF::AVCC>(box);
+  ASSERT_NE(avcc, nullptr) << "Failed to cast to AVCC";
+  // no NAL unit with fabricated (zero-filled) data
+  EXPECT_EQ(avcc->GetSequenceParameterSetNALUnits().size(), 0);
+  for (const auto &nal_unit : avcc->GetPictureParameterSetNALUnits()) {
+    std::vector<uint8_t> data = nal_unit->GetData();
+    for (const auto &byte : data) {
+      EXPECT_NE(byte, 0) << "zero-filled NAL unit data";
+    }
+    EXPECT_LE(data.size(), buffer.size());
+  }
+}
 } // namespace ISOBMFF

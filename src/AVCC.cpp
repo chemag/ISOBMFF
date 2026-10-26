@@ -118,7 +118,13 @@ Error AVCC::ReadData(Parser& parser, BinaryStream& stream) {
       break;
     }
 
-    this->AddSequenceParameterSetNALUnit(std::make_shared<NALUnit>(stream));
+    // stop at the first NAL unit that consumes no data (a truncated one)
+    size_t start = stream.Tell();
+    auto nal_unit = std::make_shared<NALUnit>(stream);
+    if (stream.Tell() == start) {
+      break;
+    }
+    this->AddSequenceParameterSetNALUnit(nal_unit);
   }
 
   err = stream.ReadUInt8(u8);
@@ -136,7 +142,13 @@ Error AVCC::ReadData(Parser& parser, BinaryStream& stream) {
       break;
     }
 
-    this->AddPictureParameterSetNALUnit(std::make_shared<NALUnit>(stream));
+    // stop at the first NAL unit that consumes no data (a truncated one)
+    size_t start = stream.Tell();
+    auto nal_unit = std::make_shared<NALUnit>(stream);
+    if (stream.Tell() == start) {
+      break;
+    }
+    this->AddPictureParameterSetNALUnit(nal_unit);
   }
 
   return Error();

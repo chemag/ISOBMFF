@@ -103,4 +103,84 @@ TEST_F(ISOBMFFHVCCTest, TestHVCCParser) {
   ASSERT_EQ(arrays[2]->GetNALUnits().size(), 1);
   EXPECT_EQ(arrays[2]->GetNALUnits()[0]->GetData().size(), 11);
 }
+// A synthetic hvcC with one VPS array declaring 65535 NAL units: one valid
+// NAL unit, then a truncated one (length 0xffff, 16 bytes of data left).
+// The truncated NAL unit used to be kept as a 65535-byte zero-filled
+// buffer, and the bytes after its length field were then read as further
+// (truncated, zero-filled) NAL units, two bytes at a time, followed by
+// empty NAL units until the count was reached.
+TEST_F(ISOBMFFHVCCTest, TestHVCCTruncatedNALUnit) {
+  // fuzzer::conv: data
+  const std::vector<uint8_t> &buffer = {
+      // configurationVersion, profile/tier/level, ...
+      0x01, 0x01, 0x60, 0x00, 0x00, 0x00, 0x90, 0x00, 0x00, 0x00, 0x00,
+      0x00, 0x5d, 0xf0, 0x00, 0xfc, 0xfd, 0xf8, 0xf8, 0x00, 0x00, 0x0f,
+      // numOfArrays: 1
+      0x01,
+      // array: completeness 1, NAL unit type 32 (VPS), numNalus 0xffff
+      0xa0, 0xff, 0xff,
+      // NAL unit 1: length 4
+      0x00, 0x04, 0x40, 0x01, 0x0c, 0x01,
+      // NAL unit 2: length 0xffff, truncated
+      0xff, 0xff,
+      0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+      0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff
+  };
+
+  // fuzzer::conv: begin
+  ISOBMFF::BinaryDataStream stream(buffer);
+  ISOBMFF::Parser parser;
+  std::shared_ptr<ISOBMFF::Box> box = parser.CreateBox("hvcC");
+
+  ISOBMFF::Error error;
+  if (box != nullptr) {
+    error = box->ReadData(parser, stream);
+  }
+  // fuzzer::conv: end
+
+  auto hvcc = std::dynamic_pointer_cast<ISOBMFF::HVCC>(box);
+  ASSERT_NE(hvcc, nullptr) << "Failed to cast to HVCC";
+  auto arrays = hvcc->GetArrays();
+  ASSERT_EQ(arrays.size(), 1);
+  EXPECT_EQ(arrays[0]->GetNALUnitType(), 32);
+  auto nal_units = arrays[0]->GetNALUnits();
+  ASSERT_EQ(nal_units.size(), 1);
+  EXPECT_EQ(nal_units[0]->GetData(),
+            std::vector<uint8_t>({0x40, 0x01, 0x0c, 0x01}));
+}
+
+// A NAL unit count larger than the data: one NAL unit, then the end of the
+// box. The remaining NAL units used to be added as empty ones.
+TEST_F(ISOBMFFHVCCTest, TestHVCCNALUnitCountExceedsData) {
+  // fuzzer::conv: data
+  const std::vector<uint8_t> &buffer = {
+      // configurationVersion, profile/tier/level, ...
+      0x01, 0x01, 0x60, 0x00, 0x00, 0x00, 0x90, 0x00, 0x00, 0x00, 0x00,
+      0x00, 0x5d, 0xf0, 0x00, 0xfc, 0xfd, 0xf8, 0xf8, 0x00, 0x00, 0x0f,
+      // numOfArrays: 1
+      0x01,
+      // array: completeness 1, NAL unit type 32 (VPS), numNalus 0xffff
+      0xa0, 0xff, 0xff,
+      // NAL unit 1: length 4
+      0x00, 0x04, 0x40, 0x01, 0x0c, 0x01
+  };
+
+  // fuzzer::conv: begin
+  ISOBMFF::BinaryDataStream stream(buffer);
+  ISOBMFF::Parser parser;
+  std::shared_ptr<ISOBMFF::Box> box = parser.CreateBox("hvcC");
+
+  ISOBMFF::Error error;
+  if (box != nullptr) {
+    error = box->ReadData(parser, stream);
+  }
+  // fuzzer::conv: end
+
+  auto hvcc = std::dynamic_pointer_cast<ISOBMFF::HVCC>(box);
+  ASSERT_NE(hvcc, nullptr) << "Failed to cast to HVCC";
+  auto arrays = hvcc->GetArrays();
+  ASSERT_EQ(arrays.size(), 1);
+  ASSERT_EQ(arrays[0]->GetNALUnits().size(), 1);
+  EXPECT_EQ(arrays[0]->GetNALUnits()[0]->GetData().size(), 4);
+}
 } // namespace ISOBMFF

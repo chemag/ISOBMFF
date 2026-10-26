@@ -54,9 +54,19 @@ AVCC::NALUnit::NALUnit(BinaryStream& stream) : impl(std::make_unique<IMPL>()) {
     return;
   }
 
+  // A NAL unit longer than the remaining data is truncated. Do not allocate
+  // (and keep) a zero-filled buffer of the declared size: rewind the length
+  // field, so that the caller sees that no data was consumed and stops.
+  if (nal_unit_length > stream.AvailableBytes()) {
+    (void)stream.Seek(-2, BinaryStream::SeekDirection::Current);
+    this->SetData(data);
+    return;
+  }
+
   if (nal_unit_length > 0) {
     data = std::vector<uint8_t>(nal_unit_length);
     err = stream.Read(&(data[0]), nal_unit_length);
+    if (err) data.clear();
   }
 
   this->SetData(data);

@@ -55,9 +55,19 @@ HVCC::Array::NALUnit::NALUnit(BinaryStream& stream)
     return;
   }
 
+  // A NAL unit longer than the remaining data is truncated. Do not allocate
+  // (and keep) a zero-filled buffer of the declared size: rewind the length
+  // field, so that the caller sees that no data was consumed and stops.
+  if (size > stream.AvailableBytes()) {
+    (void)stream.Seek(-2, BinaryStream::SeekDirection::Current);
+    this->SetData(data);
+    return;
+  }
+
   if (size > 0) {
     data = std::vector<uint8_t>(size);
     err = stream.Read(&(data[0]), size);
+    if (err) data.clear();
   }
 
   this->SetData(data);
