@@ -45,6 +45,7 @@
 #include <Container.hpp>
 #include <ContainerBox.hpp>
 #include <DIMG.hpp>
+#include <DOPS.hpp>
 #include <DREF.hpp>
 #include <DisplayableObject.hpp>
 #include <DisplayableObjectContainer.hpp>
@@ -72,6 +73,7 @@
 #include <MVHD.hpp>
 #include <Macros.hpp>
 #include <Matrix.hpp>
+#include <OPUS.hpp>
 #include <PITM.hpp>
 #include <PIXI.hpp>
 #include <Parser.hpp>

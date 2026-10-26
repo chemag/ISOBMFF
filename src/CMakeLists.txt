@@ -18,6 +18,7 @@ add_library(isobmff
     ContainerBox.cpp
     CTTS.cpp
     DIMG.cpp
+    DOPS.cpp
     DisplayableObject.cpp
     ELST.cpp
     DisplayableObjectContainer.cpp
@@ -50,6 +51,7 @@ add_library(isobmff
     META.cpp
     MP4A.cpp
     MVHD.cpp
+    OPUS.cpp
     Parser.cpp
     PITM.cpp
     PIXI-Channel.cpp

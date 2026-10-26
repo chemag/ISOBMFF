@@ -39,6 +39,7 @@
 #include <CTTS.hpp>
 #include <ContainerBox.hpp>
 #include <DIMG.hpp>
+#include <DOPS.hpp>
 #include <DREF.hpp>
 #include <ELST.hpp>
 #include <FRMA.hpp>
@@ -59,6 +60,7 @@
 #include <META.hpp>
 #include <MP4A.hpp>
 #include <MVHD.hpp>
+#include <OPUS.hpp>
 #include <PITM.hpp>
 #include <PIXI.hpp>
 #include <Parser.hpp>
@@ -409,6 +411,12 @@ void Parser::IMPL::RegisterDefaultBoxes() {
   });
   this->RegisterBox("mp4a", [=]() -> std::shared_ptr<Box> {
     return std::make_shared<MP4A>();
+  });
+  this->RegisterBox("Opus", [=]() -> std::shared_ptr<Box> {
+    return std::make_shared<OPUS>();
+  });
+  this->RegisterBox("dOps", [=]() -> std::shared_ptr<Box> {
+    return std::make_shared<DOPS>();
   });
 }
 }  // namespace ISOBMFF
