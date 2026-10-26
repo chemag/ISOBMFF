@@ -92,7 +92,26 @@ ILOC::Item::Item(BinaryStream& stream, const ILOC& iloc)
 
   this->impl->_extents.clear();
 
+  // Extents with no index, offset, or length fields take no bytes, so the
+  // checks below cannot bound them, and they are all identical. Keep at
+  // most one, so a crafted box cannot create 65535 of them per item.
+  bool has_index = (iloc.GetVersion() == 1 || iloc.GetVersion() == 2) &&
+                   (iloc.GetIndexSize() == 2 || iloc.GetIndexSize() == 4 ||
+                    iloc.GetIndexSize() == 8);
+  bool has_offset = iloc.GetOffsetSize() == 2 || iloc.GetOffsetSize() == 4 ||
+                    iloc.GetOffsetSize() == 8;
+  bool has_length = iloc.GetLengthSize() == 2 || iloc.GetLengthSize() == 4 ||
+                    iloc.GetLengthSize() == 8;
+  if (!has_index && !has_offset && !has_length && count > 1) {
+    count = 1;
+  }
+
   for (i = 0; i < count; i++) {
+    // stop at the end of the data (extent reads cannot report errors)
+    if ((has_index || has_offset || has_length) &&
+        !stream.HasBytesAvailable()) {
+      break;
+    }
     this->AddExtent(std::make_shared<Extent>(stream, iloc));
   }
 }

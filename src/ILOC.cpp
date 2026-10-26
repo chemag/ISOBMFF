@@ -103,6 +103,14 @@ Error ILOC::ReadData(Parser& parser, BinaryStream& stream) {
   this->impl->_items.clear();
 
   for (i = 0; i < count; i++) {
+    // The item count comes from the file (up to 2^32 - 1 in version 2),
+    // and Item cannot report read errors. A truncated or corrupt box would
+    // otherwise create billions of empty items after the data ends. Every
+    // item takes at least 6 bytes, so stop when the stream is exhausted.
+    if (!stream.HasBytesAvailable()) {
+      return Error(ErrorCode::InsufficientData,
+                   "ILOC: item count exceeds the box data");
+    }
     this->AddItem(std::make_shared<Item>(stream, *(this)));
   }
 
