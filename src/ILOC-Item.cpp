@@ -107,12 +107,15 @@ ILOC::Item::Item(BinaryStream& stream, const ILOC& iloc)
   }
 
   for (i = 0; i < count; i++) {
-    // stop at the end of the data (extent reads cannot report errors)
-    if ((has_index || has_offset || has_length) &&
-        !stream.HasBytesAvailable()) {
+    // Extent reads cannot report errors: stop at the first extent that
+    // consumes no data (at the end of the data, or with fewer bytes left
+    // than its smallest field), instead of adding empty extents.
+    size_t start = stream.Tell();
+    auto extent = std::make_shared<Extent>(stream, iloc);
+    if ((has_index || has_offset || has_length) && stream.Tell() == start) {
       break;
     }
-    this->AddExtent(std::make_shared<Extent>(stream, iloc));
+    this->AddExtent(extent);
   }
 }
 
