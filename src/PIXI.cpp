@@ -78,7 +78,16 @@ Error PIXI::ReadData(Parser& parser, BinaryStream& stream) {
   if (err) return err;
 
   for (i = 0; i < count; i++) {
-    this->AddChannel(std::make_shared<Channel>(stream));
+    // Channel cannot report read errors: stop at the first channel that
+    // consumes no data (at the end of the data), instead of adding empty
+    // channels.
+    size_t start = stream.Tell();
+    auto channel = std::make_shared<Channel>(stream);
+    if (stream.Tell() == start) {
+      return Error(ErrorCode::InsufficientData,
+                   "PIXI: channel count exceeds the box data");
+    }
+    this->AddChannel(channel);
   }
 
   return Error();

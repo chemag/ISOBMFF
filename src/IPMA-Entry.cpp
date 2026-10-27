@@ -62,7 +62,15 @@ IPMA::Entry::Entry(BinaryStream& stream, const IPMA& ipma)
   if (err) count = 0;
 
   for (i = 0; i < count; i++) {
-    this->AddAssociation(std::make_shared<Association>(stream, ipma));
+    // Association cannot report read errors: stop at the first association
+    // that consumes no data (at the end of the data), instead of adding
+    // empty associations.
+    size_t start = stream.Tell();
+    auto association = std::make_shared<Association>(stream, ipma);
+    if (stream.Tell() == start) {
+      break;
+    }
+    this->AddAssociation(association);
   }
 }
 

@@ -77,7 +77,21 @@ Error IPMA::ReadData(Parser& parser, BinaryStream& stream) {
   if (err) return err;
 
   for (i = 0; i < count; i++) {
-    this->AddEntry(std::make_shared<Entry>(stream, *(this)));
+    // The entry count comes from the file (up to 2^32 - 1), and Entry
+    // cannot report read errors. Stop when the stream is exhausted, or when
+    // an entry consumes no data (a truncated one), instead of creating
+    // billions of empty entries. Every valid entry takes at least 3 bytes,
+    // so the loop is bounded by the box size.
+    if (!stream.HasBytesAvailable()) {
+      return Error(ErrorCode::InsufficientData,
+                   "IPMA: entry count exceeds the box data");
+    }
+    size_t start = stream.Tell();
+    auto entry = std::make_shared<Entry>(stream, *(this));
+    if (stream.Tell() == start) {
+      return Error(ErrorCode::InsufficientData, "IPMA: truncated entry");
+    }
+    this->AddEntry(entry);
   }
 
   return Error();
