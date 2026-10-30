@@ -17,6 +17,8 @@ add_library(isobmff
     Container.cpp
     ContainerBox.cpp
     CTTS.cpp
+    DEC3.cpp
+    EC3.cpp
     DIMG.cpp
     DOPS.cpp
     DisplayableObject.cpp

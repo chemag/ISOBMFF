@@ -37,6 +37,8 @@
 #include <CDSC.hpp>
 #include <COLR.hpp>
 #include <CTTS.hpp>
+#include <DEC3.hpp>
+#include <EC3.hpp>
 #include <ContainerBox.hpp>
 #include <DIMG.hpp>
 #include <DOPS.hpp>
@@ -408,6 +410,12 @@ void Parser::IMPL::RegisterDefaultBoxes() {
   });
   this->RegisterBox("av01", [=]() -> std::shared_ptr<Box> {
     return std::make_shared<AV01>();
+  });
+  this->RegisterBox("ec-3", [=]() -> std::shared_ptr<Box> {
+    return std::make_shared<EC3>();
+  });
+  this->RegisterBox("dec3", [=]() -> std::shared_ptr<Box> {
+    return std::make_shared<DEC3>();
   });
   this->RegisterBox("mp4a", [=]() -> std::shared_ptr<Box> {
     return std::make_shared<MP4A>();

@@ -45,6 +45,8 @@
 #include <Container.hpp>
 #include <ContainerBox.hpp>
 #include <DIMG.hpp>
+#include <DEC3.hpp>
+#include <EC3.hpp>
 #include <DOPS.hpp>
 #include <DREF.hpp>
 #include <DisplayableObject.hpp>
