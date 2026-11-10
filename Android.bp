@@ -1,0 +1,53 @@
+// Soong build for AOSP imports of isobmff (e.g. as a liblcvm submodule).
+
+package {
+    default_applicable_licenses: ["isobmff_license"],
+}
+
+license {
+    name: "isobmff_license",
+    visibility: [":__subpackages__"],
+    license_kinds: [
+        "SPDX-license-identifier-MIT",
+    ],
+    license_text: [
+        "LICENSE",
+    ],
+}
+
+cc_library_shared {
+    name: "libisobmff",
+    vendor_available: true,
+    product_available: true,
+    host_supported: true,
+    srcs: ["src/*.cpp"],
+    rtti: true,
+    // The warning flags match the CMake Debug build.
+    cflags: [
+        "-Wall",
+        "-Wextra",
+        "-Wunused-parameter",
+        "-Wshadow",
+        "-Wformat",
+        "-Wextra-semi",
+        "-Wextra-semi-stmt",
+        "-Wsign-conversion",
+        "-Wtautological-unsigned-zero-compare",
+        "-Wold-style-cast",
+        "-Wshorten-64-to-32",
+        "-Wimplicit-int-conversion",
+        "-Wfloat-conversion",
+        "-Wdouble-promotion",
+        "-Wimplicit-float-conversion",
+        "-Wmissing-variable-declarations",
+        "-Winvalid-utf8",
+        "-Wcast-qual",
+        "-Wcast-align",
+        "-Wunreachable-code-break",
+        "-Wno-covered-switch-default",
+        "-Werror",
+        "-fexceptions",
+    ],
+    local_include_dirs: ["src"],
+    export_include_dirs: ["include"],
+}
