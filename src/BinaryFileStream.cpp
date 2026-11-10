@@ -142,7 +142,9 @@ BinaryFileStream::IMPL::IMPL(const std::string& path)
 #endif
 
   if (this->_stream.good()) {
-    std::streamsize pos;
+    // std::streamoff, not std::streamsize: tellg() returns a 64-bit offset,
+    // but std::streamsize is 32-bit on 32-bit targets.
+    std::streamoff pos;
 
     this->_stream.seekg(0, std::ios_base::end);
 
