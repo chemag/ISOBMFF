@@ -100,9 +100,12 @@ Error INFE::ReadData(Parser& parser, BinaryStream& stream) {
       if (err) return err;
       this->SetContentType(contentType);
 
+      // content_encoding is optional
       std::string contentEncoding;
-      err = stream.ReadPascalString(contentEncoding);
-      if (err) return err;
+      if (stream.HasBytesAvailable()) {
+        err = stream.ReadPascalString(contentEncoding);
+        if (err) return err;
+      }
       this->SetContentEncoding(contentEncoding);
     } else {
       std::string itemName;
@@ -115,9 +118,12 @@ Error INFE::ReadData(Parser& parser, BinaryStream& stream) {
       if (err) return err;
       this->SetContentType(contentType);
 
+      // content_encoding is optional
       std::string contentEncoding;
-      err = stream.ReadNULLTerminatedString(contentEncoding);
-      if (err) return err;
+      if (stream.HasBytesAvailable()) {
+        err = stream.ReadNULLTerminatedString(contentEncoding);
+        if (err) return err;
+      }
       this->SetContentEncoding(contentEncoding);
     }
   }
@@ -170,6 +176,20 @@ Error INFE::ReadData(Parser& parser, BinaryStream& stream) {
     if (err) return err;
     this->SetItemType(itemType);
 
+    // utf8string item_name: present in every version 2/3 entry, before the
+    // type-specific fields. Tolerate entries that end right after item_type,
+    // which used to parse.
+    std::string itemName;
+    if (stream.HasBytesAvailable()) {
+      if (parser.GetPreferredStringType() == Parser::StringType::Pascal) {
+        err = stream.ReadPascalString(itemName);
+      } else {
+        err = stream.ReadNULLTerminatedString(itemName);
+      }
+      if (err) return err;
+    }
+    this->SetItemName(itemName);
+
     if (parser.GetPreferredStringType() == Parser::StringType::Pascal) {
       if (this->GetItemType() == "mime") {
         std::string contentType;
@@ -177,9 +197,12 @@ Error INFE::ReadData(Parser& parser, BinaryStream& stream) {
         if (err) return err;
         this->SetContentType(contentType);
 
+        // content_encoding is optional
         std::string contentEncoding;
-        err = stream.ReadPascalString(contentEncoding);
-        if (err) return err;
+        if (stream.HasBytesAvailable()) {
+          err = stream.ReadPascalString(contentEncoding);
+          if (err) return err;
+        }
         this->SetContentEncoding(contentEncoding);
       } else if (this->GetItemType() == "uri ") {
         std::string itemURIType;
@@ -194,9 +217,12 @@ Error INFE::ReadData(Parser& parser, BinaryStream& stream) {
         if (err) return err;
         this->SetContentType(contentType);
 
+        // content_encoding is optional
         std::string contentEncoding;
-        err = stream.ReadNULLTerminatedString(contentEncoding);
-        if (err) return err;
+        if (stream.HasBytesAvailable()) {
+          err = stream.ReadNULLTerminatedString(contentEncoding);
+          if (err) return err;
+        }
         this->SetContentEncoding(contentEncoding);
       } else if (this->GetItemType() == "uri ") {
         std::string itemURIType;
