@@ -192,4 +192,41 @@ TEST(ISOBMFFDEC3Test, CopyMoveAndRepeatedRead) {
   EXPECT_EQ(12, assigned.GetComplexityIndexTypeA());
   EXPECT_FALSE(assigned.GetDisplayableProperties().empty());
 }
+
+// The Android Atmos dec3 payload again, in the fuzzer::conv form that
+// fuzz/converter.py turns into DEC3_fuzzer.
+TEST(ISOBMFFDEC3Test, TestDEC3Parser) {
+  // fuzzer::conv: data
+  const std::vector<uint8_t>& buffer = {
+      // dec3 box size: 15 bytes, box header not included
+      // data_rate = 768, num_ind_sub = 0
+      0x18, 0x00,
+      // fscod = 0, bsid = 16, asvc = 0, bsmod = 0, acmod = 7, lfeon = 1,
+      // num_dep_sub = 0
+      0x20, 0x0f, 0x00,
+      // flag_ec3_extension_type_a = 1, complexity_index_type_a = 12
+      0x01, 0x0c};
+
+  // fuzzer::conv: begin
+  ISOBMFF::BinaryDataStream stream(buffer);
+  ISOBMFF::Parser parser;
+  std::shared_ptr<ISOBMFF::Box> box = parser.CreateBox("dec3");
+
+  ISOBMFF::Error error;
+  if (box != nullptr) {
+    error = box->ReadData(parser, stream);
+  }
+  if (error) {
+    fprintf(stderr, "Parse error: %s\n", error.GetMessage().c_str());
+  }
+  // fuzzer::conv: end
+
+  EXPECT_FALSE(error);
+  auto dec3 = std::dynamic_pointer_cast<ISOBMFF::DEC3>(box);
+  ASSERT_NE(dec3, nullptr) << "Failed to cast to DEC3";
+  EXPECT_EQ(dec3->GetDataRate(), 768);
+  ASSERT_EQ(dec3->GetIndependentSubstreams().size(), 1u);
+  EXPECT_EQ(dec3->GetIndependentSubstreams()[0].GetChannelCount(), 6);
+  EXPECT_EQ(dec3->GetComplexityIndexTypeA(), 12);
+}
 }  // namespace ISOBMFF

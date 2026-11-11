@@ -90,4 +90,46 @@ TEST(ISOBMFFEC3Test, ExactFourCCRegistrationAndNestedParsing) {
   ASSERT_NE(nullptr, ec3);
   EXPECT_NE(nullptr, ec3->GetTypedBox<DEC3>("dec3"));
 }
+
+// The ec-3 sample entry again, in the fuzzer::conv form that
+// fuzz/converter.py turns into EC3_fuzzer.
+TEST(ISOBMFFEC3Test, TestEC3Parser) {
+  // fuzzer::conv: data
+  const std::vector<uint8_t>& buffer = {
+      // ec-3 box size: 71 bytes, box header not included
+      // reserved (6 bytes), data_reference_index = 1
+      0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01,
+      // reserved (8 bytes), channelcount = 2, samplesize = 16
+      0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0x00, 0x10,
+      // pre_defined, reserved, samplerate = 48000 << 16
+      0x00, 0x00, 0x00, 0x00, 0xbb, 0x80, 0x00, 0x00,
+      // dec3 (15 bytes): the Android Atmos configuration
+      0x00, 0x00, 0x00, 0x0f, 0x64, 0x65, 0x63, 0x33, 0x18, 0x00, 0x20, 0x0f,
+      0x00, 0x01, 0x0c,
+      // btrt (20 bytes)
+      0x00, 0x00, 0x00, 0x14, 0x62, 0x74, 0x72, 0x74, 0x00, 0x00, 0x00, 0x00,
+      0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+
+  // fuzzer::conv: begin
+  ISOBMFF::BinaryDataStream stream(buffer);
+  ISOBMFF::Parser parser;
+  std::shared_ptr<ISOBMFF::Box> box = parser.CreateBox("ec-3");
+
+  ISOBMFF::Error error;
+  if (box != nullptr) {
+    error = box->ReadData(parser, stream);
+  }
+  if (error) {
+    fprintf(stderr, "Parse error: %s\n", error.GetMessage().c_str());
+  }
+  // fuzzer::conv: end
+
+  EXPECT_FALSE(error);
+  auto ec3 = std::dynamic_pointer_cast<ISOBMFF::EC3>(box);
+  ASSERT_NE(ec3, nullptr) << "Failed to cast to EC3";
+  EXPECT_EQ(ec3->GetDataReferenceIndex(), 1);
+  EXPECT_EQ(ec3->GetSampleRateRaw(), 48000u << 16);
+  ASSERT_NE(ec3->GetTypedBox<ISOBMFF::DEC3>("dec3"), nullptr);
+  EXPECT_NE(ec3->GetBox("btrt"), nullptr);
+}
 }  // namespace ISOBMFF
