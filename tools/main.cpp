@@ -51,7 +51,7 @@ static arg_options DEFAULT_OPTIONS{
     .infiles = std::vector<char*>(),
 };
 
-void usage(char* name) {
+[[noreturn]] void usage(char* name) {
   fprintf(stderr, "usage: %s [options]\n", name);
   fprintf(stderr, "where options are:\n");
   fprintf(stderr, "\t-d:\t\tIncrease debug verbosity [%i]\n",
