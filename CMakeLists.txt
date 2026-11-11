@@ -6,31 +6,6 @@ project(ISOBMFF VERSION 0.15)
 # Set the C++ standard
 set(CMAKE_CXX_STANDARD 14)
 
-# Compiler selection
-if(APPLE)
-    message(STATUS "Using default Apple Clang on macOS.")
-elseif(UNIX AND NOT APPLE)
-    # Check for Clang first
-    find_program(CLANG_C_COMPILER clang)
-    find_program(CLANG_CXX_COMPILER clang++)
-    if(CLANG_C_COMPILER AND CLANG_CXX_COMPILER)
-        set(CMAKE_C_COMPILER ${CLANG_C_COMPILER})
-        set(CMAKE_CXX_COMPILER ${CLANG_CXX_COMPILER})
-        message(STATUS "Using Clang on Linux.")
-    else()
-        # Fallback to GNU if Clang is not found
-        find_program(GNU_C_COMPILER gcc)
-        find_program(GNU_CXX_COMPILER g++)
-        if(GNU_C_COMPILER AND GNU_CXX_COMPILER)
-            set(CMAKE_C_COMPILER ${GNU_C_COMPILER})
-            set(CMAKE_CXX_COMPILER ${GNU_CXX_COMPILER})
-            message(STATUS "Using GNU on Linux.")
-        else()
-            message(FATAL_ERROR "Neither Clang nor GNU compilers were found.")
-        endif()
-    endif()
-endif()
-
 # Verify the compiler
 if(APPLE)
     if (NOT CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
@@ -42,14 +17,26 @@ elseif(UNIX AND NOT APPLE)
     endif()
 endif()
 
-# Set debug flags for both C and C++
-set(COMMON_DEBUG_FLAGS "-g -O0 -Wall -Wextra -Wunused-parameter -Wshadow -Wformat -Wextra-semi -Wsign-conversion -Wtautological-unsigned-zero-compare -Wold-style-cast -Wshorten-64-to-32 -Wimplicit-int-conversion -Wfloat-conversion -Wdouble-promotion -Wimplicit-float-conversion -Wmissing-variable-declarations -Winvalid-utf8 -Wcast-qual -Wcast-align -Wunreachable-code-break -Wno-covered-switch-default -Werror")
-# Only Clang (incl. AppleClang) has -Wextra-semi-stmt
-if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  set(COMMON_DEBUG_FLAGS "${COMMON_DEBUG_FLAGS} -Wextra-semi-stmt")
-endif()
-
-
+# Set debug flags for both C and C++. Some of the warnings exist only in
+# clang (or only in newer gcc releases), and gcc rejects an unknown -W option,
+# so each of those is added only if the compiler accepts it.
+set(COMMON_DEBUG_FLAGS "-g -O0 -Wall -Wextra -Wunused-parameter -Wshadow -Wformat -Wextra-semi -Wsign-conversion -Wold-style-cast -Wfloat-conversion -Wdouble-promotion -Wcast-qual -Wcast-align -Wno-covered-switch-default -Werror")
+include(CheckCXXCompilerFlag)
+foreach(flag
+    -Wtautological-unsigned-zero-compare
+    -Wshorten-64-to-32
+    -Wimplicit-int-conversion
+    -Wimplicit-float-conversion
+    -Wmissing-variable-declarations
+    -Winvalid-utf8
+    -Wunreachable-code-break
+    -Wextra-semi-stmt)
+  string(MAKE_C_IDENTIFIER "HAVE_CXX_FLAG${flag}" have_flag)
+  check_cxx_compiler_flag(${flag} ${have_flag})
+  if(${have_flag})
+    set(COMMON_DEBUG_FLAGS "${COMMON_DEBUG_FLAGS} ${flag}")
+  endif()
+endforeach()
 
 set(CMAKE_C_FLAGS_DEBUG "${COMMON_DEBUG_FLAGS}")
 set(CMAKE_CXX_FLAGS_DEBUG "${COMMON_DEBUG_FLAGS}")
