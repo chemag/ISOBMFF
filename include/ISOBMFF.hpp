@@ -33,6 +33,9 @@
 
 #include <AV01.hpp>
 #include <AV1C.hpp>
+#include <AV2CInBand.hpp>
+#include <AV2COutOfBand.hpp>
+#include <AV2SampleEntry.hpp>
 #include <AVC1.hpp>
 #include <AVC3.hpp>
 #include <AVCC.hpp>

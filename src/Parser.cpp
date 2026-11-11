@@ -30,6 +30,9 @@
 
 #include <AV01.hpp>
 #include <AV1C.hpp>
+#include <AV2CInBand.hpp>
+#include <AV2COutOfBand.hpp>
+#include <AV2SampleEntry.hpp>
 #include <AVC1.hpp>
 #include <AVC3.hpp>
 #include <AVCC.hpp>
@@ -414,6 +417,18 @@ void Parser::IMPL::RegisterDefaultBoxes() {
   });
   this->RegisterBox("av1C", [=]() -> std::shared_ptr<Box> {
     return std::make_shared<AV1C>();
+  });
+  this->RegisterBox("av2E", [=]() -> std::shared_ptr<Box> {
+    return std::make_shared<AV2SampleEntry>("av2E");
+  });
+  this->RegisterBox("av2e", [=]() -> std::shared_ptr<Box> {
+    return std::make_shared<AV2SampleEntry>("av2e");
+  });
+  this->RegisterBox("av2C", [=]() -> std::shared_ptr<Box> {
+    return std::make_shared<AV2COutOfBand>();
+  });
+  this->RegisterBox("av2c", [=]() -> std::shared_ptr<Box> {
+    return std::make_shared<AV2CInBand>();
   });
   this->RegisterBox("ec-3", [=]() -> std::shared_ptr<Box> {
     return std::make_shared<EC3>();

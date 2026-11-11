@@ -4,6 +4,9 @@
 add_library(isobmff
     AV01.cpp
     AV1C.cpp
+    AV2CInBand.cpp
+    AV2COutOfBand.cpp
+    AV2SampleEntry.cpp
     AVC1.cpp
     AVC3.cpp
     AVCC-NALUnit.cpp
