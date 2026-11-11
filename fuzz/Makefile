@@ -5,8 +5,8 @@ CORPUS_DIR = corpus
 CONVERTER = ./converter.py
 RUNS ?= 100
 
-# List of fuzzers
-FUZZERS = Parser META FTYP MVHD HDLR TKHD MDHD DREF STSD HVC1 HVCC STTS STSS MP4A URL CTTS AVC1 AVCC
+# List of fuzzers: one per unit test carrying fuzzer::conv markers
+FUZZERS = $(patsubst $(SRC_DIR)/%_unittest.cpp,%,$(shell grep -l 'fuzzer::conv: begin' $(SRC_DIR)/*_unittest.cpp))
 
 # Default target
 all: $(addsuffix _fuzzer.cpp, $(FUZZERS))
