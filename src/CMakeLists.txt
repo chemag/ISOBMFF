@@ -78,6 +78,9 @@ target_include_directories(isobmff PUBLIC ../include)
 set_target_properties(isobmff PROPERTIES POSITION_INDEPENDENT_CODE ON)
 if (WIN32)
   target_link_libraries(isobmff PUBLIC wsock32 ws2_32)
+  # This is a static library: Without ISOBMFF_LIB_BUILD, Macros.hpp declares
+  # the public classes __declspec(dllimport), and linking against them fails.
+  target_compile_definitions(isobmff PUBLIC ISOBMFF_LIB_BUILD)
 endif()
 
 # https://cmake.org/cmake/help/latest/guide/tutorial/index.html#adding-a-version-number-and-configured-header-file

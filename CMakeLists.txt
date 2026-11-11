@@ -17,34 +17,40 @@ elseif(UNIX AND NOT APPLE)
     endif()
 endif()
 
-# Set debug flags for both C and C++. Some of the warnings exist only in
-# clang (or only in newer gcc releases), and gcc rejects an unknown -W option,
-# so each of those is added only if the compiler accepts it.
-set(COMMON_DEBUG_FLAGS "-g -O0 -Wall -Wextra -Wunused-parameter -Wshadow -Wformat -Wextra-semi -Wsign-conversion -Wold-style-cast -Wfloat-conversion -Wdouble-promotion -Wcast-qual -Wcast-align -Wno-covered-switch-default -Werror")
-include(CheckCXXCompilerFlag)
-foreach(flag
-    -Wtautological-unsigned-zero-compare
-    -Wshorten-64-to-32
-    -Wimplicit-int-conversion
-    -Wimplicit-float-conversion
-    -Wmissing-variable-declarations
-    -Winvalid-utf8
-    -Wunreachable-code-break
-    -Wextra-semi-stmt)
-  string(MAKE_C_IDENTIFIER "HAVE_CXX_FLAG${flag}" have_flag)
-  check_cxx_compiler_flag(${flag} ${have_flag})
-  if(${have_flag})
-    set(COMMON_DEBUG_FLAGS "${COMMON_DEBUG_FLAGS} ${flag}")
-  endif()
-endforeach()
+# Set debug flags for both C and C++ with gcc and clang (MSVC keeps its own
+# defaults). Some of the warnings exist only in clang (or only in newer gcc
+# releases), and gcc rejects an unknown -W option, so each of those is added
+# only if the compiler accepts it.
+if(NOT MSVC)
+  set(COMMON_DEBUG_FLAGS "-g -O0 -Wall -Wextra -Wunused-parameter -Wshadow -Wformat -Wextra-semi -Wsign-conversion -Wold-style-cast -Wfloat-conversion -Wdouble-promotion -Wcast-qual -Wcast-align -Wno-covered-switch-default -Werror")
+  include(CheckCXXCompilerFlag)
+  foreach(flag
+      -Wtautological-unsigned-zero-compare
+      -Wshorten-64-to-32
+      -Wimplicit-int-conversion
+      -Wimplicit-float-conversion
+      -Wmissing-variable-declarations
+      -Winvalid-utf8
+      -Wunreachable-code-break
+      -Wextra-semi-stmt)
+    string(MAKE_C_IDENTIFIER "HAVE_CXX_FLAG${flag}" have_flag)
+    check_cxx_compiler_flag(${flag} ${have_flag})
+    if(${have_flag})
+      set(COMMON_DEBUG_FLAGS "${COMMON_DEBUG_FLAGS} ${flag}")
+    endif()
+  endforeach()
 
-set(CMAKE_C_FLAGS_DEBUG "${COMMON_DEBUG_FLAGS}")
-set(CMAKE_CXX_FLAGS_DEBUG "${COMMON_DEBUG_FLAGS}")
+  set(CMAKE_C_FLAGS_DEBUG "${COMMON_DEBUG_FLAGS}")
+  set(CMAKE_CXX_FLAGS_DEBUG "${COMMON_DEBUG_FLAGS}")
+endif()
 
 
 # Add subdirectories for tests and fuzzers if enabled
 add_subdirectory(src)
-add_subdirectory(tools)
+# The tool uses getopt_long(), which MSVC does not provide.
+if(NOT MSVC)
+  add_subdirectory(tools)
+endif()
 
 option(BUILD_TESTS "Build ISOBMFF tests" ON)
 if(BUILD_TESTS)
