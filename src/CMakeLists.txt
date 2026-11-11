@@ -3,6 +3,7 @@
 
 add_library(isobmff
     AV01.cpp
+    AV1C.cpp
     AVC1.cpp
     AVC3.cpp
     AVCC-NALUnit.cpp

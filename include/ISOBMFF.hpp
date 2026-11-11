@@ -32,6 +32,7 @@
 #define ISOBMFF_HPP
 
 #include <AV01.hpp>
+#include <AV1C.hpp>
 #include <AVC1.hpp>
 #include <AVC3.hpp>
 #include <AVCC.hpp>

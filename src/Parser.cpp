@@ -29,6 +29,7 @@
  */
 
 #include <AV01.hpp>
+#include <AV1C.hpp>
 #include <AVC1.hpp>
 #include <AVC3.hpp>
 #include <AVCC.hpp>
@@ -410,6 +411,9 @@ void Parser::IMPL::RegisterDefaultBoxes() {
   });
   this->RegisterBox("av01", [=]() -> std::shared_ptr<Box> {
     return std::make_shared<AV01>();
+  });
+  this->RegisterBox("av1C", [=]() -> std::shared_ptr<Box> {
+    return std::make_shared<AV1C>();
   });
   this->RegisterBox("ec-3", [=]() -> std::shared_ptr<Box> {
     return std::make_shared<EC3>();
