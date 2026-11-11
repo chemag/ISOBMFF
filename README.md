@@ -47,28 +47,20 @@ After you have cloned the ISOBMFF project, you will need to fetch the submodules
 `git submodule update --init --recursive`
 
 
-### macOS
+### Build
 
-An Xcode project is provided for convenience, containing the following targets:
+The library, the `isobmff` tool, and the unit tests build with CMake on
+Linux, macOS, and Windows:
 
- - `ISOBMFF`: The main cross-platform C++ library.
- - `ISOBMFF-Dump`: A cross-platform command-line utility for dumping files.
+```
+$ cmake -S . -B build -DBUILD_CLANG_FUZZER=OFF
+$ cmake --build build
+$ ctest --test-dir build
+```
 
-Note that you can also build the library with `make`, on the command line.
-
-### Windows
-
-An VisualStudio solution is provided for convenience, containing the following targets:
-
- - `ISOBMFF Static v142`: A static library built with the V142 toolset (VS 2019)
- - `ISOBMFF Static v143`: A static library built with the V143 toolset (VS 2022)
- - `ISOBMFF DLL v142`: A dynamic library (DLL) built with the V142 toolset (VS 2019)
- - `ISOBMFF DLL v143`: A dynamic library (DLL) built with the V143 toolset (VS 2022)
- - `ISOBMFF-Dump`: A cross-platform command-line utility for dumping files.
-
-### Linux/Unix
-
-The library can be build with `make`, on the command line.
+The tests need googletest (gtest and gmock). The tool is not built with
+MSVC, since it uses `getopt_long()`. The `.github/workflows/` files show
+the exact Linux, macOS, and Windows setups.
 
 Library Usage
 -------------

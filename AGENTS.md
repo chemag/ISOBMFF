@@ -103,19 +103,17 @@ isobmff/
    +-- converter.py   # Auto-generates fuzzers from unit tests
    +-- corpus/        # Fuzzing seed corpus
 +-- build/            # Build output directory
-+-- VisualStudio/     # Windows build support (VS 2019/2022)
 ```
 
 ## Build System
 
 **Supported Platforms:**
-- macOS (Xcode project + Makefile)
-- Linux/Unix (Makefile + CMake)
-- Windows (Visual Studio 2019/2022 solutions)
+- Linux (CMake, gcc or clang)
+- macOS (CMake, Apple Clang)
+- Windows (CMake, MSVC; the tool is not built, since it uses getopt_long())
 
 **Build Targets:**
 - Static library (ISOBMFF)
-- Dynamic library/DLL (Windows)
 - Command-line dump utility (ISOBMFF-Dump)
 
 **Build Options (CMakeLists.txt):**
@@ -126,7 +124,7 @@ isobmff/
 - C++14 standard
 - Clang or GCC on Linux
 - Apple Clang on macOS
-- MSVC v142/v143 on Windows
+- MSVC on Windows
 
 ## Tools
 
@@ -162,7 +160,8 @@ Command-line tool for analyzing ISO media files (`tools/main.cpp`):
 - Recent fuzzing results: Successfully completed 10^7 (10 million) fuzzing iterations on AVCC and AVC1 atom parsers
 
 ### Continuous Integration
-- GitHub Actions workflows for macOS and Windows builds
+- GitHub Actions workflows (CMake) for Linux (gcc, clang, 32-bit gcc), macOS
+  (Apple Clang), and Windows (MSVC) builds, with the unit tests
 - Build status badges in README
 
 ## Usage Example
