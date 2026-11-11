@@ -236,8 +236,8 @@ TEST_F(ISOBMFFELSTTest, TestELSTParserTestMp4) {
   if (box != nullptr) {
     error = box->ReadData(parser, stream);
   }
-  EXPECT_FALSE(error) << "Parse error: " << error.GetMessage();
   // fuzzer::conv: end
+  EXPECT_FALSE(error) << "Parse error: " << error.GetMessage();
 
   // Validate ELST box
   auto elst = std::dynamic_pointer_cast<ISOBMFF::ELST>(box);
@@ -287,8 +287,8 @@ TEST_F(ISOBMFFELSTTest, TestELSTParserStackedMp4Track1) {
   if (box != nullptr) {
     error = box->ReadData(parser, stream);
   }
-  EXPECT_FALSE(error) << "Parse error: " << error.GetMessage();
   // fuzzer::conv: end
+  EXPECT_FALSE(error) << "Parse error: " << error.GetMessage();
 
   // Validate ELST box
   auto elst = std::dynamic_pointer_cast<ISOBMFF::ELST>(box);
@@ -342,8 +342,8 @@ TEST_F(ISOBMFFELSTTest, TestELSTParserStackedMp4Track2) {
   if (box != nullptr) {
     error = box->ReadData(parser, stream);
   }
-  EXPECT_FALSE(error) << "Parse error: " << error.GetMessage();
   // fuzzer::conv: end
+  EXPECT_FALSE(error) << "Parse error: " << error.GetMessage();
 
   // Validate ELST box
   auto elst = std::dynamic_pointer_cast<ISOBMFF::ELST>(box);
