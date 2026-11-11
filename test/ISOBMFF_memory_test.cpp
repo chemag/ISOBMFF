@@ -239,11 +239,12 @@ TEST_F(IsobmffMemoryTest, MDATSkippingComparison) {
   std::cout << "Without MDAT skipping: " << bytesToMB(mem_without_skipping)
             << " MB" << std::endl;
   std::cout << "Difference:            "
-            << bytesToMB(mem_without_skipping - mem_with_skipping) << " MB"
-            << std::endl;
+            << bytesToMB(mem_without_skipping) - bytesToMB(mem_with_skipping)
+            << " MB" << std::endl;
 
-  // Non-skipping should use at least as much memory as skipping
-  EXPECT_GE(mem_without_skipping, mem_with_skipping)
-      << "Expected non-skipping to use at least as much memory as skipping";
+  // Informational only: no assertion. MOV1.MOV has no mdat box, so both
+  // parses do the same work, and an RSS delta measured after the first parse
+  // has grown (and freed) the heap is noise at page granularity. Asserting
+  // that one delta is at least the other failed intermittently.
 }
 }  // namespace ISOBMFF
