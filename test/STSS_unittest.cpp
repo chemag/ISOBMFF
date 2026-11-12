@@ -2,24 +2,25 @@
  *  Copyright (c) Meta Platforms, Inc. and its affiliates.
  */
 
-#include <ISOBMFF.hpp>                  // for various
-#include <BinaryDataStream.hpp> // for BinaryDataStream
-#include <Parser.hpp>           // for Parser
-
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+
+#include <BinaryDataStream.hpp>  // for BinaryDataStream
+#include <ISOBMFF.hpp>           // for various
+#include <Parser.hpp>            // for Parser
 
 namespace ISOBMFF {
 
 class ISOBMFFSTSSTest : public ::testing::Test {
-public:
+ public:
   ISOBMFFSTSSTest() {}
   ~ISOBMFFSTSSTest() override {}
 };
 
 TEST_F(ISOBMFFSTSSTest, TestSTSSParser) {
   // fuzzer::conv: data
-  const std::vector<uint8_t> &buffer = {
+  const std::vector<uint8_t>& buffer = {
+      // clang-format off
       // following example input is from a sample .mp4 video file
       // stss size: 24 bytes
       // 0x00, 0x00, 0x00, 0x18,
@@ -28,6 +29,7 @@ TEST_F(ISOBMFFSTSSTest, TestSTSSParser) {
       // stss content:
       0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02,
       0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x1f
+      // clang-format on
   };
 
   // fuzzer::conv: begin
@@ -54,4 +56,4 @@ TEST_F(ISOBMFFSTSSTest, TestSTSSParser) {
   EXPECT_EQ(stss->GetSampleNumber(0), 1);
   EXPECT_EQ(stss->GetSampleNumber(1), 31);
 }
-} // namespace ISOBMFF
+}  // namespace ISOBMFF

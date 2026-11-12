@@ -20,8 +20,12 @@ class ISOBMFFFRMATest : public ::testing::Test {
 // A synthetic frma, as in the sinf of an encrypted avc1 track.
 TEST_F(ISOBMFFFRMATest, TestFRMAParser) {
   // fuzzer::conv: data
-  const std::vector<uint8_t>& buffer = {// data_format = 'avc1'
-                                        0x61, 0x76, 0x63, 0x31};
+  const std::vector<uint8_t>& buffer = {
+      // clang-format off
+      // data_format = 'avc1'
+      0x61, 0x76, 0x63, 0x31
+      // clang-format on
+  };
 
   // fuzzer::conv: begin
   ISOBMFF::BinaryDataStream stream(buffer);
@@ -47,8 +51,12 @@ TEST_F(ISOBMFFFRMATest, TestFRMAParser) {
 // A truncated frma (2 of the 4 data_format bytes).
 TEST_F(ISOBMFFFRMATest, TestFRMAParserTruncated) {
   // fuzzer::conv: data
-  const std::vector<uint8_t>& buffer = {// data_format truncated
-                                        0x61, 0x76};
+  const std::vector<uint8_t>& buffer = {
+      // clang-format off
+      // data_format truncated
+      0x61, 0x76
+      // clang-format on
+  };
 
   // fuzzer::conv: begin
   ISOBMFF::BinaryDataStream stream(buffer);

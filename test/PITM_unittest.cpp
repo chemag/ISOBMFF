@@ -21,11 +21,14 @@ class ISOBMFFPITMTest : public ::testing::Test {
 TEST_F(ISOBMFFPITMTest, TestPITMParser) {
   // fuzzer::conv: data
   const std::vector<uint8_t>& buffer = {
+      // clang-format off
       // pitm box size: 14 bytes, box header not included
       // version = 0, flags = 0
       0x00, 0x00, 0x00, 0x00,
       // item_ID = 49
-      0x00, 0x31};
+      0x00, 0x31
+      // clang-format on
+  };
 
   // fuzzer::conv: begin
   ISOBMFF::BinaryDataStream stream(buffer);
@@ -52,10 +55,14 @@ TEST_F(ISOBMFFPITMTest, TestPITMParser) {
 // A synthetic version 1 pitm, with a 32-bit item_ID.
 TEST_F(ISOBMFFPITMTest, TestPITMParserVersion1) {
   // fuzzer::conv: data
-  const std::vector<uint8_t>& buffer = {// version = 1, flags = 0
-                                        0x01, 0x00, 0x00, 0x00,
-                                        // item_ID = 65536
-                                        0x00, 0x01, 0x00, 0x00};
+  const std::vector<uint8_t>& buffer = {
+      // clang-format off
+      // version = 1, flags = 0
+      0x01, 0x00, 0x00, 0x00,
+      // item_ID = 65536
+      0x00, 0x01, 0x00, 0x00
+      // clang-format on
+  };
 
   // fuzzer::conv: begin
   ISOBMFF::BinaryDataStream stream(buffer);
@@ -83,8 +90,11 @@ TEST_F(ISOBMFFPITMTest, TestPITMParserVersion1) {
 TEST_F(ISOBMFFPITMTest, TestPITMParserTruncated) {
   // fuzzer::conv: data
   const std::vector<uint8_t>& buffer = {
+      // clang-format off
       // version = 0, flags = 0, item_ID truncated
-      0x00, 0x00, 0x00, 0x00, 0x00};
+      0x00, 0x00, 0x00, 0x00, 0x00
+      // clang-format on
+  };
 
   // fuzzer::conv: begin
   ISOBMFF::BinaryDataStream stream(buffer);

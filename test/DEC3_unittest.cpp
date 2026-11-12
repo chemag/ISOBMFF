@@ -198,6 +198,7 @@ TEST(ISOBMFFDEC3Test, CopyMoveAndRepeatedRead) {
 TEST(ISOBMFFDEC3Test, TestDEC3Parser) {
   // fuzzer::conv: data
   const std::vector<uint8_t>& buffer = {
+      // clang-format off
       // dec3 box size: 15 bytes, box header not included
       // data_rate = 768, num_ind_sub = 0
       0x18, 0x00,
@@ -205,7 +206,9 @@ TEST(ISOBMFFDEC3Test, TestDEC3Parser) {
       // num_dep_sub = 0
       0x20, 0x0f, 0x00,
       // flag_ec3_extension_type_a = 1, complexity_index_type_a = 12
-      0x01, 0x0c};
+      0x01, 0x0c
+      // clang-format on
+  };
 
   // fuzzer::conv: begin
   ISOBMFF::BinaryDataStream stream(buffer);

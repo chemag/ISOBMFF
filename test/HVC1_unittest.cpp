@@ -2,24 +2,25 @@
  *  Copyright (c) Meta Platforms, Inc. and its affiliates.
  */
 
-#include <ISOBMFF.hpp>                  // for various
-#include <BinaryDataStream.hpp> // for BinaryDataStream
-#include <Parser.hpp>           // for Parser
-
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+
+#include <BinaryDataStream.hpp>  // for BinaryDataStream
+#include <ISOBMFF.hpp>           // for various
+#include <Parser.hpp>            // for Parser
 
 namespace ISOBMFF {
 
 class ISOBMFFHVC1Test : public ::testing::Test {
-public:
+ public:
   ISOBMFFHVC1Test() {}
   ~ISOBMFFHVC1Test() override {}
 };
 
 TEST_F(ISOBMFFHVC1Test, TestHVC1Parser) {
   // fuzzer::conv: data
-  const std::vector<uint8_t> &buffer = {
+  const std::vector<uint8_t>& buffer = {
+      // clang-format off
       // following example input is from a sample .mp4 video file
       // hvc1 size: 221 bytes
       // 0x00, 0x00, 0x00, 0xdd,
@@ -53,6 +54,7 @@ TEST_F(ISOBMFFHVC1Test, TestHVC1Parser) {
       0x00, 0x17, 0x68, 0x50, 0x94, 0xa2, 0x00, 0x01,
       0x00, 0x0b, 0x44, 0x01, 0xc0, 0xe3, 0x0f, 0x09,
       0xc1, 0x50, 0xaf, 0xb0, 0x84
+      // clang-format on
   };
 
   // fuzzer::conv: begin
@@ -73,7 +75,7 @@ TEST_F(ISOBMFFHVC1Test, TestHVC1Parser) {
   auto hvc1 = std::dynamic_pointer_cast<ISOBMFF::HVC1>(box);
   ASSERT_NE(hvc1, nullptr) << "Failed to cast to HVC1";
 
-    // Validate Version and Flags
+  // Validate Version and Flags
   EXPECT_EQ(hvc1->GetVersion(), 0) << "Unexpected version";
   EXPECT_EQ(hvc1->GetFlags(), 0) << "Unexpected flags";
 
@@ -92,14 +94,15 @@ TEST_F(ISOBMFFHVC1Test, TestHVC1Parser) {
 
   // Validate sub-boxes inside HVC1
   std::vector<std::shared_ptr<Box>> boxes = hvc1->GetBoxes();
-  ASSERT_EQ(boxes.size(), 1) << "Expected 1 sub-box, but found " << boxes.size();
-  for (const auto &subbox : boxes) {
+  ASSERT_EQ(boxes.size(), 1)
+      << "Expected 1 sub-box, but found " << boxes.size();
+  for (const auto& subbox : boxes) {
     const std::string type = subbox->GetName();
     if (type == "hvcC") {
       SUCCEED() << "Found expected hvcC box";
-  } else {
+    } else {
       FAIL() << "Unexpected sub-box type: " << type;
-  }
+    }
   }
 }
-} // namespace ISOBMFF
+}  // namespace ISOBMFF

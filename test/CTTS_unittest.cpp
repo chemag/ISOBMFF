@@ -2,24 +2,25 @@
  *  Copyright (c) Meta Platforms, Inc. and its affiliates.
  */
 
-#include <ISOBMFF.hpp>                  // for various
-#include <BinaryDataStream.hpp> // for BinaryDataStream
-#include <Parser.hpp>           // for Parser
-
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+
+#include <BinaryDataStream.hpp>  // for BinaryDataStream
+#include <ISOBMFF.hpp>           // for various
+#include <Parser.hpp>            // for Parser
 
 namespace ISOBMFF {
 
 class ISOBMFFCTTSTest : public ::testing::Test {
-public:
+ public:
   ISOBMFFCTTSTest() {}
   ~ISOBMFFCTTSTest() override {}
 };
 
 TEST_F(ISOBMFFCTTSTest, TestCTTSParser) {
   // fuzzer::conv: data
-  const std::vector<uint8_t> &buffer = {
+  const std::vector<uint8_t>& buffer = {
+      // clang-format off
       // following example input is from a sample .mp4 video file
       // ctts size: 344 bytes
       // 0x00, 0x00, 0x01, 0x58,
@@ -68,7 +69,8 @@ TEST_F(ISOBMFFCTTSTest, TestCTTSParser) {
       0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x02, 0x00,
       0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x06, 0x00,
       0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x02, 0x00
-    };
+      // clang-format on
+  };
 
   // fuzzer::conv: begin
   ISOBMFF::BinaryDataStream stream(buffer);
@@ -221,4 +223,4 @@ TEST_F(ISOBMFFCTTSTest, TestCTTSParser) {
   EXPECT_EQ(ctts->GetSampleCount(40), 1);
   EXPECT_EQ(ctts->GetSampleOffset(40), 512);
 }
-} // namespace ISOBMFF
+}  // namespace ISOBMFF

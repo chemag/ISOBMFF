@@ -2,24 +2,25 @@
  *  Copyright (c) Meta Platforms, Inc. and its affiliates.
  */
 
-#include <ISOBMFF.hpp>                  // for various
-#include <BinaryDataStream.hpp> // for BinaryDataStream
-#include <Parser.hpp>           // for Parser
-
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+
+#include <BinaryDataStream.hpp>  // for BinaryDataStream
+#include <ISOBMFF.hpp>           // for various
+#include <Parser.hpp>            // for Parser
 
 namespace ISOBMFF {
 
 class ISOBMFFURLTest : public ::testing::Test {
-public:
+ public:
   ISOBMFFURLTest() {}
   ~ISOBMFFURLTest() override {}
 };
 
 TEST_F(ISOBMFFURLTest, TestURLParser) {
   // fuzzer::conv: data
-  const std::vector<uint8_t> &buffer = {
+  const std::vector<uint8_t>& buffer = {
+      // clang-format off
       // following example input is from a sample .mp4 video file
       // url  size: 12 bytes
       // 0x00, 0x00, 0x00, 0x0c,
@@ -27,6 +28,7 @@ TEST_F(ISOBMFFURLTest, TestURLParser) {
       // 0x75, 0x72, 0x6c, 0x20,
       // url  content:
       0x00, 0x00, 0x00, 0x01,
+      // clang-format on
   };
 
   // fuzzer::conv: begin
@@ -51,4 +53,4 @@ TEST_F(ISOBMFFURLTest, TestURLParser) {
   EXPECT_EQ(url->GetVersion(), 0);
   EXPECT_EQ(url->GetFlags(), 0x00000001);
 }
-} // namespace ISOBMFF
+}  // namespace ISOBMFF

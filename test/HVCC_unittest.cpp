@@ -2,24 +2,25 @@
  *  Copyright (c) Meta Platforms, Inc. and its affiliates.
  */
 
-#include <ISOBMFF.hpp>                  // for various
-#include <BinaryDataStream.hpp> // for BinaryDataStream
-#include <Parser.hpp>           // for Parser
-
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+
+#include <BinaryDataStream.hpp>  // for BinaryDataStream
+#include <ISOBMFF.hpp>           // for various
+#include <Parser.hpp>            // for Parser
 
 namespace ISOBMFF {
 
 class ISOBMFFHVCCTest : public ::testing::Test {
-public:
+ public:
   ISOBMFFHVCCTest() {}
   ~ISOBMFFHVCCTest() override {}
 };
 
 TEST_F(ISOBMFFHVCCTest, TestHVCCParser) {
   // fuzzer::conv: data
-  const std::vector<uint8_t> &buffer = {
+  const std::vector<uint8_t>& buffer = {
+      // clang-format off
       // following example input is from a sample .mp4 video file
       // hvcC size: 135 bytes
       // 0x00, 0x00, 0x00, 0x87,
@@ -42,6 +43,7 @@ TEST_F(ISOBMFFHVCCTest, TestHVCCParser) {
       0xcd, 0x65, 0x00, 0x17, 0x68, 0x50, 0x94, 0xa2,
       0x00, 0x01, 0x00, 0x0b, 0x44, 0x01, 0xc0, 0xe3,
       0x0f, 0x09, 0xc1, 0x50, 0xaf, 0xb0, 0x84
+      // clang-format on
   };
 
   // fuzzer::conv: begin
@@ -113,10 +115,12 @@ TEST_F(ISOBMFFHVCCTest, TestHVCCParser) {
 // empty NAL units until the count was reached.
 TEST_F(ISOBMFFHVCCTest, TestHVCCTruncatedNALUnit) {
   // fuzzer::conv: data
-  const std::vector<uint8_t> &buffer = {
+  const std::vector<uint8_t>& buffer = {
+      // clang-format off
       // configurationVersion, profile/tier/level, ...
-      0x01, 0x01, 0x60, 0x00, 0x00, 0x00, 0x90, 0x00, 0x00, 0x00, 0x00,
-      0x00, 0x5d, 0xf0, 0x00, 0xfc, 0xfd, 0xf8, 0xf8, 0x00, 0x00, 0x0f,
+      0x01, 0x01, 0x60, 0x00, 0x00, 0x00, 0x90, 0x00,
+      0x00, 0x00, 0x00, 0x00, 0x5d, 0xf0, 0x00, 0xfc,
+      0xfd, 0xf8, 0xf8, 0x00, 0x00, 0x0f,
       // numOfArrays: 1
       0x01,
       // array: completeness 1, NAL unit type 32 (VPS), numNalus 0xffff
@@ -124,9 +128,10 @@ TEST_F(ISOBMFFHVCCTest, TestHVCCTruncatedNALUnit) {
       // NAL unit 1: length 4
       0x00, 0x04, 0x40, 0x01, 0x0c, 0x01,
       // NAL unit 2: length 0xffff, truncated
-      0xff, 0xff,
       0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
-      0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff
+      0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+      0xff, 0xff
+      // clang-format on
   };
 
   // fuzzer::conv: begin
@@ -155,16 +160,19 @@ TEST_F(ISOBMFFHVCCTest, TestHVCCTruncatedNALUnit) {
 // box. The remaining NAL units used to be added as empty ones.
 TEST_F(ISOBMFFHVCCTest, TestHVCCNALUnitCountExceedsData) {
   // fuzzer::conv: data
-  const std::vector<uint8_t> &buffer = {
+  const std::vector<uint8_t>& buffer = {
+      // clang-format off
       // configurationVersion, profile/tier/level, ...
-      0x01, 0x01, 0x60, 0x00, 0x00, 0x00, 0x90, 0x00, 0x00, 0x00, 0x00,
-      0x00, 0x5d, 0xf0, 0x00, 0xfc, 0xfd, 0xf8, 0xf8, 0x00, 0x00, 0x0f,
+      0x01, 0x01, 0x60, 0x00, 0x00, 0x00, 0x90, 0x00,
+      0x00, 0x00, 0x00, 0x00, 0x5d, 0xf0, 0x00, 0xfc,
+      0xfd, 0xf8, 0xf8, 0x00, 0x00, 0x0f,
       // numOfArrays: 1
       0x01,
       // array: completeness 1, NAL unit type 32 (VPS), numNalus 0xffff
       0xa0, 0xff, 0xff,
       // NAL unit 1: length 4
       0x00, 0x04, 0x40, 0x01, 0x0c, 0x01
+      // clang-format on
   };
 
   // fuzzer::conv: begin
@@ -200,4 +208,4 @@ TEST_F(ISOBMFFHVCCTest, TestHVCCAvgFrameRate) {
   hvcc.SetAvgFrameRate(480.0);
   EXPECT_EQ(hvcc.GetAvgFrameRateRaw(), UINT16_MAX);
 }
-} // namespace ISOBMFF
+}  // namespace ISOBMFF

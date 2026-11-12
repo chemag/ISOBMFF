@@ -21,11 +21,14 @@ class ISOBMFFAV2CInBandTest : public ::testing::Test {
 TEST_F(ISOBMFFAV2CInBandTest, TestAV2CInBandParser) {
   // fuzzer::conv: data
   const std::vector<uint8_t>& buffer = {
+      // clang-format off
       // av2c box size: 10 bytes, box header not included
       // reserved1 = 0 (3 bits), max_num_streams_minus1 = 1 (2 bits),
       // max_profile_idc = 2 (5 bits), max_level_idx = 13 (5 bits),
       // max_tier = 1 (1 bit): 000 01 00010 01101 1
-      0x08, 0x9b};
+      0x08, 0x9b
+      // clang-format on
+  };
 
   // fuzzer::conv: begin
   ISOBMFF::BinaryDataStream stream(buffer);
@@ -57,7 +60,11 @@ TEST_F(ISOBMFFAV2CInBandTest, TestAV2CInBandParser) {
 // A truncated av2c (1 of its 2 bytes) must be reported as an error.
 TEST_F(ISOBMFFAV2CInBandTest, TestAV2CInBandParserTruncated) {
   // fuzzer::conv: data
-  const std::vector<uint8_t>& buffer = {0x08};
+  const std::vector<uint8_t>& buffer = {
+      // clang-format off
+      0x08
+      // clang-format on
+  };
 
   // fuzzer::conv: begin
   ISOBMFF::BinaryDataStream stream(buffer);

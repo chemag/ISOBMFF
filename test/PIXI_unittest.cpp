@@ -19,12 +19,16 @@ class ISOBMFFPIXITest : public ::testing::Test {
 
 TEST_F(ISOBMFFPIXITest, TestPIXIParser) {
   // fuzzer::conv: data
-  const std::vector<uint8_t>& buffer = {// pixi version 0, flags 0
-                                        0x00, 0x00, 0x00, 0x00,
-                                        // num_channels: 3
-                                        0x03,
-                                        // bits_per_channel: 8, 8, 8
-                                        0x08, 0x08, 0x08};
+  const std::vector<uint8_t>& buffer = {
+      // clang-format off
+      // pixi version 0, flags 0
+      0x00, 0x00, 0x00, 0x00,
+      // num_channels: 3
+      0x03,
+      // bits_per_channel: 8, 8, 8
+      0x08, 0x08, 0x08
+      // clang-format on
+  };
 
   // fuzzer::conv: begin
   ISOBMFF::BinaryDataStream stream(buffer);
@@ -54,12 +58,16 @@ TEST_F(ISOBMFFPIXITest, TestPIXIParser) {
 // instead of adding empty channels until the count is reached.
 TEST_F(ISOBMFFPIXITest, TestPIXIChannelCountExceedsData) {
   // fuzzer::conv: data
-  const std::vector<uint8_t>& buffer = {// pixi version 0, flags 0
-                                        0x00, 0x00, 0x00, 0x00,
-                                        // num_channels: 255
-                                        0xff,
-                                        // bits_per_channel: 10, 10
-                                        0x0a, 0x0a};
+  const std::vector<uint8_t>& buffer = {
+      // clang-format off
+      // pixi version 0, flags 0
+      0x00, 0x00, 0x00, 0x00,
+      // num_channels: 255
+      0xff,
+      // bits_per_channel: 10, 10
+      0x0a, 0x0a
+      // clang-format on
+  };
 
   // fuzzer::conv: begin
   ISOBMFF::BinaryDataStream stream(buffer);

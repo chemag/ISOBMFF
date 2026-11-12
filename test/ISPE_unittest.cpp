@@ -21,11 +21,14 @@ class ISOBMFFISPETest : public ::testing::Test {
 TEST_F(ISOBMFFISPETest, TestISPEParser) {
   // fuzzer::conv: data
   const std::vector<uint8_t>& buffer = {
+      // clang-format off
       // ispe box size: 20 bytes, box header not included
       // version = 0, flags = 0
       0x00, 0x00, 0x00, 0x00,
       // image_width = 4032, image_height = 3024
-      0x00, 0x00, 0x0f, 0xc0, 0x00, 0x00, 0x0b, 0xd0};
+      0x00, 0x00, 0x0f, 0xc0, 0x00, 0x00, 0x0b, 0xd0
+      // clang-format on
+  };
 
   // fuzzer::conv: begin
   ISOBMFF::BinaryDataStream stream(buffer);
@@ -53,8 +56,11 @@ TEST_F(ISOBMFFISPETest, TestISPEParser) {
 TEST_F(ISOBMFFISPETest, TestISPEParserTruncated) {
   // fuzzer::conv: data
   const std::vector<uint8_t>& buffer = {
+      // clang-format off
       // version = 0, flags = 0, image_width = 4032
-      0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0f, 0xc0};
+      0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0f, 0xc0
+      // clang-format on
+  };
 
   // fuzzer::conv: begin
   ISOBMFF::BinaryDataStream stream(buffer);

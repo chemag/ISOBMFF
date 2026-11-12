@@ -20,6 +20,7 @@ class ISOBMFFAV1CTest : public ::testing::Test {
 TEST_F(ISOBMFFAV1CTest, TestAV1CParser) {
   // fuzzer::conv: data
   const std::vector<uint8_t>& buffer = {
+      // clang-format off
       // following example input is from an ffmpeg-generated (libsvtav1) .mp4
       // file (av1C box size: 25 bytes, box header not included)
       // marker = 1, version = 1
@@ -33,8 +34,10 @@ TEST_F(ISOBMFFAV1CTest, TestAV1CParser) {
       // initial_presentation_delay_present = 0
       0x00,
       // configOBUs: a sequence header OBU (13 bytes)
-      0x0a, 0x0b, 0x00, 0x00, 0x00, 0x42, 0xa7, 0xbf, 0xe3, 0xe0, 0x17, 0xc0,
-      0x12};
+      0x0a, 0x0b, 0x00, 0x00, 0x00, 0x42, 0xa7, 0xbf,
+      0xe3, 0xe0, 0x17, 0xc0, 0x12
+      // clang-format on
+  };
 
   // fuzzer::conv: begin
   ISOBMFF::BinaryDataStream stream(buffer);
@@ -80,6 +83,7 @@ TEST_F(ISOBMFFAV1CTest, TestAV1CParser) {
 TEST_F(ISOBMFFAV1CTest, TestAV1CParserInitialPresentationDelay) {
   // fuzzer::conv: data
   const std::vector<uint8_t>& buffer = {
+      // clang-format off
       // marker = 1, version = 1
       0x81,
       // seq_profile = 1, seq_level_idx_0 = 13
@@ -90,7 +94,9 @@ TEST_F(ISOBMFFAV1CTest, TestAV1CParserInitialPresentationDelay) {
       0xc0,
       // initial_presentation_delay_present = 1,
       // initial_presentation_delay_minus_one = 3
-      0x13};
+      0x13
+      // clang-format on
+  };
   // (no configOBUs)
 
   // fuzzer::conv: begin
@@ -131,7 +137,11 @@ TEST_F(ISOBMFFAV1CTest, TestAV1CParserInitialPresentationDelay) {
 // A truncated av1C (2 of the 4 fixed bytes) must be reported as an error.
 TEST_F(ISOBMFFAV1CTest, TestAV1CParserTruncated) {
   // fuzzer::conv: data
-  const std::vector<uint8_t>& buffer = {0x81, 0x08};
+  const std::vector<uint8_t>& buffer = {
+      // clang-format off
+      0x81, 0x08
+      // clang-format on
+  };
 
   // fuzzer::conv: begin
   ISOBMFF::BinaryDataStream stream(buffer);

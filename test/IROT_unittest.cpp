@@ -21,9 +21,12 @@ class ISOBMFFIROTTest : public ::testing::Test {
 TEST_F(ISOBMFFIROTTest, TestIROTParser) {
   // fuzzer::conv: data
   const std::vector<uint8_t>& buffer = {
+      // clang-format off
       // irot box size: 9 bytes, box header not included
       // reserved = 0, angle = 3 (270 degrees anti-clockwise)
-      0x03};
+      0x03
+      // clang-format on
+  };
 
   // fuzzer::conv: begin
   ISOBMFF::BinaryDataStream stream(buffer);
@@ -50,8 +53,12 @@ TEST_F(ISOBMFFIROTTest, TestIROTParser) {
 // A synthetic irot with its 6 reserved bits set: only angle is kept.
 TEST_F(ISOBMFFIROTTest, TestIROTParserReservedBits) {
   // fuzzer::conv: data
-  const std::vector<uint8_t>& buffer = {// reserved = 0x3f, angle = 1
-                                        0xfd};
+  const std::vector<uint8_t>& buffer = {
+      // clang-format off
+      // reserved = 0x3f, angle = 1
+      0xfd
+      // clang-format on
+  };
 
   // fuzzer::conv: begin
   ISOBMFF::BinaryDataStream stream(buffer);
@@ -79,7 +86,9 @@ TEST_F(ISOBMFFIROTTest, TestIROTParserReservedBits) {
 TEST_F(ISOBMFFIROTTest, TestIROTParserTruncated) {
   // fuzzer::conv: data
   const std::vector<uint8_t>& buffer = {
+      // clang-format off
       // (no data)
+      // clang-format on
   };
 
   // fuzzer::conv: begin

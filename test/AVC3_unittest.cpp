@@ -2,24 +2,25 @@
  *  Copyright (c) Meta Platforms, Inc. and its affiliates.
  */
 
-#include <ISOBMFF.hpp>                  // for various
-#include <BinaryDataStream.hpp> // for BinaryDataStream
-#include <Parser.hpp>           // for Parser
-
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+
+#include <BinaryDataStream.hpp>  // for BinaryDataStream
+#include <ISOBMFF.hpp>           // for various
+#include <Parser.hpp>            // for Parser
 
 namespace ISOBMFF {
 
 class ISOBMFFAVC3Test : public ::testing::Test {
-public:
+ public:
   ISOBMFFAVC3Test() {}
   ~ISOBMFFAVC3Test() override {}
 };
 
 TEST_F(ISOBMFFAVC3Test, TestAVC3Parser) {
   // fuzzer::conv: data
-  const std::vector<uint8_t> &buffer = {
+  const std::vector<uint8_t>& buffer = {
+      // clang-format off
       // following example input is from a sample .mp4 video file
       // avc3 size: 182 bytes (same data as avc1 test since they're identical)
       // 0x00, 0x00, 0x00, 0xb6,
@@ -48,7 +49,8 @@ TEST_F(ISOBMFFAVC3Test, TestAVC3Parser) {
       0x09, 0x00, 0x00, 0x00, 0x00, 0x14, 0x62, 0x74,
       0x72, 0x74, 0x00, 0x00, 0x00, 0x00, 0x00, 0x9a,
       0x9e, 0xc2, 0x00, 0x00, 0x00, 0x00
-    };
+      // clang-format on
+  };
 
   // fuzzer::conv: begin
   ISOBMFF::BinaryDataStream stream(buffer);
@@ -75,9 +77,10 @@ TEST_F(ISOBMFFAVC3Test, TestAVC3Parser) {
   // Validate data reference index
   EXPECT_EQ(avc3->GetDataReferenceIndex(), 1);
 
-  // Validate width and height (should be identical to AVC1 since they share implementation)
-  EXPECT_EQ(avc3->GetWidth(), 1728);  // 0x06C0
-  EXPECT_EQ(avc3->GetHeight(), 2304); // 0x0900
+  // Validate width and height (should be identical to AVC1 since they share
+  // implementation)
+  EXPECT_EQ(avc3->GetWidth(), 1728);   // 0x06C0
+  EXPECT_EQ(avc3->GetHeight(), 2304);  // 0x0900
 
   // Validate horizontal and vertical resolution
   // 72 dpi, as 16.16 fixed point and as a double
@@ -112,4 +115,4 @@ TEST_F(ISOBMFFAVC3Test, TestAVC3BoxType) {
   auto avc1 = std::dynamic_pointer_cast<ISOBMFF::AVC1>(box);
   ASSERT_NE(avc1, nullptr) << "Failed to cast to AVC1 (inheritance test)";
 }
-} // namespace ISOBMFF
+}  // namespace ISOBMFF

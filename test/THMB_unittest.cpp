@@ -22,9 +22,12 @@ class ISOBMFFTHMBTest : public ::testing::Test {
 TEST_F(ISOBMFFTHMBTest, TestTHMBParser) {
   // fuzzer::conv: data
   const std::vector<uint8_t>& buffer = {
+      // clang-format off
       // thmb box size: 14 bytes, box header not included
       // from_item_ID = 50, reference_count, to_item_IDs
-      0x00, 0x32, 0x00, 0x01, 0x00, 0x31};
+      0x00, 0x32, 0x00, 0x01, 0x00, 0x31
+      // clang-format on
+  };
 
   // fuzzer::conv: begin
   ISOBMFF::BinaryDataStream stream(buffer);

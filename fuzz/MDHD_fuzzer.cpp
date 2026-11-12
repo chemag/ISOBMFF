@@ -6,9 +6,9 @@
 // MDHD_unittest.cpp.
 // Do not edit directly.
 
-#include <MDHD.hpp>             // for various
-#include <BinaryDataStream.hpp> // for BinaryDataStream
-#include <Parser.hpp>           // for Parser
+#include <BinaryDataStream.hpp>  // for BinaryDataStream
+#include <MDHD.hpp>              // for various
+#include <Parser.hpp>            // for Parser
 
 
 // libfuzzer infra to test the fuzz target

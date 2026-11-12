@@ -2,24 +2,25 @@
  *  Copyright (c) Meta Platforms, Inc. and its affiliates.
  */
 
-#include <ISOBMFF.hpp>                  // for various
-#include <BinaryDataStream.hpp> // for BinaryDataStream
-#include <Parser.hpp>           // for Parser
-
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+
+#include <BinaryDataStream.hpp>  // for BinaryDataStream
+#include <ISOBMFF.hpp>           // for various
+#include <Parser.hpp>            // for Parser
 
 namespace ISOBMFF {
 
 class ISOBMFFAVC1Test : public ::testing::Test {
-public:
+ public:
   ISOBMFFAVC1Test() {}
   ~ISOBMFFAVC1Test() override {}
 };
 
 TEST_F(ISOBMFFAVC1Test, TestAVC1Parser) {
   // fuzzer::conv: data
-  const std::vector<uint8_t> &buffer = {
+  const std::vector<uint8_t>& buffer = {
+      // clang-format off
       // following example input is from a sample .mp4 video file
       // avc1 size: 182 bytes
       // 0x00, 0x00, 0x00, 0xb6,
@@ -48,7 +49,8 @@ TEST_F(ISOBMFFAVC1Test, TestAVC1Parser) {
       0x09, 0x00, 0x00, 0x00, 0x00, 0x14, 0x62, 0x74,
       0x72, 0x74, 0x00, 0x00, 0x00, 0x00, 0x00, 0x9a,
       0x9e, 0xc2, 0x00, 0x00, 0x00, 0x00
-    };
+      // clang-format on
+  };
 
   // fuzzer::conv: begin
   ISOBMFF::BinaryDataStream stream(buffer);
@@ -76,8 +78,8 @@ TEST_F(ISOBMFFAVC1Test, TestAVC1Parser) {
   EXPECT_EQ(avc1->GetDataReferenceIndex(), 1);
 
   // Validate width and height
-  EXPECT_EQ(avc1->GetWidth(), 1728);  // 0x06C0
-  EXPECT_EQ(avc1->GetHeight(), 2304); // 0x0900
+  EXPECT_EQ(avc1->GetWidth(), 1728);   // 0x06C0
+  EXPECT_EQ(avc1->GetHeight(), 2304);  // 0x0900
 
   // Validate horizontal and vertical resolution
   // 72 dpi, as 16.16 fixed point and as a double
@@ -106,4 +108,4 @@ TEST_F(ISOBMFFAVC1Test, TestAVC1Resolution) {
   avc1.SetVertResolution(-72.0);  // negative values saturate to 0
   EXPECT_EQ(avc1.GetVertResolutionRaw(), 0u);
 }
-} // namespace ISOBMFF
+}  // namespace ISOBMFF

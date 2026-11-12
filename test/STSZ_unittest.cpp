@@ -19,7 +19,8 @@ class ISOBMFFSTSZTest : public ::testing::Test {
 
 TEST_F(ISOBMFFSTSZTest, TestSTSZParser) {
   // fuzzer::conv: data
-  const std::vector<uint8_t> &buffer = {
+  const std::vector<uint8_t>& buffer = {
+      // clang-format off
       // the first 5 entries of the video track stsz in media/MOV1.MOV,
       // with sample_count set to 5
       // stsz size: 40 bytes
@@ -37,6 +38,7 @@ TEST_F(ISOBMFFSTSZTest, TestSTSZParser) {
       0x00, 0x02, 0x91, 0x0b, 0x00, 0x01, 0xd4, 0x68,
       0x00, 0x01, 0x31, 0x94, 0x00, 0x00, 0x99, 0x67,
       0x00, 0x00, 0x3f, 0xd4
+      // clang-format on
   };
 
   // fuzzer::conv: begin
@@ -69,7 +71,8 @@ TEST_F(ISOBMFFSTSZTest, TestSTSZParser) {
 
 TEST_F(ISOBMFFSTSZTest, TestSTSZParserConstantSize) {
   // fuzzer::conv: data
-  const std::vector<uint8_t> &buffer = {
+  const std::vector<uint8_t>& buffer = {
+      // clang-format off
       // the stsz of the first timed-metadata track in media/MOV1.MOV
       // stsz size: 20 bytes
       // 0x00, 0x00, 0x00, 0x14,
@@ -82,6 +85,7 @@ TEST_F(ISOBMFFSTSZTest, TestSTSZParserConstantSize) {
       0x00, 0x00, 0x00, 0x08,
       // sample_count: 1
       0x00, 0x00, 0x00, 0x01
+      // clang-format on
   };
 
   // fuzzer::conv: begin
@@ -109,7 +113,8 @@ TEST_F(ISOBMFFSTSZTest, TestSTSZParserConstantSize) {
 
 TEST_F(ISOBMFFSTSZTest, TestSTSZParserTruncated) {
   // fuzzer::conv: data
-  const std::vector<uint8_t> &buffer = {
+  const std::vector<uint8_t>& buffer = {
+      // clang-format off
       // sample_count says 5 samples, but the table holds only 3 entries
       // stsz content:
       // version (1 byte) and flags (3 bytes)
@@ -121,6 +126,7 @@ TEST_F(ISOBMFFSTSZTest, TestSTSZParserTruncated) {
       // entry_size[0..2]
       0x00, 0x02, 0x91, 0x0b, 0x00, 0x01, 0xd4, 0x68,
       0x00, 0x01, 0x31, 0x94
+      // clang-format on
   };
 
   // fuzzer::conv: begin

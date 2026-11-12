@@ -6,8 +6,8 @@
 // Parser_unittest.cpp.
 // Do not edit directly.
 
-#include <ISOBMFF.hpp>        // for various
-#include <Parser.hpp> // for Parser
+#include <ISOBMFF.hpp>  // for various
+#include <Parser.hpp>   // for Parser
 
 
 // libfuzzer infra to test the fuzz target

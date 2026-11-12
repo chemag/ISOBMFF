@@ -2,24 +2,25 @@
  *  Copyright (c) Meta Platforms, Inc. and its affiliates.
  */
 
-#include <ISOBMFF.hpp>                  // for various
-#include <BinaryDataStream.hpp> // for BinaryDataStream
-#include <Parser.hpp>           // for Parser
-
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+
+#include <BinaryDataStream.hpp>  // for BinaryDataStream
+#include <ISOBMFF.hpp>           // for various
+#include <Parser.hpp>            // for Parser
 
 namespace ISOBMFF {
 
 class ISOBMFFSTTSTest : public ::testing::Test {
-public:
+ public:
   ISOBMFFSTTSTest() {}
   ~ISOBMFFSTTSTest() override {}
 };
 
 TEST_F(ISOBMFFSTTSTest, TestSTTSParser) {
   // fuzzer::conv: data
-  const std::vector<uint8_t> &buffer = {
+  const std::vector<uint8_t>& buffer = {
+      // clang-format off
       // following example input is from a sample .mp4 video file
       // stts size: 88 bytes
       // 0x00, 0x00, 0x00, 0x58,
@@ -36,6 +37,7 @@ TEST_F(ISOBMFFSTTSTest, TestSTTSParser) {
       0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x0b, 0xbf,
       0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x0b, 0xb0,
       0x00, 0x00, 0x00, 0x03, 0x00, 0x00, 0x0b, 0xbf
+      // clang-format on
   };
 
   // fuzzer::conv: begin
@@ -58,7 +60,7 @@ TEST_F(ISOBMFFSTTSTest, TestSTTSParser) {
 
   // Validate entry count
   EXPECT_EQ(stts->GetEntryCount(), 9);
-  
+
   // Validate sample counts and deltas
   EXPECT_EQ(stts->GetSampleCount(0), 8);
   EXPECT_EQ(stts->GetSampleDelta(0), 3000);
@@ -79,4 +81,4 @@ TEST_F(ISOBMFFSTTSTest, TestSTTSParser) {
   EXPECT_EQ(stts->GetSampleCount(8), 3);
   EXPECT_EQ(stts->GetSampleDelta(8), 3007);
 }
-} // namespace ISOBMFF
+}  // namespace ISOBMFF

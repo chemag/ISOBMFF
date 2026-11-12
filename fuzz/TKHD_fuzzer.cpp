@@ -6,9 +6,9 @@
 // TKHD_unittest.cpp.
 // Do not edit directly.
 
-#include <ISOBMFF.hpp>                  // for various
-#include <BinaryDataStream.hpp> // for BinaryDataStream
-#include <Parser.hpp>           // for Parser
+#include <BinaryDataStream.hpp>  // for BinaryDataStream
+#include <ISOBMFF.hpp>           // for various
+#include <Parser.hpp>            // for Parser
 
 
 // libfuzzer infra to test the fuzz target

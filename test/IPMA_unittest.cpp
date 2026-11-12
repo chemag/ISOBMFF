@@ -21,6 +21,7 @@ class ISOBMFFIPMATest : public ::testing::Test {
 TEST_F(ISOBMFFIPMATest, TestIPMAParser) {
   // fuzzer::conv: data
   const std::vector<uint8_t>& buffer = {
+      // clang-format off
       // ipma version 0, flags 0 (8-bit associations)
       0x00, 0x00, 0x00, 0x00,
       // entry_count: 2
@@ -34,7 +35,9 @@ TEST_F(ISOBMFFIPMATest, TestIPMAParser) {
       // entry 2: item_ID: 2, association_count: 1
       0x00, 0x02, 0x01,
       // essential: 1, property_index: 3
-      0x83};
+      0x83
+      // clang-format on
+  };
 
   // fuzzer::conv: begin
   ISOBMFF::BinaryDataStream stream(buffer);
@@ -72,12 +75,15 @@ TEST_F(ISOBMFFIPMATest, TestIPMAParser) {
 TEST_F(ISOBMFFIPMATest, TestIPMAEntryCountExceedsData) {
   // fuzzer::conv: data
   const std::vector<uint8_t>& buffer = {
+      // clang-format off
       // ipma version 0, flags 0
       0x00, 0x00, 0x00, 0x00,
       // entry_count: 0xffffffff
       0xff, 0xff, 0xff, 0xff,
       // entry 1: item_ID: 1, association_count: 1, property_index: 1
-      0x00, 0x01, 0x01, 0x81};
+      0x00, 0x01, 0x01, 0x81
+      // clang-format on
+  };
 
   auto start = std::chrono::steady_clock::now();
   // fuzzer::conv: begin
@@ -109,12 +115,15 @@ TEST_F(ISOBMFFIPMATest, TestIPMAEntryCountExceedsData) {
 TEST_F(ISOBMFFIPMATest, TestIPMATruncatedEntry) {
   // fuzzer::conv: data
   const std::vector<uint8_t>& buffer = {
+      // clang-format off
       // ipma version 1 (32-bit item_ID), flags 0
       0x01, 0x00, 0x00, 0x00,
       // entry_count: 0x10000000
       0x10, 0x00, 0x00, 0x00,
       // entry 1: truncated (1 byte)
-      0x00};
+      0x00
+      // clang-format on
+  };
 
   auto start = std::chrono::steady_clock::now();
   ISOBMFF::BinaryDataStream stream(buffer);
@@ -137,6 +146,7 @@ TEST_F(ISOBMFFIPMATest, TestIPMATruncatedEntry) {
 TEST_F(ISOBMFFIPMATest, TestIPMAAssociationCountExceedsData) {
   // fuzzer::conv: data
   const std::vector<uint8_t>& buffer = {
+      // clang-format off
       // ipma version 0, flags 1 (16-bit associations)
       0x00, 0x00, 0x00, 0x01,
       // entry_count: 1
@@ -146,7 +156,9 @@ TEST_F(ISOBMFFIPMATest, TestIPMAAssociationCountExceedsData) {
       // essential: 1, property_index: 5
       0x80, 0x05,
       // association 2: truncated (1 byte)
-      0x00};
+      0x00
+      // clang-format on
+  };
 
   ISOBMFF::BinaryDataStream stream(buffer);
   ISOBMFF::Parser parser;
@@ -170,11 +182,17 @@ TEST_F(ISOBMFFIPMATest, TestIPMAAssociationCountExceedsData) {
 TEST_F(ISOBMFFIPMATest, TestIPMAEntryCountInFile) {
   // fuzzer::conv: data
   const std::vector<uint8_t>& buffer = {
-      0x00, 0x00, 0x00, 0x18, 0x66, 0x74, 0x79, 0x70, 0x6d, 0x61, 0x6e, 0x64,
-      0x72, 0x6f, 0x69, 0x64, 0x2e, 0x76, 0x65, 0x72, 0x73, 0x69, 0x6e, 0x6e,
-      0x00, 0x00, 0x00, 0x22, 0x69, 0x70, 0x6d, 0x61, 0x6e, 0x64, 0x72, 0x6f,
-      0x69, 0x64, 0x2e, 0x76, 0x65, 0x72, 0x73, 0x69, 0x6e, 0x6e, 0x00, 0x00,
-      0x18, 0x66, 0x74, 0x79, 0x70, 0x00, 0x00, 0x01, 0x74, 0x00};
+      // clang-format off
+      0x00, 0x00, 0x00, 0x18, 0x66, 0x74, 0x79, 0x70,
+      0x6d, 0x61, 0x6e, 0x64, 0x72, 0x6f, 0x69, 0x64,
+      0x2e, 0x76, 0x65, 0x72, 0x73, 0x69, 0x6e, 0x6e,
+      0x00, 0x00, 0x00, 0x22, 0x69, 0x70, 0x6d, 0x61,
+      0x6e, 0x64, 0x72, 0x6f, 0x69, 0x64, 0x2e, 0x76,
+      0x65, 0x72, 0x73, 0x69, 0x6e, 0x6e, 0x00, 0x00,
+      0x18, 0x66, 0x74, 0x79, 0x70, 0x00, 0x00, 0x01,
+      0x74, 0x00
+      // clang-format on
+  };
 
   auto start = std::chrono::steady_clock::now();
   ISOBMFF::Parser parser;

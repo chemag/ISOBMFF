@@ -21,10 +21,13 @@ class ISOBMFFSCHMTest : public ::testing::Test {
 TEST_F(ISOBMFFSCHMTest, TestSCHMParser) {
   // fuzzer::conv: data
   const std::vector<uint8_t>& buffer = {
+      // clang-format off
       // version = 0, flags = 0
       0x00, 0x00, 0x00, 0x00,
       // scheme_type = 'cenc', scheme_version = 0x00010000
-      0x63, 0x65, 0x6e, 0x63, 0x00, 0x01, 0x00, 0x00};
+      0x63, 0x65, 0x6e, 0x63, 0x00, 0x01, 0x00, 0x00
+      // clang-format on
+  };
 
   // fuzzer::conv: begin
   ISOBMFF::BinaryDataStream stream(buffer);
@@ -53,13 +56,17 @@ TEST_F(ISOBMFFSCHMTest, TestSCHMParser) {
 TEST_F(ISOBMFFSCHMTest, TestSCHMParserURI) {
   // fuzzer::conv: data
   const std::vector<uint8_t>& buffer = {
+      // clang-format off
       // version = 0, flags = 1
       0x00, 0x00, 0x00, 0x01,
       // scheme_type = 'cbcs', scheme_version = 0x00010000
       0x63, 0x62, 0x63, 0x73, 0x00, 0x01, 0x00, 0x00,
       // scheme_uri = "urn:example:scheme"
-      0x75, 0x72, 0x6e, 0x3a, 0x65, 0x78, 0x61, 0x6d, 0x70, 0x6c, 0x65, 0x3a,
-      0x73, 0x63, 0x68, 0x65, 0x6d, 0x65, 0x00};
+      0x75, 0x72, 0x6e, 0x3a, 0x65, 0x78, 0x61, 0x6d,
+      0x70, 0x6c, 0x65, 0x3a, 0x73, 0x63, 0x68, 0x65,
+      0x6d, 0x65, 0x00
+      // clang-format on
+  };
 
   // fuzzer::conv: begin
   ISOBMFF::BinaryDataStream stream(buffer);
@@ -87,8 +94,11 @@ TEST_F(ISOBMFFSCHMTest, TestSCHMParserURI) {
 TEST_F(ISOBMFFSCHMTest, TestSCHMParserTruncated) {
   // fuzzer::conv: data
   const std::vector<uint8_t>& buffer = {
+      // clang-format off
       // version = 0, flags = 0, scheme_type = 'cenc'
-      0x00, 0x00, 0x00, 0x00, 0x63, 0x65, 0x6e, 0x63};
+      0x00, 0x00, 0x00, 0x00, 0x63, 0x65, 0x6e, 0x63
+      // clang-format on
+  };
 
   // fuzzer::conv: begin
   ISOBMFF::BinaryDataStream stream(buffer);

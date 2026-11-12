@@ -2,35 +2,35 @@
  *  Copyright (c) Meta Platforms, Inc. and its affiliates.
  */
 
-#include <ISOBMFF.hpp>                  // for various
-#include <BinaryDataStream.hpp> // for BinaryDataStream
-#include <Parser.hpp>           // for Parser
-
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+
+#include <BinaryDataStream.hpp>  // for BinaryDataStream
+#include <ISOBMFF.hpp>           // for various
+#include <Parser.hpp>            // for Parser
 
 namespace ISOBMFF {
 
 class ISOBMFFDREFTest : public ::testing::Test {
-public:
+ public:
   ISOBMFFDREFTest() {}
   ~ISOBMFFDREFTest() override {}
- };
+};
 
- TEST_F(ISOBMFFDREFTest, TestDREFParser) {
+TEST_F(ISOBMFFDREFTest, TestDREFParser) {
   // fuzzer::conv: data
-  const std::vector<uint8_t> &buffer = {
+  const std::vector<uint8_t>& buffer = {
+      // clang-format off
       // following example input is from a sample .mp4 video file
       // dref size: 28 bytes
       // 0x00, 0x00, 0x00, 0x1c,
       // dref
       // 0x64, 0x72, 0x65, 0x66,
       // dref content:
-      0x00, 0x00, 0x00, 0x00,
-      0x00, 0x00, 0x00, 0x01,
-      0x00, 0x00, 0x00, 0x0c,
-      0x75, 0x72, 0x6c, 0x20,
+      0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01,
+      0x00, 0x00, 0x00, 0x0c, 0x75, 0x72, 0x6c, 0x20,
       0x00, 0x00, 0x00, 0x01
+      // clang-format on
   };
 
   // fuzzer::conv: begin
@@ -56,17 +56,18 @@ public:
 
   // Validate sub-boxes inside DREF
   std::vector<std::shared_ptr<Box>> boxes = dref->GetBoxes();
-  ASSERT_EQ(boxes.size(), 1) << "Expected 1 sub-box, but found " << boxes.size();
-  for (const auto &subbox : boxes) {
+  ASSERT_EQ(boxes.size(), 1)
+      << "Expected 1 sub-box, but found " << boxes.size();
+  for (const auto& subbox : boxes) {
     const std::string type = subbox->GetName();
     if (type == "url ") {
       auto urlBox = std::dynamic_pointer_cast<ISOBMFF::URL>(subbox);
       ASSERT_NE(urlBox, nullptr) << "Failed to cast to URL box";
       EXPECT_EQ(urlBox->GetVersion(), 0) << "Unexpected URL box version";
       EXPECT_EQ(urlBox->GetFlags(), 1) << "Unexpected URL box flags";
-  } else {
+    } else {
       FAIL() << "Unexpected sub-box type: " << type;
-  }
+    }
   }
 }
-} // namespace
+}  // namespace ISOBMFF

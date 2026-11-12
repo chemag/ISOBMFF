@@ -21,13 +21,16 @@ class ISOBMFFCOLRTest : public ::testing::Test {
 TEST_F(ISOBMFFCOLRTest, TestCOLRParserNclx) {
   // fuzzer::conv: data
   const std::vector<uint8_t>& buffer = {
+      // clang-format off
       // colour_type = 'nclx'
       0x6e, 0x63, 0x6c, 0x78,
       // colour_primaries = 1, transfer_characteristics = 1, matrix_coefficients
       // = 1
       0x00, 0x01, 0x00, 0x01, 0x00, 0x01,
       // full_range_flag = 1
-      0x80};
+      0x80
+      // clang-format on
+  };
 
   // fuzzer::conv: begin
   ISOBMFF::BinaryDataStream stream(buffer);
@@ -58,11 +61,14 @@ TEST_F(ISOBMFFCOLRTest, TestCOLRParserNclx) {
 // media/IMG1.HEIC (the profile itself is 548 bytes).
 TEST_F(ISOBMFFCOLRTest, TestCOLRParserProf) {
   // fuzzer::conv: data
-  const std::vector<uint8_t>& buffer = {// colour_type = 'prof'
-                                        0x70, 0x72, 0x6f, 0x66,
-                                        // ICC profile (truncated)
-                                        0x00, 0x00, 0x02, 0x24, 0x61, 0x70,
-                                        0x70, 0x6c};
+  const std::vector<uint8_t>& buffer = {
+      // clang-format off
+      // colour_type = 'prof'
+      0x70, 0x72, 0x6f, 0x66,
+      // ICC profile (truncated)
+      0x00, 0x00, 0x02, 0x24, 0x61, 0x70, 0x70, 0x6c
+      // clang-format on
+  };
 
   // fuzzer::conv: begin
   ISOBMFF::BinaryDataStream stream(buffer);
@@ -92,8 +98,12 @@ TEST_F(ISOBMFFCOLRTest, TestCOLRParserProf) {
 TEST_F(ISOBMFFCOLRTest, TestCOLRParserTruncated) {
   // fuzzer::conv: data
   const std::vector<uint8_t>& buffer = {
+      // clang-format off
       // colour_type = 'nclx', 3 x 16-bit codes
-      0x6e, 0x63, 0x6c, 0x78, 0x00, 0x01, 0x00, 0x01, 0x00, 0x01};
+      0x6e, 0x63, 0x6c, 0x78, 0x00, 0x01, 0x00, 0x01,
+      0x00, 0x01
+      // clang-format on
+  };
 
   // fuzzer::conv: begin
   ISOBMFF::BinaryDataStream stream(buffer);

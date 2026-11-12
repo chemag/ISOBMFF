@@ -2,24 +2,25 @@
  *  Copyright (c) Meta Platforms, Inc. and its affiliates.
  */
 
-#include <MDHD.hpp>             // for various
-#include <BinaryDataStream.hpp> // for BinaryDataStream
-#include <Parser.hpp>           // for Parser
-
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+
+#include <BinaryDataStream.hpp>  // for BinaryDataStream
+#include <MDHD.hpp>              // for various
+#include <Parser.hpp>            // for Parser
 
 namespace ISOBMFF {
 
 class ISOBMFFMDHDTest : public ::testing::Test {
-public:
+ public:
   ISOBMFFMDHDTest() {}
   ~ISOBMFFMDHDTest() override {}
 };
 
 TEST_F(ISOBMFFMDHDTest, TestMDHDParser) {
   // fuzzer::conv: data
-  const std::vector<uint8_t> &buffer = {
+  const std::vector<uint8_t>& buffer = {
+      // clang-format off
       // following example input is from a sample .mp4 video file
       // mdhd size: 32 bytes
       0x00, 0x00, 0x00, 0x20,
@@ -29,6 +30,7 @@ TEST_F(ISOBMFFMDHDTest, TestMDHDParser) {
       0x00, 0x00, 0x00, 0x00, 0xe4, 0x00, 0xb3, 0x34,
       0xe4, 0x00, 0xb3, 0x34, 0x00, 0x01, 0x5f, 0x90,
       0x00, 0x01, 0xef, 0x13, 0x00, 0x00, 0x00, 0x00,
+      // clang-format on
   };
 
   // fuzzer::conv: begin
@@ -66,7 +68,7 @@ TEST_F(ISOBMFFMDHDTest, TestMDHDParser) {
 
   // Validate displayable properties
   auto props = mdhd->GetDisplayableProperties();
-  EXPECT_EQ(props.size(), 11); // 2 from FullBox + 9 from MDHD
+  EXPECT_EQ(props.size(), 11);  // 2 from FullBox + 9 from MDHD
 
   // Validate FullBox properties
   EXPECT_EQ(props[0].first, "Version");
@@ -94,4 +96,4 @@ TEST_F(ISOBMFFMDHDTest, TestMDHDParser) {
   EXPECT_EQ(props[10].first, "Predefined");
   EXPECT_EQ(props[10].second, std::to_string(mdhd->GetPredefined()));
 }
-} // namespace ISOBMFF
+}  // namespace ISOBMFF

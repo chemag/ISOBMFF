@@ -20,6 +20,7 @@ class ISOBMFFDOPSTest : public ::testing::Test {
 TEST_F(ISOBMFFDOPSTest, TestDOPSParserFamily0) {
   // fuzzer::conv: data
   const std::vector<uint8_t>& buffer = {
+      // clang-format off
       // following example input is from an ffmpeg-generated (libopus) .mp4
       // file (dOps box size: 19 bytes, box header not included)
       // Version = 0, OutputChannelCount = 2
@@ -31,7 +32,9 @@ TEST_F(ISOBMFFDOPSTest, TestDOPSParserFamily0) {
       // OutputGain = 0
       0x00, 0x00,
       // ChannelMappingFamily = 0
-      0x00};
+      0x00
+      // clang-format on
+  };
 
   // fuzzer::conv: begin
   ISOBMFF::BinaryDataStream stream(buffer);
@@ -67,21 +70,25 @@ TEST_F(ISOBMFFDOPSTest, TestDOPSParserFamily0) {
 
 TEST_F(ISOBMFFDOPSTest, TestDOPSParserFamily1) {
   // fuzzer::conv: data
-  const std::vector<uint8_t>& buffer = {// 5.1 surround (Vorbis channel order)
-                                        // Version = 0, OutputChannelCount = 6
-                                        0x00, 0x06,
-                                        // PreSkip = 312
-                                        0x01, 0x38,
-                                        // InputSampleRate = 44100
-                                        0x00, 0x00, 0xac, 0x44,
-                                        // OutputGain = -256 (-1 dB in Q7.8)
-                                        0xff, 0x00,
-                                        // ChannelMappingFamily = 1
-                                        0x01,
-                                        // StreamCount = 4, CoupledCount = 2
-                                        0x04, 0x02,
-                                        // ChannelMapping = [0, 4, 1, 2, 3, 5]
-                                        0x00, 0x04, 0x01, 0x02, 0x03, 0x05};
+  const std::vector<uint8_t>& buffer = {
+      // clang-format off
+      // 5.1 surround (Vorbis channel order)
+      // Version = 0, OutputChannelCount = 6
+      0x00, 0x06,
+      // PreSkip = 312
+      0x01, 0x38,
+      // InputSampleRate = 44100
+      0x00, 0x00, 0xac, 0x44,
+      // OutputGain = -256 (-1 dB in Q7.8)
+      0xff, 0x00,
+      // ChannelMappingFamily = 1
+      0x01,
+      // StreamCount = 4, CoupledCount = 2
+      0x04, 0x02,
+      // ChannelMapping = [0, 4, 1, 2, 3, 5]
+      0x00, 0x04, 0x01, 0x02, 0x03, 0x05
+      // clang-format on
+  };
 
   // fuzzer::conv: begin
   ISOBMFF::BinaryDataStream stream(buffer);
@@ -124,9 +131,12 @@ TEST_F(ISOBMFFDOPSTest, TestDOPSParserFamily1) {
 TEST_F(ISOBMFFDOPSTest, TestDOPSParserTruncatedMapping) {
   // fuzzer::conv: data
   const std::vector<uint8_t>& buffer = {
+      // clang-format off
       // ChannelMappingFamily = 1 with a truncated ChannelMapping
       0x00, 0x06, 0x01, 0x38, 0x00, 0x00, 0xbb, 0x80,
-      0x00, 0x00, 0x01, 0x04, 0x02, 0x00, 0x04};
+      0x00, 0x00, 0x01, 0x04, 0x02, 0x00, 0x04
+      // clang-format on
+  };
 
   // fuzzer::conv: begin
   ISOBMFF::BinaryDataStream stream(buffer);

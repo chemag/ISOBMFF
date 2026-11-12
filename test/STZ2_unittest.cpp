@@ -19,7 +19,8 @@ class ISOBMFFSTZ2Test : public ::testing::Test {
 
 TEST_F(ISOBMFFSTZ2Test, TestSTZ2Parser16Bit) {
   // fuzzer::conv: data
-  const std::vector<uint8_t> &buffer = {
+  const std::vector<uint8_t>& buffer = {
+      // clang-format off
       // the first 5 entries of the audio track stsz in media/MOV1.MOV,
       // re-encoded as a stz2 with 16-bit entries (no file in our test
       // corpora uses stz2)
@@ -35,7 +36,9 @@ TEST_F(ISOBMFFSTZ2Test, TestSTZ2Parser16Bit) {
       // sample_count: 5
       0x00, 0x00, 0x00, 0x05,
       // entry_size[0..4]
-      0x00, 0x04, 0x00, 0xb3, 0x01, 0xfc, 0x01, 0x2c, 0x01, 0x21
+      0x00, 0x04, 0x00, 0xb3, 0x01, 0xfc, 0x01, 0x2c,
+      0x01, 0x21
+      // clang-format on
   };
 
   // fuzzer::conv: begin
@@ -68,7 +71,8 @@ TEST_F(ISOBMFFSTZ2Test, TestSTZ2Parser16Bit) {
 
 TEST_F(ISOBMFFSTZ2Test, TestSTZ2Parser8Bit) {
   // fuzzer::conv: data
-  const std::vector<uint8_t> &buffer = {
+  const std::vector<uint8_t>& buffer = {
+      // clang-format off
       // stz2 content:
       // version (1 byte) and flags (3 bytes)
       0x00, 0x00, 0x00, 0x00,
@@ -78,6 +82,7 @@ TEST_F(ISOBMFFSTZ2Test, TestSTZ2Parser8Bit) {
       0x00, 0x00, 0x00, 0x03,
       // entry_size[0..2]
       0x04, 0xb3, 0xff
+      // clang-format on
   };
 
   // fuzzer::conv: begin
@@ -108,7 +113,8 @@ TEST_F(ISOBMFFSTZ2Test, TestSTZ2Parser8Bit) {
 
 TEST_F(ISOBMFFSTZ2Test, TestSTZ2Parser4Bit) {
   // fuzzer::conv: data
-  const std::vector<uint8_t> &buffer = {
+  const std::vector<uint8_t>& buffer = {
+      // clang-format off
       // stz2 content:
       // version (1 byte) and flags (3 bytes)
       0x00, 0x00, 0x00, 0x00,
@@ -118,6 +124,7 @@ TEST_F(ISOBMFFSTZ2Test, TestSTZ2Parser4Bit) {
       0x00, 0x00, 0x00, 0x03,
       // entry_size[0..2]: 1, 15, 7 (and a 0 nibble of padding)
       0x1f, 0x70
+      // clang-format on
   };
 
   // fuzzer::conv: begin
@@ -148,7 +155,8 @@ TEST_F(ISOBMFFSTZ2Test, TestSTZ2Parser4Bit) {
 
 TEST_F(ISOBMFFSTZ2Test, TestSTZ2ParserInvalidFieldSize) {
   // fuzzer::conv: data
-  const std::vector<uint8_t> &buffer = {
+  const std::vector<uint8_t>& buffer = {
+      // clang-format off
       // stz2 content:
       // version (1 byte) and flags (3 bytes)
       0x00, 0x00, 0x00, 0x00,
@@ -158,6 +166,7 @@ TEST_F(ISOBMFFSTZ2Test, TestSTZ2ParserInvalidFieldSize) {
       0x00, 0x00, 0x00, 0x02,
       // 24 bits of entries
       0x00, 0x40, 0x0b
+      // clang-format on
   };
 
   // fuzzer::conv: begin
@@ -180,7 +189,8 @@ TEST_F(ISOBMFFSTZ2Test, TestSTZ2ParserInvalidFieldSize) {
 
 TEST_F(ISOBMFFSTZ2Test, TestSTZ2ParserTruncated) {
   // fuzzer::conv: data
-  const std::vector<uint8_t> &buffer = {
+  const std::vector<uint8_t>& buffer = {
+      // clang-format off
       // sample_count says 5 samples, but the table holds only 3 entries
       // stz2 content:
       // version (1 byte) and flags (3 bytes)
@@ -191,6 +201,7 @@ TEST_F(ISOBMFFSTZ2Test, TestSTZ2ParserTruncated) {
       0x00, 0x00, 0x00, 0x05,
       // entry_size[0..2]
       0x00, 0x04, 0x00, 0xb3, 0x01, 0xfc
+      // clang-format on
   };
 
   // fuzzer::conv: begin

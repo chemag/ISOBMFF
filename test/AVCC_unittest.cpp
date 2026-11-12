@@ -2,24 +2,25 @@
  *  Copyright (c) Meta Platforms, Inc. and its affiliates.
  */
 
-#include <ISOBMFF.hpp>                  // for various
-#include <BinaryDataStream.hpp> // for BinaryDataStream
-#include <Parser.hpp>           // for Parser
-
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+
+#include <BinaryDataStream.hpp>  // for BinaryDataStream
+#include <ISOBMFF.hpp>           // for various
+#include <Parser.hpp>            // for Parser
 
 namespace ISOBMFF {
 
 class ISOBMFFAVCCTest : public ::testing::Test {
-public:
+ public:
   ISOBMFFAVCCTest() {}
   ~ISOBMFFAVCCTest() override {}
 };
 
 TEST_F(ISOBMFFAVCCTest, TestAVCCParser) {
   // fuzzer::conv: data
-  const std::vector<uint8_t> &buffer = {
+  const std::vector<uint8_t>& buffer = {
+      // clang-format off
       // following example input is from a sample .mp4 video file
       // avcC size: 57 bytes
       // 0x00, 0x00, 0x00, 0x39,
@@ -33,7 +34,8 @@ TEST_F(ISOBMFFAVCCTest, TestAVCCParser) {
       0x78, 0xc1, 0x8c, 0xb0, 0x01, 0x00, 0x06, 0x68,
       0xeb, 0xe3, 0xcb, 0x22, 0xc0, 0xfd, 0xf8, 0xf8,
       0x00
-    };
+      // clang-format on
+  };
 
   // fuzzer::conv: begin
   ISOBMFF::BinaryDataStream stream(buffer);
@@ -95,7 +97,8 @@ TEST_F(ISOBMFFAVCCTest, TestAVCCParser) {
 // The SPS used to be kept as a 256-byte zero-filled buffer.
 TEST_F(ISOBMFFAVCCTest, TestAVCCTruncatedNALUnit) {
   // fuzzer::conv: data
-  const std::vector<uint8_t> &buffer = {
+  const std::vector<uint8_t>& buffer = {
+      // clang-format off
       // configurationVersion, profile, compatibility, level
       0x01, 0x64, 0x00, 0x1f,
       // lengthSizeMinusOne: 3
@@ -104,6 +107,7 @@ TEST_F(ISOBMFFAVCCTest, TestAVCCTruncatedNALUnit) {
       0xe1,
       // SPS: length 256, truncated (6 bytes left)
       0x01, 0x00, 0x67, 0x64, 0x00, 0x1f, 0xac, 0xd9
+      // clang-format on
   };
 
   // fuzzer::conv: begin
@@ -121,9 +125,9 @@ TEST_F(ISOBMFFAVCCTest, TestAVCCTruncatedNALUnit) {
   ASSERT_NE(avcc, nullptr) << "Failed to cast to AVCC";
   // no NAL unit with fabricated (zero-filled) data
   EXPECT_EQ(avcc->GetSequenceParameterSetNALUnits().size(), 0);
-  for (const auto &nal_unit : avcc->GetPictureParameterSetNALUnits()) {
+  for (const auto& nal_unit : avcc->GetPictureParameterSetNALUnits()) {
     std::vector<uint8_t> data = nal_unit->GetData();
-    for (const auto &byte : data) {
+    for (const auto& byte : data) {
       EXPECT_NE(byte, 0) << "zero-filled NAL unit data";
     }
     EXPECT_LE(data.size(), buffer.size());
@@ -134,7 +138,8 @@ TEST_F(ISOBMFFAVCCTest, TestAVCCTruncatedNALUnit) {
 // extension NAL unit (the SPS and PPS are shortened).
 TEST_F(ISOBMFFAVCCTest, TestAVCCHigh422) {
   // fuzzer::conv: data
-  const std::vector<uint8_t> &buffer = {
+  const std::vector<uint8_t>& buffer = {
+      // clang-format off
       // configurationVersion, profile (122), compatibility, level
       0x01, 0x7a, 0x00, 0x28,
       // lengthSizeMinusOne: 3
@@ -157,6 +162,7 @@ TEST_F(ISOBMFFAVCCTest, TestAVCCHigh422) {
       0x01,
       // SPS extension: length 3
       0x00, 0x03, 0x6d, 0x01, 0x02
+      // clang-format on
   };
 
   // fuzzer::conv: begin
@@ -188,7 +194,8 @@ TEST_F(ISOBMFFAVCCTest, TestAVCCHigh422) {
 // High profile fields are absent, and that is not an error.
 TEST_F(ISOBMFFAVCCTest, TestAVCCHighWithoutHighProfileFields) {
   // fuzzer::conv: data
-  const std::vector<uint8_t> &buffer = {
+  const std::vector<uint8_t>& buffer = {
+      // clang-format off
       // configurationVersion, profile (100), compatibility, level
       0x01, 0x64, 0x00, 0x1f,
       // lengthSizeMinusOne: 3
@@ -203,6 +210,7 @@ TEST_F(ISOBMFFAVCCTest, TestAVCCHighWithoutHighProfileFields) {
       0x00, 0x02, 0x68, 0xee,
       // only 2 of the 4 fixed bytes of the High profile fields
       0xfd, 0xf8
+      // clang-format on
   };
 
   // fuzzer::conv: begin
@@ -229,7 +237,8 @@ TEST_F(ISOBMFFAVCCTest, TestAVCCHighWithoutHighProfileFields) {
 // not read as them.
 TEST_F(ISOBMFFAVCCTest, TestAVCCBaselineIgnoresTrailingBytes) {
   // fuzzer::conv: data
-  const std::vector<uint8_t> &buffer = {
+  const std::vector<uint8_t>& buffer = {
+      // clang-format off
       // configurationVersion, profile (66), compatibility, level
       0x01, 0x42, 0xc0, 0x1e,
       // lengthSizeMinusOne: 3
@@ -244,6 +253,7 @@ TEST_F(ISOBMFFAVCCTest, TestAVCCBaselineIgnoresTrailingBytes) {
       0x00, 0x02, 0x68, 0xce,
       // trailing bytes
       0xfd, 0xf8, 0xf8, 0x00
+      // clang-format on
   };
 
   // fuzzer::conv: begin
@@ -262,4 +272,4 @@ TEST_F(ISOBMFFAVCCTest, TestAVCCBaselineIgnoresTrailingBytes) {
   ASSERT_NE(avcc, nullptr) << "Failed to cast to AVCC";
   EXPECT_FALSE(avcc->HasHighProfileFields());
 }
-} // namespace ISOBMFF
+}  // namespace ISOBMFF

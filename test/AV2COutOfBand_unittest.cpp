@@ -22,6 +22,7 @@ class ISOBMFFAV2COutOfBandTest : public ::testing::Test {
 TEST_F(ISOBMFFAV2COutOfBandTest, TestAV2COutOfBandParser) {
   // fuzzer::conv: data
   const std::vector<uint8_t>& buffer = {
+      // clang-format off
       // av2C box size: 19 bytes, box header not included
       // reserved1 = 0
       0x00,
@@ -31,7 +32,9 @@ TEST_F(ISOBMFFAV2COutOfBandTest, TestAV2COutOfBandParser) {
       0x03, 0x08, 0x00, 0x2a,
       // config_obu[1]: leb128 length = 2 (non-minimal 3-byte encoding),
       // then 2 bytes
-      0x82, 0x80, 0x00, 0x0c, 0x01};
+      0x82, 0x80, 0x00, 0x0c, 0x01
+      // clang-format on
+  };
 
   // fuzzer::conv: begin
   ISOBMFF::BinaryDataStream stream(buffer);
@@ -65,10 +68,13 @@ TEST_F(ISOBMFFAV2COutOfBandTest, TestAV2COutOfBandParser) {
 TEST_F(ISOBMFFAV2COutOfBandTest, TestAV2COutOfBandParserTruncatedOBU) {
   // fuzzer::conv: data
   const std::vector<uint8_t>& buffer = {
+      // clang-format off
       // reserved1 = 0, config_obus_count_minus1 = 0
       0x00, 0x00,
       // config_obu[0]: leb128 length = 16, but only 2 bytes follow
-      0x10, 0x08, 0x00};
+      0x10, 0x08, 0x00
+      // clang-format on
+  };
 
   // fuzzer::conv: begin
   ISOBMFF::BinaryDataStream stream(buffer);
@@ -88,10 +94,14 @@ TEST_F(ISOBMFFAV2COutOfBandTest, TestAV2COutOfBandParserTruncatedOBU) {
 TEST_F(ISOBMFFAV2COutOfBandTest, TestAV2COutOfBandParserOverlongLeb128) {
   // fuzzer::conv: data
   const std::vector<uint8_t>& buffer = {
+      // clang-format off
       // reserved1 = 0, config_obus_count_minus1 = 0
       0x00, 0x00,
       // config_obu[0]: 9 leb128 bytes, all with the continuation bit set
-      0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x01};
+      0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80,
+      0x01
+      // clang-format on
+  };
 
   // fuzzer::conv: begin
   ISOBMFF::BinaryDataStream stream(buffer);

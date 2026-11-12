@@ -2,12 +2,12 @@
  *  Copyright (c) Meta Platforms, Inc. and its affiliates.
  */
 
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
+
 #include <BinaryDataStream.hpp>  // for BinaryDataStream
 #include <ISOBMFF.hpp>           // for various
 #include <Parser.hpp>            // for Parser
-
-#include <gmock/gmock.h>
-#include <gtest/gtest.h>
 
 namespace ISOBMFF {
 
@@ -20,6 +20,7 @@ class ISOBMFFELSTTest : public ::testing::Test {
 TEST_F(ISOBMFFELSTTest, TestELSTParserVersion0) {
   // fuzzer::conv: data
   const std::vector<uint8_t>& buffer = {
+      // clang-format off
       // following example input is from MOV1.MOV test file
       // elst size: 28 bytes
       // 0x00, 0x00, 0x00, 0x1c,
@@ -37,7 +38,9 @@ TEST_F(ISOBMFFELSTTest, TestELSTParserVersion0) {
       // media_rate_integer (2 bytes) = 1
       0x00, 0x01,
       // media_rate_fraction (2 bytes) = 0
-      0x00, 0x00};
+      0x00, 0x00
+      // clang-format on
+  };
 
   // fuzzer::conv: begin
   ISOBMFF::BinaryDataStream stream(buffer);
@@ -94,6 +97,7 @@ TEST_F(ISOBMFFELSTTest, TestELSTParserVersion0) {
 TEST_F(ISOBMFFELSTTest, TestELSTParserVersion0MultipleEntries) {
   // fuzzer::conv: data
   const std::vector<uint8_t>& buffer = {
+      // clang-format off
       // elst content (version 0) with 2 entries:
       // version (1 byte) + flags (3 bytes)
       0x00, 0x00, 0x00, 0x00,
@@ -116,7 +120,9 @@ TEST_F(ISOBMFFELSTTest, TestELSTParserVersion0MultipleEntries) {
       // media_rate_integer (2 bytes) = 2
       0x00, 0x02,
       // media_rate_fraction (2 bytes) = 0x8000 (0.5)
-      0x80, 0x00};
+      0x80, 0x00
+      // clang-format on
+  };
 
   // fuzzer::conv: begin
   ISOBMFF::BinaryDataStream stream(buffer);
@@ -158,6 +164,7 @@ TEST_F(ISOBMFFELSTTest, TestELSTParserVersion0MultipleEntries) {
 TEST_F(ISOBMFFELSTTest, TestELSTParserVersion1) {
   // fuzzer::conv: data
   const std::vector<uint8_t>& buffer = {
+      // clang-format off
       // elst content (version 1) with 64-bit values:
       // version (1 byte) = 1 + flags (3 bytes)
       0x01, 0x00, 0x00, 0x00,
@@ -170,7 +177,9 @@ TEST_F(ISOBMFFELSTTest, TestELSTParserVersion1) {
       // media_rate_integer (2 bytes) = 1
       0x00, 0x01,
       // media_rate_fraction (2 bytes) = 0
-      0x00, 0x00};
+      0x00, 0x00
+      // clang-format on
+  };
 
   // fuzzer::conv: begin
   ISOBMFF::BinaryDataStream stream(buffer);
@@ -208,6 +217,7 @@ TEST_F(ISOBMFFELSTTest, TestELSTParserTestMp4) {
   // This file has 1 elst box with 2 entries
   // fuzzer::conv: data
   const std::vector<uint8_t>& buffer = {
+      // clang-format off
       // elst content (version 0) with 2 entries from test.mp4:
       // version (1 byte) + flags (3 bytes)
       0x00, 0x00, 0x00, 0x00,
@@ -230,7 +240,9 @@ TEST_F(ISOBMFFELSTTest, TestELSTParserTestMp4) {
       // media_rate_integer (2 bytes) = 1
       0x00, 0x01,
       // media_rate_fraction (2 bytes) = 0
-      0x00, 0x00};
+      0x00, 0x00
+      // clang-format on
+  };
 
   // fuzzer::conv: begin
   ISOBMFF::BinaryDataStream stream(buffer);
@@ -269,6 +281,7 @@ TEST_F(ISOBMFFELSTTest, TestELSTParserStackedMp4Track1) {
   // This file has 2 elst boxes, this is the first one with 1 entry
   // fuzzer::conv: data
   const std::vector<uint8_t>& buffer = {
+      // clang-format off
       // elst content (version 0) with 1 entry from stacked.mp4 track 1:
       // version (1 byte) + flags (3 bytes)
       0x00, 0x00, 0x00, 0x00,
@@ -281,7 +294,9 @@ TEST_F(ISOBMFFELSTTest, TestELSTParserStackedMp4Track1) {
       // media_rate_integer (2 bytes) = 1
       0x00, 0x01,
       // media_rate_fraction (2 bytes) = 0
-      0x00, 0x00};
+      0x00, 0x00
+      // clang-format on
+  };
 
   // fuzzer::conv: begin
   ISOBMFF::BinaryDataStream stream(buffer);
@@ -314,6 +329,7 @@ TEST_F(ISOBMFFELSTTest, TestELSTParserStackedMp4Track2) {
   // This file has 2 elst boxes, this is the second one with 2 entries
   // fuzzer::conv: data
   const std::vector<uint8_t>& buffer = {
+      // clang-format off
       // elst content (version 0) with 2 entries from stacked.mp4 track 2:
       // version (1 byte) + flags (3 bytes)
       0x00, 0x00, 0x00, 0x00,
@@ -336,7 +352,9 @@ TEST_F(ISOBMFFELSTTest, TestELSTParserStackedMp4Track2) {
       // media_rate_integer (2 bytes) = 1
       0x00, 0x01,
       // media_rate_fraction (2 bytes) = 0
-      0x00, 0x00};
+      0x00, 0x00
+      // clang-format on
+  };
 
   // fuzzer::conv: begin
   ISOBMFF::BinaryDataStream stream(buffer);
@@ -373,6 +391,7 @@ TEST_F(ISOBMFFELSTTest, TestELSTParserStackedMp4Track2) {
 TEST_F(ISOBMFFELSTTest, TestELSTMediaRate) {
   // fuzzer::conv: data
   const std::vector<uint8_t>& buffer = {
+      // clang-format off
       // elst content (version 0) with 2 entries:
       // version (1 byte) + flags (3 bytes)
       0x00, 0x00, 0x00, 0x00,
@@ -396,7 +415,9 @@ TEST_F(ISOBMFFELSTTest, TestELSTMediaRate) {
       // media_rate_integer (2 bytes) = 0
       0x00, 0x00,
       // media_rate_fraction (2 bytes) = 0
-      0x00, 0x00};
+      0x00, 0x00
+      // clang-format on
+  };
 
   // fuzzer::conv: begin
   ISOBMFF::BinaryDataStream stream(buffer);

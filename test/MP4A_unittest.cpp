@@ -2,24 +2,25 @@
  *  Copyright (c) Meta Platforms, Inc. and its affiliates.
  */
 
-#include <ISOBMFF.hpp>                  // for various
-#include <BinaryDataStream.hpp> // for BinaryDataStream
-#include <Parser.hpp>           // for Parser
-
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+
+#include <BinaryDataStream.hpp>  // for BinaryDataStream
+#include <ISOBMFF.hpp>           // for various
+#include <Parser.hpp>            // for Parser
 
 namespace ISOBMFF {
 
 class ISOBMFFMP4ATest : public ::testing::Test {
-public:
+ public:
   ISOBMFFMP4ATest() {}
   ~ISOBMFFMP4ATest() override {}
 };
 
 TEST_F(ISOBMFFMP4ATest, TestMP4AParser) {
   // fuzzer::conv: data
-  const std::vector<uint8_t> &buffer = {
+  const std::vector<uint8_t>& buffer = {
+      // clang-format off
       // following example input is from a sample .mp4 video file
       // mp4a size: 75 bytes
       // 0x00, 0x00, 0x00, 0x4b,
@@ -35,6 +36,7 @@ TEST_F(ISOBMFFMP4ATest, TestMP4AParser) {
       0x15, 0x00, 0x03, 0x00, 0x00, 0x01, 0xf4, 0x00,
       0x00, 0x01, 0xf4, 0x00, 0x05, 0x02, 0x11, 0x90,
       0x06, 0x01, 0x02
+      // clang-format on
   };
 
   // fuzzer::conv: begin
@@ -83,4 +85,4 @@ TEST_F(ISOBMFFMP4ATest, TestMP4ASampleRate) {
   mp4a.SetSampleRate(96000.0);
   EXPECT_EQ(mp4a.GetSampleRateRaw(), UINT32_MAX);
 }
-} // namespace ISOBMFF
+}  // namespace ISOBMFF

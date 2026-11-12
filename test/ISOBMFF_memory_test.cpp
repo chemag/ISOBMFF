@@ -25,7 +25,8 @@
  *   ./isobmff_memory_test
  *
  *   # Run specific test
- *   ./isobmff_memory_test --gtest_filter=IsobmffMemoryTest.MDATSkippingMemoryUsage
+ *   ./isobmff_memory_test
+ * --gtest_filter=IsobmffMemoryTest.MDATSkippingMemoryUsage
  */
 
 #include <gtest/gtest.h>
@@ -74,7 +75,8 @@ class IsobmffMemoryTest : public ::testing::Test {
       return 0;
     }
     fclose(fp);
-    return static_cast<size_t>(rss) * static_cast<size_t>(sysconf(_SC_PAGESIZE));
+    return static_cast<size_t>(rss) *
+           static_cast<size_t>(sysconf(_SC_PAGESIZE));
 #else
     return 0;
 #endif

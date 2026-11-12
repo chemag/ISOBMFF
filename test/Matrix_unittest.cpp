@@ -22,6 +22,7 @@ TEST_F(ISOBMFFMatrixTest, TestMatrixRotation90) {
   // a 90-degree rotation of a 1080-pixel-wide image: {0,1,0, -1,0,0,
   // 1080,0,1}, as stored in a tkhd box
   const std::vector<uint8_t> buffer = {
+      // clang-format off
       // a = 0 (16.16)
       0x00, 0x00, 0x00, 0x00,
       // b = 1.0 (16.16)
@@ -39,7 +40,9 @@ TEST_F(ISOBMFFMatrixTest, TestMatrixRotation90) {
       // y = 0 (16.16)
       0x00, 0x00, 0x00, 0x00,
       // w = 1.0 (2.30)
-      0x40, 0x00, 0x00, 0x00};
+      0x40, 0x00, 0x00, 0x00
+      // clang-format on
+  };
 
   ISOBMFF::BinaryDataStream stream(buffer);
   ISOBMFF::Matrix matrix;
@@ -61,8 +64,7 @@ TEST_F(ISOBMFFMatrixTest, TestMatrixRotation90) {
 
 TEST_F(ISOBMFFMatrixTest, TestMatrixSetters) {
   // the unity matrix, as stored
-  ISOBMFF::Matrix matrix(0x00010000, 0, 0, 0, 0x00010000, 0, 0, 0,
-                         0x40000000);
+  ISOBMFF::Matrix matrix(0x00010000, 0, 0, 0, 0x00010000, 0, 0, 0, 0x40000000);
   EXPECT_DOUBLE_EQ(matrix.GetA(), 1.0);
   EXPECT_DOUBLE_EQ(matrix.GetD(), 1.0);
   EXPECT_DOUBLE_EQ(matrix.GetW(), 1.0);

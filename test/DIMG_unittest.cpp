@@ -22,9 +22,13 @@ class ISOBMFFDIMGTest : public ::testing::Test {
 TEST_F(ISOBMFFDIMGTest, TestDIMGParser) {
   // fuzzer::conv: data
   const std::vector<uint8_t>& buffer = {
+      // clang-format off
       // dimg box size: 20 bytes, box header not included
       // from_item_ID = 49, reference_count, to_item_IDs
-      0x00, 0x31, 0x00, 0x04, 0x00, 0x01, 0x00, 0x02, 0x00, 0x03, 0x00, 0x04};
+      0x00, 0x31, 0x00, 0x04, 0x00, 0x01, 0x00, 0x02,
+      0x00, 0x03, 0x00, 0x04
+      // clang-format on
+  };
 
   // fuzzer::conv: begin
   ISOBMFF::BinaryDataStream stream(buffer);
@@ -56,9 +60,12 @@ TEST_F(ISOBMFFDIMGTest, TestDIMGParser) {
 TEST_F(ISOBMFFDIMGTest, TestDIMGParserVersion1) {
   // fuzzer::conv: data
   const std::vector<uint8_t>& buffer = {
+      // clang-format off
       // from_item_ID = 65536, reference_count = 2, to_item_ID = 1, 2
-      0x00, 0x01, 0x00, 0x00, 0x00, 0x02, 0x00,
-      0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x02};
+      0x00, 0x01, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00,
+      0x00, 0x01, 0x00, 0x00, 0x00, 0x02
+      // clang-format on
+  };
 
   // fuzzer::conv: begin
   ISOBMFF::BinaryDataStream stream(buffer);
@@ -91,8 +98,11 @@ TEST_F(ISOBMFFDIMGTest, TestDIMGParserVersion1) {
 TEST_F(ISOBMFFDIMGTest, TestDIMGParserTruncated) {
   // fuzzer::conv: data
   const std::vector<uint8_t>& buffer = {
+      // clang-format off
       // from_item_ID = 49, reference_count = 4, to_item_ID = 1, 2
-      0x00, 0x31, 0x00, 0x04, 0x00, 0x01, 0x00, 0x02};
+      0x00, 0x31, 0x00, 0x04, 0x00, 0x01, 0x00, 0x02
+      // clang-format on
+  };
 
   // fuzzer::conv: begin
   ISOBMFF::BinaryDataStream stream(buffer);

@@ -41,12 +41,12 @@
 #include <CDSC.hpp>
 #include <COLR.hpp>
 #include <CTTS.hpp>
-#include <DEC3.hpp>
-#include <EC3.hpp>
 #include <ContainerBox.hpp>
+#include <DEC3.hpp>
 #include <DIMG.hpp>
 #include <DOPS.hpp>
 #include <DREF.hpp>
+#include <EC3.hpp>
 #include <ELST.hpp>
 #include <FRMA.hpp>
 #include <FTYP.hpp>
@@ -74,8 +74,8 @@
 #include <STSD.hpp>
 #include <STSS.hpp>
 #include <STSZ.hpp>
-#include <STZ2.hpp>
 #include <STTS.hpp>
+#include <STZ2.hpp>
 #include <THMB.hpp>
 #include <TKHD.hpp>
 #include <URL.hpp>

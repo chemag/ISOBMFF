@@ -21,6 +21,7 @@ class ISOBMFFILOCTest : public ::testing::Test {
 TEST_F(ISOBMFFILOCTest, TestILOCParser) {
   // fuzzer::conv: data
   const std::vector<uint8_t>& buffer = {
+      // clang-format off
       // iloc version 0, flags 0
       0x00, 0x00, 0x00, 0x00,
       // offset_size: 4, length_size: 4
@@ -38,7 +39,9 @@ TEST_F(ISOBMFFILOCTest, TestILOCParser) {
       // extent_offset: 0x200, extent_length: 0x10
       0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00, 0x10,
       // extent_offset: 0x300, extent_length: 0x30
-      0x00, 0x00, 0x03, 0x00, 0x00, 0x00, 0x00, 0x30};
+      0x00, 0x00, 0x03, 0x00, 0x00, 0x00, 0x00, 0x30
+      // clang-format on
+  };
 
   // fuzzer::conv: begin
   ISOBMFF::BinaryDataStream stream(buffer);
@@ -79,6 +82,7 @@ TEST_F(ISOBMFFILOCTest, TestILOCParser) {
 TEST_F(ISOBMFFILOCTest, TestILOCItemCountExceedsData) {
   // fuzzer::conv: data
   const std::vector<uint8_t>& buffer = {
+      // clang-format off
       // iloc version 2, flags 0
       0x02, 0x00, 0x00, 0x00,
       // offset_size: 4, length_size: 4
@@ -89,9 +93,12 @@ TEST_F(ISOBMFFILOCTest, TestILOCItemCountExceedsData) {
       0xff, 0xff, 0xff, 0xff,
       // item 1: item_ID: 1, construction_method: 0, data_reference_index: 0,
       // extent_count: 1
-      0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01,
+      0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00,
+      0x00, 0x01,
       // extent_offset: 0x10, extent_length: 0x20
-      0x00, 0x00, 0x00, 0x10, 0x00, 0x00, 0x00, 0x20};
+      0x00, 0x00, 0x00, 0x10, 0x00, 0x00, 0x00, 0x20
+      // clang-format on
+  };
 
   auto start = std::chrono::steady_clock::now();
   // fuzzer::conv: begin
@@ -123,6 +130,7 @@ TEST_F(ISOBMFFILOCTest, TestILOCItemCountExceedsData) {
 TEST_F(ISOBMFFILOCTest, TestILOCExtentCountExceedsData) {
   // fuzzer::conv: data
   const std::vector<uint8_t>& buffer = {
+      // clang-format off
       // iloc version 0, flags 0
       0x00, 0x00, 0x00, 0x00,
       // offset_size: 4, length_size: 4
@@ -134,7 +142,9 @@ TEST_F(ISOBMFFILOCTest, TestILOCExtentCountExceedsData) {
       // item 1: item_ID: 1, data_reference_index: 0, extent_count: 0xffff
       0x00, 0x01, 0x00, 0x00, 0xff, 0xff,
       // extent_offset: 0x10, extent_length: 0x20
-      0x00, 0x00, 0x00, 0x10, 0x00, 0x00, 0x00, 0x20};
+      0x00, 0x00, 0x00, 0x10, 0x00, 0x00, 0x00, 0x20
+      // clang-format on
+  };
 
   ISOBMFF::BinaryDataStream stream(buffer);
   ISOBMFF::Parser parser;
@@ -156,6 +166,7 @@ TEST_F(ISOBMFFILOCTest, TestILOCExtentCountExceedsData) {
 TEST_F(ISOBMFFILOCTest, TestILOCZeroSizeExtents) {
   // fuzzer::conv: data
   const std::vector<uint8_t>& buffer = {
+      // clang-format off
       // iloc version 0, flags 0
       0x00, 0x00, 0x00, 0x00,
       // offset_size: 0, length_size: 0
@@ -167,7 +178,9 @@ TEST_F(ISOBMFFILOCTest, TestILOCZeroSizeExtents) {
       // item 1: item_ID: 1, data_reference_index: 0, extent_count: 0xffff
       0x00, 0x01, 0x00, 0x00, 0xff, 0xff,
       // item 2: item_ID: 2, data_reference_index: 0, extent_count: 0xffff
-      0x00, 0x02, 0x00, 0x00, 0xff, 0xff};
+      0x00, 0x02, 0x00, 0x00, 0xff, 0xff
+      // clang-format on
+  };
 
   ISOBMFF::BinaryDataStream stream(buffer);
   ISOBMFF::Parser parser;
@@ -190,6 +203,7 @@ TEST_F(ISOBMFFILOCTest, TestILOCZeroSizeExtents) {
 TEST_F(ISOBMFFILOCTest, TestILOCTruncatedItem) {
   // fuzzer::conv: data
   const std::vector<uint8_t>& buffer = {
+      // clang-format off
       // iloc version 0, flags 0
       0x00, 0x00, 0x00, 0x00,
       // offset_size: 4, length_size: 4
@@ -203,7 +217,9 @@ TEST_F(ISOBMFFILOCTest, TestILOCTruncatedItem) {
       // extent_offset: 0x10, extent_length: 0x20
       0x00, 0x00, 0x00, 0x10, 0x00, 0x00, 0x00, 0x20,
       // item 2: truncated (1 byte)
-      0x00};
+      0x00
+      // clang-format on
+  };
 
   auto start = std::chrono::steady_clock::now();
   // fuzzer::conv: begin
@@ -234,6 +250,7 @@ TEST_F(ISOBMFFILOCTest, TestILOCTruncatedItem) {
 TEST_F(ISOBMFFILOCTest, TestILOCTruncatedExtent) {
   // fuzzer::conv: data
   const std::vector<uint8_t>& buffer = {
+      // clang-format off
       // iloc version 0, flags 0
       0x00, 0x00, 0x00, 0x00,
       // offset_size: 4, length_size: 4
@@ -247,7 +264,9 @@ TEST_F(ISOBMFFILOCTest, TestILOCTruncatedExtent) {
       // extent_offset: 0x10, extent_length: 0x20
       0x00, 0x00, 0x00, 0x10, 0x00, 0x00, 0x00, 0x20,
       // extent 2: truncated (3 bytes)
-      0x00, 0x00, 0x00};
+      0x00, 0x00, 0x00
+      // clang-format on
+  };
 
   ISOBMFF::BinaryDataStream stream(buffer);
   ISOBMFF::Parser parser;
@@ -271,12 +290,17 @@ TEST_F(ISOBMFFILOCTest, TestILOCTruncatedExtent) {
 TEST_F(ISOBMFFILOCTest, TestILOCTruncatedItemInStsd) {
   // fuzzer::conv: data
   const std::vector<uint8_t>& buffer = {
-      0x17, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-      0x23, 0x69, 0x6c, 0x6f, 0x63, 0x69, 0x6e, 0x66, 0x65, 0x95, 0x00,
-      0x11, 0x00, 0x00, 0x6a, 0x6a, 0x00, 0x6a, 0x6a, 0x63, 0x6a, 0x6a,
-      0x13, 0xff, 0x00, 0x00, 0x00, 0x00, 0x6a, 0x00, 0x6a, 0x6a, 0x00,
-      0x6a, 0x6a, 0x63, 0x6a, 0x6a, 0x13, 0xff, 0xfd, 0x8b, 0x0f, 0x6a,
-      0xce, 0xff, 0xff, 0xff, 0x79, 0x70};
+      // clang-format off
+      0x17, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+      0x00, 0x00, 0x00, 0x23, 0x69, 0x6c, 0x6f, 0x63,
+      0x69, 0x6e, 0x66, 0x65, 0x95, 0x00, 0x11, 0x00,
+      0x00, 0x6a, 0x6a, 0x00, 0x6a, 0x6a, 0x63, 0x6a,
+      0x6a, 0x13, 0xff, 0x00, 0x00, 0x00, 0x00, 0x6a,
+      0x00, 0x6a, 0x6a, 0x00, 0x6a, 0x6a, 0x63, 0x6a,
+      0x6a, 0x13, 0xff, 0xfd, 0x8b, 0x0f, 0x6a, 0xce,
+      0xff, 0xff, 0xff, 0x79, 0x70
+      // clang-format on
+  };
 
   auto start = std::chrono::steady_clock::now();
   ISOBMFF::BinaryDataStream stream(buffer);

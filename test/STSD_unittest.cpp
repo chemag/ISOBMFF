@@ -2,24 +2,25 @@
  *  Copyright (c) Meta Platforms, Inc. and its affiliates.
  */
 
-#include <ISOBMFF.hpp>                  // for various
-#include <BinaryDataStream.hpp> // for BinaryDataStream
-#include <Parser.hpp>           // for Parser
-
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+
+#include <BinaryDataStream.hpp>  // for BinaryDataStream
+#include <ISOBMFF.hpp>           // for various
+#include <Parser.hpp>            // for Parser
 
 namespace ISOBMFF {
 
 class ISOBMFFSTSDTest : public ::testing::Test {
-public:
+ public:
   ISOBMFFSTSDTest() {}
   ~ISOBMFFSTSDTest() override {}
 };
 
 TEST_F(ISOBMFFSTSDTest, TestSTSDParser) {
   // fuzzer::conv: data
-  const std::vector<uint8_t> &buffer = {
+  const std::vector<uint8_t>& buffer = {
+      // clang-format off
       // following example input is from a sample .mp4 video file
       // stsd size: 237 bytes
       // 0x00, 0x00, 0x00, 0xed,
@@ -55,6 +56,7 @@ TEST_F(ISOBMFFSTSDTest, TestSTSDParser) {
       0x00, 0x17, 0x68, 0x50, 0x94, 0xa2, 0x00, 0x01,
       0x00, 0x0b, 0x44, 0x01, 0xc0, 0xe3, 0x0f, 0x09,
       0xc1, 0x50, 0xaf, 0xb0, 0x84
+      // clang-format on
   };
 
   // fuzzer::conv: begin
@@ -79,14 +81,15 @@ TEST_F(ISOBMFFSTSDTest, TestSTSDParser) {
   EXPECT_EQ(stsd->GetVersion(), 0) << "Unexpected STSD version";
   EXPECT_EQ(stsd->GetFlags(), 0) << "Unexpected STSD flags";
   std::vector<std::shared_ptr<Box>> boxes = stsd->GetBoxes();
-  ASSERT_EQ(boxes.size(), 1) << "Expected 1 sub-box, but found " << boxes.size();
-  for (const auto &subbox : boxes) {
+  ASSERT_EQ(boxes.size(), 1)
+      << "Expected 1 sub-box, but found " << boxes.size();
+  for (const auto& subbox : boxes) {
     const std::string type = subbox->GetName();
     if (type == "hvc1") {
       SUCCEED() << "Found expected hvc1 box";
-  } else {
+    } else {
       FAIL() << "Unexpected sub-box type: " << type;
-  }
+    }
   }
 }
-} // namespace ISOBMFF
+}  // namespace ISOBMFF

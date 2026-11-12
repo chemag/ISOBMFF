@@ -2,24 +2,25 @@
  *  Copyright (c) Meta Platforms, Inc. and its affiliates.
  */
 
-#include <ISOBMFF.hpp>                  // for various
-#include <BinaryDataStream.hpp> // for BinaryDataStream
-#include <Parser.hpp>           // for Parser
-
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+
+#include <BinaryDataStream.hpp>  // for BinaryDataStream
+#include <ISOBMFF.hpp>           // for various
+#include <Parser.hpp>            // for Parser
 
 namespace ISOBMFF {
 
 class ISOBMFFTKHDTest : public ::testing::Test {
-public:
+ public:
   ISOBMFFTKHDTest() {}
   ~ISOBMFFTKHDTest() override {}
 };
 
 TEST_F(ISOBMFFTKHDTest, TestTKHDParser) {
   // fuzzer::conv: data
-  const std::vector<uint8_t> &buffer = {
+  const std::vector<uint8_t>& buffer = {
+      // clang-format off
       // following example input is from a sample .mp4 video file
       // tkhd size: 92 bytes
       // 0x00, 0x00, 0x00, 0x5c,
@@ -37,6 +38,7 @@ TEST_F(ISOBMFFTKHDTest, TestTKHDParser) {
       0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
       0x40, 0x00, 0x00, 0x00, 0x06, 0xc0, 0x00, 0x00,
       0x09, 0x00, 0x00, 0x00
+      // clang-format on
   };
 
   // fuzzer::conv: begin
@@ -110,4 +112,4 @@ TEST_F(ISOBMFFTKHDTest, TestTKHDFixedPoint) {
   tkhd.SetVolume(0.5);
   EXPECT_EQ(tkhd.GetVolumeRaw(), 0x0080);
 }
-} // namespace ISOBMFF
+}  // namespace ISOBMFF

@@ -22,10 +22,14 @@ class ISOBMFFURNTest : public ::testing::Test {
 TEST_F(ISOBMFFURNTest, TestURNParser) {
   // fuzzer::conv: data
   const std::vector<uint8_t>& buffer = {
+      // clang-format off
       // version = 0, flags = 1 (media data in the same file)
       0x00, 0x00, 0x00, 0x01,
       // name = "urn:example"
-      0x75, 0x72, 0x6e, 0x3a, 0x65, 0x78, 0x61, 0x6d, 0x70, 0x6c, 0x65, 0x00};
+      0x75, 0x72, 0x6e, 0x3a, 0x65, 0x78, 0x61, 0x6d,
+      0x70, 0x6c, 0x65, 0x00
+      // clang-format on
+  };
 
   // fuzzer::conv: begin
   ISOBMFF::BinaryDataStream stream(buffer);
@@ -52,8 +56,12 @@ TEST_F(ISOBMFFURNTest, TestURNParser) {
 // A truncated urn (3 of the 4 version and flags bytes).
 TEST_F(ISOBMFFURNTest, TestURNParserTruncated) {
   // fuzzer::conv: data
-  const std::vector<uint8_t>& buffer = {// version and flags truncated
-                                        0x00, 0x00, 0x00};
+  const std::vector<uint8_t>& buffer = {
+      // clang-format off
+      // version and flags truncated
+      0x00, 0x00, 0x00
+      // clang-format on
+  };
 
   // fuzzer::conv: begin
   ISOBMFF::BinaryDataStream stream(buffer);

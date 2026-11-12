@@ -2,34 +2,34 @@
  *  Copyright (c) Meta Platforms, Inc. and its affiliates.
  */
 
-#include <ISOBMFF.hpp>                  // for various
-#include <BinaryDataStream.hpp> // for BinaryDataStream
-#include <Parser.hpp>           // for Parser
-
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+
+#include <BinaryDataStream.hpp>  // for BinaryDataStream
+#include <ISOBMFF.hpp>           // for various
+#include <Parser.hpp>            // for Parser
 
 namespace ISOBMFF {
 
 class ISOBMFFFTYPTest : public ::testing::Test {
-public:
+ public:
   ISOBMFFFTYPTest() {}
   ~ISOBMFFFTYPTest() override {}
 };
 
 TEST_F(ISOBMFFFTYPTest, TestFTYPParser) {
   // fuzzer::conv: data
-  const std::vector<uint8_t> &buffer = {
+  const std::vector<uint8_t>& buffer = {
+      // clang-format off
       // following example input is from a sample .mp4 video file
       // ftyp size: 24 bytes
       // 0x00, 0x00, 0x00, 0x18,
       // // ftyp
       // 0x66, 0x74, 0x79, 0x70,
       // ftyp content
-      0x6d, 0x70, 0x34, 0x32,
-      0x00, 0x00, 0x00, 0x00,
-      0x69, 0x73, 0x6f, 0x6d,
-      0x6d, 0x70, 0x34, 0x32
+      0x6d, 0x70, 0x34, 0x32, 0x00, 0x00, 0x00, 0x00,
+      0x69, 0x73, 0x6f, 0x6d, 0x6d, 0x70, 0x34, 0x32
+      // clang-format on
   };
 
   // fuzzer::conv: begin
@@ -72,4 +72,4 @@ TEST_F(ISOBMFFFTYPTest, TestFTYPParser) {
   EXPECT_EQ(displayableProperties[2].first, "Compatible brands");
   EXPECT_EQ(displayableProperties[2].second, Utils::ToString(compatibleBrands));
 }
-} // namespace ISOBMFF
+}  // namespace ISOBMFF

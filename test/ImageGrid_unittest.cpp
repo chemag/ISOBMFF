@@ -20,6 +20,7 @@ class ISOBMFFImageGridTest : public ::testing::Test {
 // (fuzz/converter.py only handles boxes created by Parser::CreateBox()).
 TEST_F(ISOBMFFImageGridTest, TestImageGrid2x2) {
   const std::vector<uint8_t> buffer = {
+      // clang-format off
       // version: 0
       0x00,
       // flags: 0 (16-bit output_width and output_height)
@@ -31,7 +32,9 @@ TEST_F(ISOBMFFImageGridTest, TestImageGrid2x2) {
       // output_width: 4096
       0x10, 0x00,
       // output_height: 3072
-      0x0c, 0x00};
+      0x0c, 0x00
+      // clang-format on
+  };
 
   ISOBMFF::BinaryDataStream stream(buffer);
   ISOBMFF::ImageGrid grid(stream);
@@ -48,6 +51,7 @@ TEST_F(ISOBMFFImageGridTest, TestImageGrid2x2) {
 
 TEST_F(ISOBMFFImageGridTest, TestImageGrid32BitOutputSize) {
   const std::vector<uint8_t> buffer = {
+      // clang-format off
       // version: 0
       0x00,
       // flags: 1 (32-bit output_width and output_height)
@@ -59,7 +63,9 @@ TEST_F(ISOBMFFImageGridTest, TestImageGrid32BitOutputSize) {
       // output_width: 12288
       0x00, 0x00, 0x30, 0x00,
       // output_height: 4096
-      0x00, 0x00, 0x10, 0x00};
+      0x00, 0x00, 0x10, 0x00
+      // clang-format on
+  };
 
   ISOBMFF::BinaryDataStream stream(buffer);
   ISOBMFF::ImageGrid grid(stream);
