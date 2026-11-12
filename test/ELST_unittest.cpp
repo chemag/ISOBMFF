@@ -69,6 +69,7 @@ TEST_F(ISOBMFFELSTTest, TestELSTParserVersion0) {
   EXPECT_EQ(elst->GetMediaTime(0), 0);
   EXPECT_EQ(elst->GetMediaRateInteger(0), 1);
   EXPECT_EQ(elst->GetMediaRateFraction(0), 0);
+  EXPECT_DOUBLE_EQ(elst->GetMediaRate(0), 1.0);
 
   // Validate displayable properties
   auto displayableProperties = elst->GetDisplayableProperties();
@@ -86,6 +87,8 @@ TEST_F(ISOBMFFELSTTest, TestELSTParserVersion0) {
   EXPECT_EQ(displayableProperties[5].second, "1");
   EXPECT_EQ(displayableProperties[6].first, "Media Rate Fraction");
   EXPECT_EQ(displayableProperties[6].second, "0");
+  EXPECT_EQ(displayableProperties[7].first, "Media Rate");
+  EXPECT_EQ(displayableProperties[7].second, std::to_string(1.0));
 }
 
 TEST_F(ISOBMFFELSTTest, TestELSTParserVersion0MultipleEntries) {
@@ -148,6 +151,8 @@ TEST_F(ISOBMFFELSTTest, TestELSTParserVersion0MultipleEntries) {
   EXPECT_EQ(elst->GetMediaRateInteger(1), 2);
   // 0x8000 as signed int16 is -32768
   EXPECT_EQ(elst->GetMediaRateFraction(1), -32768);
+  // media_rate is 0x00028000 (16.16): 2.5
+  EXPECT_DOUBLE_EQ(elst->GetMediaRate(1), 2.5);
 }
 
 TEST_F(ISOBMFFELSTTest, TestELSTParserVersion1) {
@@ -363,6 +368,58 @@ TEST_F(ISOBMFFELSTTest, TestELSTParserStackedMp4Track2) {
   EXPECT_EQ(elst->GetMediaTime(1), 0);
   EXPECT_EQ(elst->GetMediaRateInteger(1), 1);
   EXPECT_EQ(elst->GetMediaRateFraction(1), 0);
+}
+
+TEST_F(ISOBMFFELSTTest, TestELSTMediaRate) {
+  // fuzzer::conv: data
+  const std::vector<uint8_t>& buffer = {
+      // elst content (version 0) with 2 entries:
+      // version (1 byte) + flags (3 bytes)
+      0x00, 0x00, 0x00, 0x00,
+      // entry_count (4 bytes) = 2
+      0x00, 0x00, 0x00, 0x02,
+      // Entry 1: half-speed reverse play
+      // edit_duration (4 bytes) = 1000
+      0x00, 0x00, 0x03, 0xe8,
+      // media_time (4 bytes) = 2000
+      0x00, 0x00, 0x07, 0xd0,
+      // media_rate (16.16) = -0.5 (0xffff8000):
+      // media_rate_integer (2 bytes) = 0xffff
+      0xff, 0xff,
+      // media_rate_fraction (2 bytes) = 0x8000
+      0x80, 0x00,
+      // Entry 2: a dwell (media_rate = 0)
+      // edit_duration (4 bytes) = 500
+      0x00, 0x00, 0x01, 0xf4,
+      // media_time (4 bytes) = 2000
+      0x00, 0x00, 0x07, 0xd0,
+      // media_rate_integer (2 bytes) = 0
+      0x00, 0x00,
+      // media_rate_fraction (2 bytes) = 0
+      0x00, 0x00};
+
+  // fuzzer::conv: begin
+  ISOBMFF::BinaryDataStream stream(buffer);
+  ISOBMFF::Parser parser;
+  std::shared_ptr<ISOBMFF::Box> box = parser.CreateBox("elst");
+
+  ISOBMFF::Error error;
+  if (box != nullptr) {
+    error = box->ReadData(parser, stream);
+  }
+  // fuzzer::conv: end
+  EXPECT_FALSE(error) << "Parse error: " << error.GetMessage();
+
+  auto elst = std::dynamic_pointer_cast<ISOBMFF::ELST>(box);
+  ASSERT_NE(elst, nullptr) << "Failed to cast to ELST";
+  ASSERT_EQ(elst->GetEntryCount(), 2u);
+
+  // the raw halves, as stored
+  EXPECT_EQ(elst->GetMediaRateInteger(0), -1);
+  EXPECT_EQ(elst->GetMediaRateFraction(0), -32768);
+  // the 16.16 value they form: -1 + 0.5
+  EXPECT_DOUBLE_EQ(elst->GetMediaRate(0), -0.5);
+  EXPECT_DOUBLE_EQ(elst->GetMediaRate(1), 0.0);
 }
 
 }  // namespace ISOBMFF

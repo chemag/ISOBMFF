@@ -55,8 +55,13 @@ class ISOBMFF_EXPORT ELST : public FullBox {
   size_t GetEntryCount() const;
   uint64_t GetEditDuration(size_t index) const;
   int64_t GetMediaTime(size_t index) const;
+  // media_rate_integer and media_rate_fraction, as stored: together they
+  // are media_rate, a 16.16 fixed-point number (1.0 is normal speed)
   int16_t GetMediaRateInteger(size_t index) const;
   int16_t GetMediaRateFraction(size_t index) const;
+  // media_rate as a double: e.g. 1.0 for normal-speed forward play, 0.0 for
+  // a dwell
+  double GetMediaRate(size_t index) const;
 
   ISOBMFF_EXPORT friend void swap(ELST& o1, ELST& o2);
 

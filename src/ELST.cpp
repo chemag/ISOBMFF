@@ -29,6 +29,7 @@
  */
 
 #include <ELST.hpp>
+#include <FixedPoint.hpp>
 #include <Parser.hpp>
 #include <cstdint>
 #include <cstring>
@@ -135,6 +136,7 @@ ELST::GetDisplayableProperties() const {
                      std::to_string(this->GetMediaRateInteger(index))});
     props.push_back({"Media Rate Fraction",
                      std::to_string(this->GetMediaRateFraction(index))});
+    props.push_back({"Media Rate", std::to_string(this->GetMediaRate(index))});
   }
 
   return props;
@@ -156,6 +158,20 @@ int16_t ELST::GetMediaRateInteger(size_t index) const {
 
 int16_t ELST::GetMediaRateFraction(size_t index) const {
   return this->impl->_media_rate_fraction[index];
+}
+
+double ELST::GetMediaRate(size_t index) const {
+  // ISO/IEC 14496-12:2026, section 8.6.6.3: media_rate "is expressed as a
+  // 16.16 fixed-point integer (16 bits each for the integer and fractional
+  // part)". Put the two 16-bit halves back together as the 32-bit
+  // fixed-point value they form, so that negative rates (e.g. -0.5, stored
+  // as 0xffff8000) convert correctly.
+  const uint32_t raw =
+      (static_cast<uint32_t>(
+           static_cast<uint16_t>(this->impl->_media_rate_integer[index]))
+       << 16) |
+      static_cast<uint16_t>(this->impl->_media_rate_fraction[index]);
+  return FixedPoint::ToDouble(static_cast<int32_t>(raw), 16);
 }
 
 ELST::IMPL::IMPL() {}
