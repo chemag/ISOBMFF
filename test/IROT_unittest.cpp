@@ -43,7 +43,8 @@ TEST_F(ISOBMFFIROTTest, TestIROTParser) {
 
   auto irot = std::dynamic_pointer_cast<ISOBMFF::IROT>(box);
   ASSERT_NE(irot, nullptr) << "Failed to cast to IROT";
-  EXPECT_EQ(irot->GetAngle(), 3);
+  EXPECT_EQ(irot->GetAngleRaw(), 3);
+  EXPECT_EQ(irot->GetAngle(), 270);
 }
 
 // A synthetic irot with its 6 reserved bits set: only angle is kept.
@@ -70,7 +71,8 @@ TEST_F(ISOBMFFIROTTest, TestIROTParserReservedBits) {
 
   auto irot = std::dynamic_pointer_cast<ISOBMFF::IROT>(box);
   ASSERT_NE(irot, nullptr) << "Failed to cast to IROT";
-  EXPECT_EQ(irot->GetAngle(), 1);
+  EXPECT_EQ(irot->GetAngleRaw(), 1);
+  EXPECT_EQ(irot->GetAngle(), 90);
 }
 
 // An empty irot.
@@ -92,5 +94,23 @@ TEST_F(ISOBMFFIROTTest, TestIROTParserTruncated) {
   // fuzzer::conv: end
 
   EXPECT_TRUE(error);
+}
+
+TEST_F(ISOBMFFIROTTest, TestIROTAngleSetters) {
+  ISOBMFF::IROT irot;
+  irot.SetAngle(180);
+  EXPECT_EQ(irot.GetAngleRaw(), 2);
+  EXPECT_EQ(irot.GetAngle(), 180);
+  irot.SetAngleRaw(3);
+  EXPECT_EQ(irot.GetAngle(), 270);
+  // 360 is a full turn (0), and values that are not multiples of 90 round
+  // down to one
+  irot.SetAngle(360);
+  EXPECT_EQ(irot.GetAngle(), 0);
+  irot.SetAngle(100);
+  EXPECT_EQ(irot.GetAngle(), 90);
+  // the raw field is 2 bits wide
+  irot.SetAngleRaw(5);
+  EXPECT_EQ(irot.GetAngleRaw(), 1);
 }
 }  // namespace ISOBMFF

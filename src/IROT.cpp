@@ -74,7 +74,7 @@ Error IROT::ReadData(Parser& parser, BinaryStream& stream) {
   err = stream.ReadUInt8(u8);
   if (err) return err;
 
-  this->SetAngle(u8 & 0x3);
+  this->SetAngleRaw(u8 & 0x3);
   return Error();
 }
 
@@ -82,14 +82,25 @@ std::vector<std::pair<std::string, std::string> >
 IROT::GetDisplayableProperties() const {
   auto props(Box::GetDisplayableProperties());
 
+  props.push_back({"Angle (raw)", std::to_string(this->GetAngleRaw())});
   props.push_back({"Angle", std::to_string(this->GetAngle())});
 
   return props;
 }
 
-uint8_t IROT::GetAngle() const { return this->impl->_angle; }
+uint8_t IROT::GetAngleRaw() const { return this->impl->_angle; }
 
-void IROT::SetAngle(uint8_t value) { this->impl->_angle = value; }
+void IROT::SetAngleRaw(uint8_t value) {
+  this->impl->_angle = static_cast<uint8_t>(value & 0x3);
+}
+
+uint16_t IROT::GetAngle() const {
+  return static_cast<uint16_t>(this->impl->_angle * 90);
+}
+
+void IROT::SetAngle(uint16_t value) {
+  this->impl->_angle = static_cast<uint8_t>((value / 90) % 4);
+}
 
 IROT::IMPL::IMPL() : _angle(0) {}
 

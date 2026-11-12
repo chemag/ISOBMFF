@@ -37,6 +37,11 @@
 #include <memory>
 
 namespace ISOBMFF {
+// ImageRotation ("irot", ISO/IEC 23008-12:2022, section 6.5.10): rotates the
+// reconstructed image of the associated image item anti-clockwise, in units
+// of 90 degrees. The 2-bit angle field holds the number of 90-degree steps:
+// "angle * 90 specifies the angle (in anti-clockwise direction) in units of
+// degrees."
 class ISOBMFF_EXPORT IROT : public Box {
  public:
   IROT();
@@ -50,8 +55,14 @@ class ISOBMFF_EXPORT IROT : public Box {
   std::vector<std::pair<std::string, std::string> > GetDisplayableProperties()
       const override;
 
-  uint8_t GetAngle() const;
-  void SetAngle(uint8_t value);
+  // the angle field as stored (0..3)
+  uint8_t GetAngleRaw() const;
+  void SetAngleRaw(uint8_t value);
+  // the anti-clockwise rotation in degrees: 0, 90, 180, or 270. SetAngle()
+  // stores (value / 90) % 4, so values that are not multiples of 90 round
+  // down to one
+  uint16_t GetAngle() const;
+  void SetAngle(uint16_t value);
 
   ISOBMFF_EXPORT friend void swap(IROT& o1, IROT& o2);
 

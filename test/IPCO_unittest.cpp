@@ -56,7 +56,8 @@ TEST_F(ISOBMFFIPCOTest, TestIPCOParser) {
   auto irot =
       std::dynamic_pointer_cast<ISOBMFF::IROT>(ipco->GetPropertyAtIndex(1));
   ASSERT_NE(irot, nullptr);
-  EXPECT_EQ(irot->GetAngle(), 3);
+  EXPECT_EQ(irot->GetAngleRaw(), 3);
+  EXPECT_EQ(irot->GetAngle(), 270);
   EXPECT_NE(
       std::dynamic_pointer_cast<ISOBMFF::PIXI>(ipco->GetPropertyAtIndex(2)),
       nullptr);
