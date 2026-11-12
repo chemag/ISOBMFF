@@ -29,6 +29,7 @@
  */
 
 #include <ContainerBox.hpp>
+#include <FixedPoint.hpp>
 #include <MP4A.hpp>
 
 namespace ISOBMFF {
@@ -155,17 +156,10 @@ uint16_t MP4A::GetSampleSize() const { return this->impl->_samplesize; }
 
 uint32_t MP4A::GetSampleRateRaw() const { return this->impl->_samplerate; }
 
-float MP4A::GetSampleRate() const {
-  uint32_t sampleRateFixed = this->GetSampleRateRaw();
-  // Read Sample Rate:
-  // The sample rate is stored as a 16.16 fixed-point number (32 bits).
-  // The integer part is obtained by shifting the value right by 16 bits
-  // (>> 16).
-  float sampleRate = (sampleRateFixed >> 16);
-  // The fractional part is obtained by masking the lower 16 bits
-  // (& 0xFFFF) and dividing by 65536.0.
-  sampleRate += ((sampleRateFixed & 0xffff) / 65536.0f);
-  return sampleRate;
+double MP4A::GetSampleRate() const {
+  // ISO/IEC 14496-12:2026, section 12.2.3.3: samplerate "is expressed as a
+  // 16.16 fixed-point number (hi.lo)"
+  return FixedPoint::ToDouble(this->impl->_samplerate, 16);
 }
 
 void MP4A::SetChannelCount(uint16_t channelcount) {
@@ -178,6 +172,10 @@ void MP4A::SetSampleSize(uint16_t samplesize) {
 
 void MP4A::SetSampleRateRaw(uint32_t samplerate) {
   this->impl->_samplerate = samplerate;
+}
+
+void MP4A::SetSampleRate(double value) {
+  this->impl->_samplerate = FixedPoint::FromDouble<uint32_t>(value, 16);
 }
 
 void MP4A::AddBox(std::shared_ptr<Box> box) {

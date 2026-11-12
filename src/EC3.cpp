@@ -4,6 +4,7 @@
 
 #include <DEC3.hpp>
 #include <EC3.hpp>
+#include <FixedPoint.hpp>
 #include <utility>
 
 namespace ISOBMFF {
@@ -80,6 +81,9 @@ uint16_t EC3::GetDataReferenceIndex() const {
 uint16_t EC3::GetChannelCount() const { return impl->channel_count; }
 uint16_t EC3::GetSampleSize() const { return impl->sample_size; }
 uint32_t EC3::GetSampleRateRaw() const { return impl->sample_rate; }
+double EC3::GetSampleRate() const {
+  return FixedPoint::ToDouble(impl->sample_rate, 16);
+}
 std::vector<std::pair<std::string, std::string> >
 EC3::GetDisplayableProperties() const {
   auto props = ContainerBox::GetDisplayableProperties();
@@ -90,6 +94,7 @@ EC3::GetDisplayableProperties() const {
   props.push_back(
       {"Sample Size (placeholder)", std::to_string(GetSampleSize())});
   props.push_back({"Sample Rate (raw)", std::to_string(GetSampleRateRaw())});
+  props.push_back({"Sample Rate", std::to_string(GetSampleRate())});
   return props;
 }
 }  // namespace ISOBMFF

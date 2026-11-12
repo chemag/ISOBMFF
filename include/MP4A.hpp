@@ -57,12 +57,14 @@ class ISOBMFF_EXPORT MP4A : public FullBox, public Container {
 
   uint16_t GetChannelCount() const;
   uint16_t GetSampleSize() const;
+  // samplerate (16.16 fixed point): the sampling rate, in Hz
   uint32_t GetSampleRateRaw() const;
-  float GetSampleRate() const;
+  double GetSampleRate() const;
 
   void SetChannelCount(uint16_t value);
   void SetSampleSize(uint16_t value);
   void SetSampleRateRaw(uint32_t value);
+  void SetSampleRate(double value);
 
   void AddBox(std::shared_ptr<Box> box) override;
   std::vector<std::shared_ptr<Box> > GetBoxes() const override;

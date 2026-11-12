@@ -7,6 +7,7 @@
  */
 
 #include <ContainerBox.hpp>
+#include <FixedPoint.hpp>
 #include <OPUS.hpp>
 
 namespace ISOBMFF {
@@ -133,12 +134,10 @@ uint16_t OPUS::GetSampleSize() const { return this->impl->_samplesize; }
 
 uint32_t OPUS::GetSampleRateRaw() const { return this->impl->_samplerate; }
 
-float OPUS::GetSampleRate() const {
-  uint32_t sampleRateFixed = this->GetSampleRateRaw();
-  // The sample rate is stored as a 16.16 fixed-point number (32 bits).
-  float sampleRate = (sampleRateFixed >> 16);
-  sampleRate += ((sampleRateFixed & 0xffff) / 65536.0f);
-  return sampleRate;
+double OPUS::GetSampleRate() const {
+  // ISO/IEC 14496-12:2026, section 12.2.3.3: samplerate "is expressed as a
+  // 16.16 fixed-point number (hi.lo)"
+  return FixedPoint::ToDouble(this->impl->_samplerate, 16);
 }
 
 void OPUS::SetDataReferenceIndex(uint16_t datareferenceindex) {
@@ -155,6 +154,10 @@ void OPUS::SetSampleSize(uint16_t samplesize) {
 
 void OPUS::SetSampleRateRaw(uint32_t samplerate) {
   this->impl->_samplerate = samplerate;
+}
+
+void OPUS::SetSampleRate(double value) {
+  this->impl->_samplerate = FixedPoint::FromDouble<uint32_t>(value, 16);
 }
 
 void OPUS::AddBox(std::shared_ptr<Box> box) {

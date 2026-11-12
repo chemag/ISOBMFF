@@ -129,6 +129,7 @@ TEST(ISOBMFFEC3Test, TestEC3Parser) {
   ASSERT_NE(ec3, nullptr) << "Failed to cast to EC3";
   EXPECT_EQ(ec3->GetDataReferenceIndex(), 1);
   EXPECT_EQ(ec3->GetSampleRateRaw(), 48000u << 16);
+  EXPECT_DOUBLE_EQ(ec3->GetSampleRate(), 48000.0);
   ASSERT_NE(ec3->GetTypedBox<ISOBMFF::DEC3>("dec3"), nullptr);
   EXPECT_NE(ec3->GetBox("btrt"), nullptr);
 }

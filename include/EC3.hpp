@@ -27,7 +27,9 @@ class ISOBMFF_EXPORT EC3 : public ContainerBox {
   uint16_t GetDataReferenceIndex() const;
   uint16_t GetChannelCount() const;  // raw sample-entry placeholder
   uint16_t GetSampleSize() const;    // raw sample-entry placeholder
+  // samplerate (16.16 fixed point): the sampling rate, in Hz
   uint32_t GetSampleRateRaw() const;
+  double GetSampleRate() const;
   ISOBMFF_EXPORT friend void swap(EC3& o1, EC3& o2);
 
  private:

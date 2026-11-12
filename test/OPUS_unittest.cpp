@@ -64,7 +64,7 @@ TEST_F(ISOBMFFOPUSTest, TestOPUSParser) {
   EXPECT_EQ(opus->GetChannelCount(), 2);
   EXPECT_EQ(opus->GetSampleSize(), 16);
   EXPECT_EQ(opus->GetSampleRateRaw(), 3145728000u);
-  EXPECT_FLOAT_EQ(opus->GetSampleRate(), 48000);
+  EXPECT_DOUBLE_EQ(opus->GetSampleRate(), 48000.0);
 
   // Validate child boxes
   auto boxes = opus->GetBoxes();

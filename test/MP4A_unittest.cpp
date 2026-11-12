@@ -66,6 +66,21 @@ TEST_F(ISOBMFFMP4ATest, TestMP4AParser) {
   // Validate sample rate (raw)
   EXPECT_EQ(mp4a->GetSampleRateRaw(), 3145728000);
   // Validate sample rate
-  EXPECT_FLOAT_EQ(mp4a->GetSampleRate(), 48000);
+  EXPECT_DOUBLE_EQ(mp4a->GetSampleRate(), 48000.0);
+}
+
+// samplerate is an unsigned 16.16 fixed-point field: a fractional rate
+// keeps its fraction (GetSampleRate() used to return a float that dropped
+// precision)
+TEST_F(ISOBMFFMP4ATest, TestMP4ASampleRate) {
+  ISOBMFF::MP4A mp4a;
+  mp4a.SetSampleRateRaw((44100u << 16) | 0x8000u);
+  EXPECT_DOUBLE_EQ(mp4a.GetSampleRate(), 44100.5);
+  mp4a.SetSampleRate(22050.25);
+  EXPECT_EQ(mp4a.GetSampleRateRaw(), (22050u << 16) | 0x4000u);
+  // the largest 16.16 value is just under 65536 Hz: higher rates saturate
+  // (they are carried in a SamplingRateBox instead)
+  mp4a.SetSampleRate(96000.0);
+  EXPECT_EQ(mp4a.GetSampleRateRaw(), UINT32_MAX);
 }
 } // namespace ISOBMFF
