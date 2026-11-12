@@ -72,7 +72,7 @@ TEST_F(ISOBMFFHVCCTest, TestHVCCParser) {
   EXPECT_EQ(hvcc->GetGeneralLevelIDC(), 153);
   EXPECT_EQ(hvcc->GetMinSpatialSegmentationIDC(), 0);
   EXPECT_EQ(hvcc->GetParallelismType(), 0);
-  EXPECT_EQ(hvcc->GetChromaFormat(), 1);
+  EXPECT_EQ(hvcc->GetChromaFormatIDC(), 1);
   EXPECT_EQ(hvcc->GetBitDepthLumaMinus8(), 0);
   EXPECT_EQ(hvcc->GetBitDepthChromaMinus8(), 0);
   EXPECT_EQ(hvcc->GetAvgFrameRate(), 0);

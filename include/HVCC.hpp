@@ -68,7 +68,7 @@ class ISOBMFF_EXPORT HVCC : public Box, public DisplayableObjectContainer {
   uint8_t GetGeneralLevelIDC() const;
   uint16_t GetMinSpatialSegmentationIDC() const;
   uint8_t GetParallelismType() const;
-  uint8_t GetChromaFormat() const;
+  uint8_t GetChromaFormatIDC() const;
   uint8_t GetBitDepthLumaMinus8() const;
   uint8_t GetBitDepthChromaMinus8() const;
   uint16_t GetAvgFrameRate() const;
@@ -86,7 +86,7 @@ class ISOBMFF_EXPORT HVCC : public Box, public DisplayableObjectContainer {
   void SetGeneralLevelIDC(uint8_t value);
   void SetMinSpatialSegmentationIDC(uint16_t value);
   void SetParallelismType(uint8_t value);
-  void SetChromaFormat(uint8_t value);
+  void SetChromaFormatIDC(uint8_t value);
   void SetBitDepthLumaMinus8(uint8_t value);
   void SetBitDepthChromaMinus8(uint8_t value);
   void SetAvgFrameRate(uint16_t value);

@@ -48,7 +48,7 @@ class HVCC::IMPL {
   uint8_t _generalLevelIDC;
   uint16_t _minSpatialSegmentationIDC;
   uint8_t _parallelismType;
-  uint8_t _chromaFormat;
+  uint8_t _chromaFormatIDC;
   uint8_t _bitDepthLumaMinus8;
   uint8_t _bitDepthChromaMinus8;
   uint16_t _avgFrameRate;
@@ -134,7 +134,7 @@ Error HVCC::ReadData(Parser& parser, BinaryStream& stream) {
   err = stream.ReadUInt8(u8);
   if (err) return err;
 
-  this->SetChromaFormat(u8 & 0x03);
+  this->SetChromaFormatIDC(u8 & 0x03);
 
   err = stream.ReadUInt8(u8);
   if (err) return err;
@@ -204,11 +204,12 @@ HVCC::GetDisplayableProperties() const {
        Utils::ToHexString(this->GetGeneralConstraintIndicatorFlags())});
   props.push_back(
       {"General level IDC", std::to_string(this->GetGeneralLevelIDC())});
-  props.push_back({"Min spacial segmentation IDC",
+  props.push_back({"Min spatial segmentation IDC",
                    std::to_string(this->GetMinSpatialSegmentationIDC())});
   props.push_back(
       {"Parallelism type", std::to_string(this->GetParallelismType())});
-  props.push_back({"Chroma format", std::to_string(this->GetChromaFormat())});
+  props.push_back(
+      {"Chroma format IDC", std::to_string(this->GetChromaFormatIDC())});
   props.push_back({"Bit depth luma minus 8",
                    std::to_string(this->GetBitDepthLumaMinus8())});
   props.push_back({"Bit depth chroma minus 8",
@@ -263,7 +264,9 @@ uint8_t HVCC::GetParallelismType() const {
   return this->impl->_parallelismType;
 }
 
-uint8_t HVCC::GetChromaFormat() const { return this->impl->_chromaFormat; }
+uint8_t HVCC::GetChromaFormatIDC() const {
+  return this->impl->_chromaFormatIDC;
+}
 
 uint8_t HVCC::GetBitDepthLumaMinus8() const {
   return this->impl->_bitDepthLumaMinus8;
@@ -327,7 +330,9 @@ void HVCC::SetParallelismType(uint8_t value) {
   this->impl->_parallelismType = value;
 }
 
-void HVCC::SetChromaFormat(uint8_t value) { this->impl->_chromaFormat = value; }
+void HVCC::SetChromaFormatIDC(uint8_t value) {
+  this->impl->_chromaFormatIDC = value;
+}
 
 void HVCC::SetBitDepthLumaMinus8(uint8_t value) {
   this->impl->_bitDepthLumaMinus8 = value;
@@ -375,7 +380,7 @@ HVCC::IMPL::IMPL()
       _generalLevelIDC(0),
       _minSpatialSegmentationIDC(0),
       _parallelismType(0),
-      _chromaFormat(0),
+      _chromaFormatIDC(0),
       _bitDepthLumaMinus8(0),
       _bitDepthChromaMinus8(0),
       _avgFrameRate(0),
@@ -394,7 +399,7 @@ HVCC::IMPL::IMPL(const IMPL& o)
       _generalLevelIDC(o._generalLevelIDC),
       _minSpatialSegmentationIDC(o._minSpatialSegmentationIDC),
       _parallelismType(o._parallelismType),
-      _chromaFormat(o._chromaFormat),
+      _chromaFormatIDC(o._chromaFormatIDC),
       _bitDepthLumaMinus8(o._bitDepthLumaMinus8),
       _bitDepthChromaMinus8(o._bitDepthChromaMinus8),
       _avgFrameRate(o._avgFrameRate),
