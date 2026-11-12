@@ -45,6 +45,35 @@ if(NOT MSVC)
 endif()
 
 
+option(BUILD_CLANG_FUZZER "Build clang fuzzer sanitizer targets" ON)
+if(BUILD_CLANG_FUZZER)
+  if(NOT CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    message(FATAL_ERROR "BUILD_CLANG_FUZZER requires Clang (found ${CMAKE_CXX_COMPILER_ID})")
+  endif()
+  # These have to be set here, before add_subdirectory(src):
+  # add_compile_options() only reaches the targets of the directory it is
+  # called from and of the subdirectories added after it. Setting them in
+  # fuzz/ (as this file used to) left the library, built in src/, with no
+  # sanitizer and no coverage instrumentation: libFuzzer got no feedback
+  # from the box parsers and mutated blind, and a memory error inside a
+  # parser went unreported.
+  #
+  # address
+  #     AddressSanitizer: reads off the end of a box, use after free.
+  # undefined
+  #     The UBSan default group: signed overflow, oversized shift counts,
+  #     misaligned and null pointer use, out of range enum and bool loads.
+  #     -fno-sanitize-recover makes its findings fatal, so that libFuzzer
+  #     records them as crashes (by default UBSan prints and continues).
+  # fuzzer-no-link
+  #     Coverage instrumentation for the library without libFuzzer's
+  #     main(); the fuzz targets link that themselves (fuzz/).
+  set(ISOBMFF_SAN_FLAGS -fsanitize=address,undefined
+                        -fno-sanitize-recover=undefined)
+  add_compile_options(${ISOBMFF_SAN_FLAGS} -fsanitize=fuzzer-no-link)
+  add_link_options(${ISOBMFF_SAN_FLAGS})
+endif()
+
 # Add subdirectories for tests and fuzzers if enabled
 add_subdirectory(src)
 # The tool uses getopt_long(), which MSVC does not provide.
@@ -58,7 +87,6 @@ if(BUILD_TESTS)
   add_subdirectory(test)
 endif()
 
-option(BUILD_CLANG_FUZZER "Build clang fuzzer sanitizer targets" ON)
 if(BUILD_CLANG_FUZZER)
   add_subdirectory(fuzz)
 endif()
