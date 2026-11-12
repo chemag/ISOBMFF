@@ -28,6 +28,7 @@
  * @author      Jean-David Gadina - www.digidna.net
  */
 
+#include <FixedPoint.hpp>
 #include <MVHD.hpp>
 #include <cstring>
 
@@ -42,8 +43,8 @@ class MVHD::IMPL {
   uint64_t _modificationTime;
   uint32_t _timescale;
   uint64_t _duration;
-  uint32_t _rate;
-  uint16_t _volume;
+  int32_t _rate;
+  int16_t _volume;
   uint16_t _reserved1;
   uint32_t _reserved2[2];
   Matrix _matrix;
@@ -122,12 +123,12 @@ Error MVHD::ReadData(Parser& parser, BinaryStream& stream) {
   uint32_t temp32;
   err = stream.ReadBigEndianUInt32(temp32);
   if (err) return err;
-  this->SetRate(temp32);
+  this->SetRateRaw(static_cast<int32_t>(temp32));
 
   uint16_t temp16;
   err = stream.ReadBigEndianUInt16(temp16);
   if (err) return err;
-  this->SetVolume(temp16);
+  this->SetVolumeRaw(static_cast<int16_t>(temp16));
 
   err = stream.ReadBigEndianUInt16(this->impl->_reserved1);
   if (err) return err;
@@ -169,7 +170,9 @@ MVHD::GetDisplayableProperties() const {
       {"Modification time", std::to_string(this->GetModificationTime())});
   props.push_back({"Timescale", std::to_string(this->GetTimescale())});
   props.push_back({"Duration", std::to_string(this->GetDuration())});
+  props.push_back({"Rate (raw)", std::to_string(this->GetRateRaw())});
   props.push_back({"Rate", std::to_string(this->GetRate())});
+  props.push_back({"Volume (raw)", std::to_string(this->GetVolumeRaw())});
   props.push_back({"Volume", std::to_string(this->GetVolume())});
   props.push_back({"Matrix", this->GetMatrix().ToString()});
   props.push_back({"Next track ID", std::to_string(this->GetNextTrackID())});
@@ -187,9 +190,17 @@ uint32_t MVHD::GetTimescale() const { return this->impl->_timescale; }
 
 uint64_t MVHD::GetDuration() const { return this->impl->_duration; }
 
-uint32_t MVHD::GetRate() const { return this->impl->_rate; }
+int32_t MVHD::GetRateRaw() const { return this->impl->_rate; }
 
-uint16_t MVHD::GetVolume() const { return this->impl->_volume; }
+double MVHD::GetRate() const {
+  return FixedPoint::ToDouble(this->impl->_rate, 16);
+}
+
+int16_t MVHD::GetVolumeRaw() const { return this->impl->_volume; }
+
+double MVHD::GetVolume() const {
+  return FixedPoint::ToDouble(this->impl->_volume, 8);
+}
 
 Matrix MVHD::GetMatrix() const { return this->impl->_matrix; }
 
@@ -207,9 +218,17 @@ void MVHD::SetTimescale(uint32_t value) { this->impl->_timescale = value; }
 
 void MVHD::SetDuration(uint64_t value) { this->impl->_duration = value; }
 
-void MVHD::SetRate(uint32_t value) { this->impl->_rate = value; }
+void MVHD::SetRateRaw(int32_t value) { this->impl->_rate = value; }
 
-void MVHD::SetVolume(uint16_t value) { this->impl->_volume = value; }
+void MVHD::SetRate(double value) {
+  this->impl->_rate = FixedPoint::FromDouble<int32_t>(value, 16);
+}
+
+void MVHD::SetVolumeRaw(int16_t value) { this->impl->_volume = value; }
+
+void MVHD::SetVolume(double value) {
+  this->impl->_volume = FixedPoint::FromDouble<int16_t>(value, 8);
+}
 
 void MVHD::SetMatrix(const Matrix& value) { this->impl->_matrix = value; }
 

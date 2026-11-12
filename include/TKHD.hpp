@@ -58,10 +58,15 @@ class ISOBMFF_EXPORT TKHD : public FullBox {
   uint64_t GetDuration() const;
   uint16_t GetLayer() const;
   uint16_t GetAlternateGroup() const;
-  uint16_t GetVolume() const;
+  // volume (8.8 fixed point, 1.0 is full volume)
+  int16_t GetVolumeRaw() const;
+  double GetVolume() const;
   Matrix GetMatrix() const;
-  float GetWidth() const;
-  float GetHeight() const;
+  // width and height (16.16 fixed point): the visual presentation size
+  uint32_t GetWidthRaw() const;
+  double GetWidth() const;
+  uint32_t GetHeightRaw() const;
+  double GetHeight() const;
 
   void SetCreationTime(uint64_t value);
   void SetModificationTime(uint64_t value);
@@ -69,10 +74,13 @@ class ISOBMFF_EXPORT TKHD : public FullBox {
   void SetDuration(uint64_t value);
   void SetLayer(uint16_t value);
   void SetAlternateGroup(uint16_t value);
-  void SetVolume(uint16_t value);
+  void SetVolumeRaw(int16_t value);
+  void SetVolume(double value);
   void SetMatrix(Matrix value);
-  void SetWidth(float value);
-  void SetHeight(float value);
+  void SetWidthRaw(uint32_t value);
+  void SetWidth(double value);
+  void SetHeightRaw(uint32_t value);
+  void SetHeight(double value);
 
   ISOBMFF_EXPORT friend void swap(TKHD& o1, TKHD& o2);
 

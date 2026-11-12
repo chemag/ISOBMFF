@@ -64,13 +64,16 @@ TEST_F(ISOBMFFTKHDTest, TestTKHDParser) {
   EXPECT_EQ(tkhd->GetDuration(), 0x00003702);
   EXPECT_EQ(tkhd->GetLayer(), 0);
   EXPECT_EQ(tkhd->GetAlternateGroup(), 0);
-  EXPECT_EQ(tkhd->GetVolume(), 0);
-  EXPECT_EQ(tkhd->GetWidth(), 1728);
-  EXPECT_EQ(tkhd->GetHeight(), 2304);
+  EXPECT_EQ(tkhd->GetVolumeRaw(), 0);
+  EXPECT_DOUBLE_EQ(tkhd->GetVolume(), 0.0);
+  EXPECT_EQ(tkhd->GetWidthRaw(), 1728u << 16);
+  EXPECT_DOUBLE_EQ(tkhd->GetWidth(), 1728.0);
+  EXPECT_EQ(tkhd->GetHeightRaw(), 2304u << 16);
+  EXPECT_DOUBLE_EQ(tkhd->GetHeight(), 2304.0);
 
   // Validate displayable properties
   auto displayableProperties = tkhd->GetDisplayableProperties();
-  ASSERT_EQ(displayableProperties.size(), 12);
+  ASSERT_EQ(displayableProperties.size(), 15);
   EXPECT_EQ(displayableProperties[0].first, "Version");
   EXPECT_EQ(displayableProperties[1].first, "Flags");
   EXPECT_EQ(displayableProperties[2].first, "Creation time");
@@ -79,9 +82,32 @@ TEST_F(ISOBMFFTKHDTest, TestTKHDParser) {
   EXPECT_EQ(displayableProperties[5].first, "Duration");
   EXPECT_EQ(displayableProperties[6].first, "Layer");
   EXPECT_EQ(displayableProperties[7].first, "Alternate group");
-  EXPECT_EQ(displayableProperties[8].first, "Volume");
-  EXPECT_EQ(displayableProperties[9].first, "Matrix");
-  EXPECT_EQ(displayableProperties[10].first, "Width");
-  EXPECT_EQ(displayableProperties[11].first, "Height");
+  EXPECT_EQ(displayableProperties[8].first, "Volume (raw)");
+  EXPECT_EQ(displayableProperties[9].first, "Volume");
+  EXPECT_EQ(displayableProperties[10].first, "Matrix");
+  EXPECT_EQ(displayableProperties[11].first, "Width (raw)");
+  EXPECT_EQ(displayableProperties[11].second, std::to_string(1728u << 16));
+  EXPECT_EQ(displayableProperties[12].first, "Width");
+  EXPECT_EQ(displayableProperties[12].second, std::to_string(1728.0));
+  EXPECT_EQ(displayableProperties[13].first, "Height (raw)");
+  EXPECT_EQ(displayableProperties[14].first, "Height");
+}
+
+// width and height are unsigned 16.16 fixed-point fields: a fractional size
+// keeps its fraction, and negative values saturate to 0
+TEST_F(ISOBMFFTKHDTest, TestTKHDFixedPoint) {
+  ISOBMFF::TKHD tkhd;
+
+  tkhd.SetWidthRaw(0x02d08000);  // 720.5
+  EXPECT_DOUBLE_EQ(tkhd.GetWidth(), 720.5);
+  tkhd.SetHeight(480.25);
+  EXPECT_EQ(tkhd.GetHeightRaw(), 0x01e04000u);
+  tkhd.SetWidth(-1.0);
+  EXPECT_EQ(tkhd.GetWidthRaw(), 0u);
+
+  tkhd.SetVolumeRaw(0x0100);
+  EXPECT_DOUBLE_EQ(tkhd.GetVolume(), 1.0);
+  tkhd.SetVolume(0.5);
+  EXPECT_EQ(tkhd.GetVolumeRaw(), 0x0080);
 }
 } // namespace ISOBMFF

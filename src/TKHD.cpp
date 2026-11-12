@@ -28,6 +28,7 @@
  * @author      Jean-David Gadina - www.digidna.net
  */
 
+#include <FixedPoint.hpp>
 #include <TKHD.hpp>
 #include <cstring>
 
@@ -46,11 +47,11 @@ class TKHD::IMPL {
   uint32_t _reserved2[2];
   uint16_t _layer;
   uint16_t _alternateGroup;
-  uint16_t _volume;
+  int16_t _volume;
   uint16_t _reserved3;
   Matrix _matrix;
-  float _width;
-  float _height;
+  uint32_t _width;
+  uint32_t _height;
 };
 
 TKHD::TKHD() : FullBox("tkhd"), impl(std::make_unique<IMPL>()) {}
@@ -143,7 +144,7 @@ Error TKHD::ReadData(Parser& parser, BinaryStream& stream) {
 
   err = stream.ReadBigEndianUInt16(temp16);
   if (err) return err;
-  this->SetVolume(temp16);
+  this->SetVolumeRaw(static_cast<int16_t>(temp16));
 
   err = stream.ReadBigEndianUInt16(this->impl->_reserved3);
   if (err) return err;
@@ -153,14 +154,14 @@ Error TKHD::ReadData(Parser& parser, BinaryStream& stream) {
   if (err) return err;
   this->SetMatrix(tempMatrix);
 
-  float tempFloat;
-  err = stream.ReadBigEndianFixedPoint(tempFloat, 16, 16);
+  uint32_t temp32;
+  err = stream.ReadBigEndianUInt32(temp32);
   if (err) return err;
-  this->SetWidth(tempFloat);
+  this->SetWidthRaw(temp32);
 
-  err = stream.ReadBigEndianFixedPoint(tempFloat, 16, 16);
+  err = stream.ReadBigEndianUInt32(temp32);
   if (err) return err;
-  this->SetHeight(tempFloat);
+  this->SetHeightRaw(temp32);
   return Error();
 }
 
@@ -176,9 +177,12 @@ TKHD::GetDisplayableProperties() const {
   props.push_back({"Layer", std::to_string(this->GetLayer())});
   props.push_back(
       {"Alternate group", std::to_string(this->GetAlternateGroup())});
+  props.push_back({"Volume (raw)", std::to_string(this->GetVolumeRaw())});
   props.push_back({"Volume", std::to_string(this->GetVolume())});
   props.push_back({"Matrix", this->GetMatrix().ToString()});
+  props.push_back({"Width (raw)", std::to_string(this->GetWidthRaw())});
   props.push_back({"Width", std::to_string(this->GetWidth())});
+  props.push_back({"Height (raw)", std::to_string(this->GetHeightRaw())});
   props.push_back({"Height", std::to_string(this->GetHeight())});
 
   return props;
@@ -198,13 +202,25 @@ uint16_t TKHD::GetLayer() const { return this->impl->_layer; }
 
 uint16_t TKHD::GetAlternateGroup() const { return this->impl->_alternateGroup; }
 
-uint16_t TKHD::GetVolume() const { return this->impl->_volume; }
+int16_t TKHD::GetVolumeRaw() const { return this->impl->_volume; }
+
+double TKHD::GetVolume() const {
+  return FixedPoint::ToDouble(this->impl->_volume, 8);
+}
 
 Matrix TKHD::GetMatrix() const { return this->impl->_matrix; }
 
-float TKHD::GetWidth() const { return this->impl->_width; }
+uint32_t TKHD::GetWidthRaw() const { return this->impl->_width; }
 
-float TKHD::GetHeight() const { return this->impl->_height; }
+double TKHD::GetWidth() const {
+  return FixedPoint::ToDouble(this->impl->_width, 16);
+}
+
+uint32_t TKHD::GetHeightRaw() const { return this->impl->_height; }
+
+double TKHD::GetHeight() const {
+  return FixedPoint::ToDouble(this->impl->_height, 16);
+}
 
 void TKHD::SetCreationTime(uint64_t value) {
   this->impl->_creationTime = value;
@@ -224,13 +240,25 @@ void TKHD::SetAlternateGroup(uint16_t value) {
   this->impl->_alternateGroup = value;
 }
 
-void TKHD::SetVolume(uint16_t value) { this->impl->_volume = value; }
+void TKHD::SetVolumeRaw(int16_t value) { this->impl->_volume = value; }
+
+void TKHD::SetVolume(double value) {
+  this->impl->_volume = FixedPoint::FromDouble<int16_t>(value, 8);
+}
 
 void TKHD::SetMatrix(Matrix value) { this->impl->_matrix = value; }
 
-void TKHD::SetWidth(float value) { this->impl->_width = value; }
+void TKHD::SetWidthRaw(uint32_t value) { this->impl->_width = value; }
 
-void TKHD::SetHeight(float value) { this->impl->_height = value; }
+void TKHD::SetWidth(double value) {
+  this->impl->_width = FixedPoint::FromDouble<uint32_t>(value, 16);
+}
+
+void TKHD::SetHeightRaw(uint32_t value) { this->impl->_height = value; }
+
+void TKHD::SetHeight(double value) {
+  this->impl->_height = FixedPoint::FromDouble<uint32_t>(value, 16);
+}
 
 TKHD::IMPL::IMPL()
     : _creationTime(0),

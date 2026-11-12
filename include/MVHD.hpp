@@ -55,8 +55,12 @@ class ISOBMFF_EXPORT MVHD : public FullBox {
   uint64_t GetModificationTime() const;
   uint32_t GetTimescale() const;
   uint64_t GetDuration() const;
-  uint32_t GetRate() const;
-  uint16_t GetVolume() const;
+  // rate (16.16 fixed point, typically 1.0): the preferred playback rate
+  int32_t GetRateRaw() const;
+  double GetRate() const;
+  // volume (8.8 fixed point, 1.0 is full volume): the preferred volume
+  int16_t GetVolumeRaw() const;
+  double GetVolume() const;
   Matrix GetMatrix() const;
   uint32_t GetNextTrackID() const;
 
@@ -64,8 +68,10 @@ class ISOBMFF_EXPORT MVHD : public FullBox {
   void SetModificationTime(uint64_t value);
   void SetTimescale(uint32_t value);
   void SetDuration(uint64_t value);
-  void SetRate(uint32_t value);
-  void SetVolume(uint16_t value);
+  void SetRateRaw(int32_t value);
+  void SetRate(double value);
+  void SetVolumeRaw(int16_t value);
+  void SetVolume(double value);
   void SetMatrix(const Matrix& value);
   void SetNextTrackID(uint32_t value);
 
