@@ -81,6 +81,15 @@ TEST_F(ISOBMFFAVCCTest, TestAVCCParser) {
   // Validate PPS NAL units
   EXPECT_EQ(avcc->GetPictureParameterSetNALUnits().size(), 1);
   EXPECT_EQ(avcc->GetPictureParameterSetNALUnits()[0]->GetData().size(), 6);
+
+  // Validate the High profile fields (0xfd 0xf8 0xf8 0x00): 4:2:0, 8-bit
+  // luma and chroma, no SPS extensions
+  EXPECT_TRUE(avcc->HasHighProfileFields());
+  EXPECT_EQ(avcc->GetChromaFormat(), 1);
+  EXPECT_EQ(avcc->GetBitDepthLumaMinus8(), 0);
+  EXPECT_EQ(avcc->GetBitDepthChromaMinus8(), 0);
+  EXPECT_EQ(avcc->GetNumOfSequenceParameterSetExt(), 0);
+  EXPECT_EQ(avcc->GetSequenceParameterSetExtNALUnits().size(), 0);
 }
 // A synthetic avcC whose only SPS declares 256 bytes, but only 6 are left.
 // The SPS used to be kept as a 256-byte zero-filled buffer.
@@ -119,5 +128,138 @@ TEST_F(ISOBMFFAVCCTest, TestAVCCTruncatedNALUnit) {
     }
     EXPECT_LE(data.size(), buffer.size());
   }
+}
+
+// A High 4:2:2 profile (122) avcC with 10-bit luma and chroma and one SPS
+// extension NAL unit (the SPS and PPS are shortened).
+TEST_F(ISOBMFFAVCCTest, TestAVCCHigh422) {
+  // fuzzer::conv: data
+  const std::vector<uint8_t> &buffer = {
+      // configurationVersion, profile (122), compatibility, level
+      0x01, 0x7a, 0x00, 0x28,
+      // lengthSizeMinusOne: 3
+      0xff,
+      // numOfSequenceParameterSets: 1
+      0xe1,
+      // SPS: length 4
+      0x00, 0x04, 0x67, 0x7a, 0x00, 0x28,
+      // numOfPictureParameterSets: 1
+      0x01,
+      // PPS: length 2
+      0x00, 0x02, 0x68, 0xee,
+      // chroma_format: 2 (4:2:2)
+      0xfe,
+      // bit_depth_luma_minus8: 2
+      0xfa,
+      // bit_depth_chroma_minus8: 2
+      0xfa,
+      // numOfSequenceParameterSetExt: 1
+      0x01,
+      // SPS extension: length 3
+      0x00, 0x03, 0x6d, 0x01, 0x02
+  };
+
+  // fuzzer::conv: begin
+  ISOBMFF::BinaryDataStream stream(buffer);
+  ISOBMFF::Parser parser;
+  std::shared_ptr<ISOBMFF::Box> box = parser.CreateBox("avcC");
+
+  ISOBMFF::Error error;
+  if (box != nullptr) {
+    error = box->ReadData(parser, stream);
+  }
+  // fuzzer::conv: end
+
+  EXPECT_FALSE(error) << error.GetMessage();
+  auto avcc = std::dynamic_pointer_cast<ISOBMFF::AVCC>(box);
+  ASSERT_NE(avcc, nullptr) << "Failed to cast to AVCC";
+  EXPECT_EQ(avcc->GetAVCProfileIndication(), 122);
+  EXPECT_TRUE(avcc->HasHighProfileFields());
+  EXPECT_EQ(avcc->GetChromaFormat(), 2);
+  EXPECT_EQ(avcc->GetBitDepthLumaMinus8(), 2);
+  EXPECT_EQ(avcc->GetBitDepthChromaMinus8(), 2);
+  EXPECT_EQ(avcc->GetNumOfSequenceParameterSetExt(), 1);
+  ASSERT_EQ(avcc->GetSequenceParameterSetExtNALUnits().size(), 1);
+  EXPECT_EQ(avcc->GetSequenceParameterSetExtNALUnits()[0]->GetData(),
+            std::vector<uint8_t>({0x6d, 0x01, 0x02}));
+}
+
+// A High profile avcC that ends after the PPSs, as some muxers write it: the
+// High profile fields are absent, and that is not an error.
+TEST_F(ISOBMFFAVCCTest, TestAVCCHighWithoutHighProfileFields) {
+  // fuzzer::conv: data
+  const std::vector<uint8_t> &buffer = {
+      // configurationVersion, profile (100), compatibility, level
+      0x01, 0x64, 0x00, 0x1f,
+      // lengthSizeMinusOne: 3
+      0xff,
+      // numOfSequenceParameterSets: 1
+      0xe1,
+      // SPS: length 4
+      0x00, 0x04, 0x67, 0x64, 0x00, 0x1f,
+      // numOfPictureParameterSets: 1
+      0x01,
+      // PPS: length 2
+      0x00, 0x02, 0x68, 0xee,
+      // only 2 of the 4 fixed bytes of the High profile fields
+      0xfd, 0xf8
+  };
+
+  // fuzzer::conv: begin
+  ISOBMFF::BinaryDataStream stream(buffer);
+  ISOBMFF::Parser parser;
+  std::shared_ptr<ISOBMFF::Box> box = parser.CreateBox("avcC");
+
+  ISOBMFF::Error error;
+  if (box != nullptr) {
+    error = box->ReadData(parser, stream);
+  }
+  // fuzzer::conv: end
+
+  EXPECT_FALSE(error) << error.GetMessage();
+  auto avcc = std::dynamic_pointer_cast<ISOBMFF::AVCC>(box);
+  ASSERT_NE(avcc, nullptr) << "Failed to cast to AVCC";
+  EXPECT_EQ(avcc->GetPictureParameterSetNALUnits().size(), 1);
+  EXPECT_FALSE(avcc->HasHighProfileFields());
+  EXPECT_EQ(avcc->GetChromaFormat(), 0);
+  EXPECT_EQ(avcc->GetSequenceParameterSetExtNALUnits().size(), 0);
+}
+
+// A Baseline profile (66) avcC has no High profile fields: trailing bytes are
+// not read as them.
+TEST_F(ISOBMFFAVCCTest, TestAVCCBaselineIgnoresTrailingBytes) {
+  // fuzzer::conv: data
+  const std::vector<uint8_t> &buffer = {
+      // configurationVersion, profile (66), compatibility, level
+      0x01, 0x42, 0xc0, 0x1e,
+      // lengthSizeMinusOne: 3
+      0xff,
+      // numOfSequenceParameterSets: 1
+      0xe1,
+      // SPS: length 4
+      0x00, 0x04, 0x67, 0x42, 0xc0, 0x1e,
+      // numOfPictureParameterSets: 1
+      0x01,
+      // PPS: length 2
+      0x00, 0x02, 0x68, 0xce,
+      // trailing bytes
+      0xfd, 0xf8, 0xf8, 0x00
+  };
+
+  // fuzzer::conv: begin
+  ISOBMFF::BinaryDataStream stream(buffer);
+  ISOBMFF::Parser parser;
+  std::shared_ptr<ISOBMFF::Box> box = parser.CreateBox("avcC");
+
+  ISOBMFF::Error error;
+  if (box != nullptr) {
+    error = box->ReadData(parser, stream);
+  }
+  // fuzzer::conv: end
+
+  EXPECT_FALSE(error) << error.GetMessage();
+  auto avcc = std::dynamic_pointer_cast<ISOBMFF::AVCC>(box);
+  ASSERT_NE(avcc, nullptr) << "Failed to cast to AVCC";
+  EXPECT_FALSE(avcc->HasHighProfileFields());
 }
 } // namespace ISOBMFF

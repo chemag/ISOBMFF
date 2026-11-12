@@ -67,6 +67,18 @@ class ISOBMFF_EXPORT AVCC : public Box, public DisplayableObjectContainer {
   uint8_t GetNumOfSequenceParameterSets() const;
   uint8_t GetNumOfPictureParameterSets() const;
 
+  // The fields that follow the PPSs when AVCProfileIndication is not 66, 77
+  // or 88 (Baseline, Main or Extended), ISO/IEC 14496-15:2022, section
+  // 5.3.2.1.2. Some muxers omit them, so they are optional:
+  // HasHighProfileFields() is true only when the box contains them, and the
+  // getters below return 0 (and an empty list) otherwise.
+  bool HasHighProfileFields() const;
+  // chroma_format: the chroma_format_idc of the SPSs (1 is 4:2:0)
+  uint8_t GetChromaFormat() const;
+  uint8_t GetBitDepthLumaMinus8() const;
+  uint8_t GetBitDepthChromaMinus8() const;
+  uint8_t GetNumOfSequenceParameterSetExt() const;
+
   void SetConfigurationVersion(uint8_t value);
   void SetAVCProfileIndication(uint8_t value);
   void SetProfileCompatibility(uint8_t value);
@@ -74,6 +86,11 @@ class ISOBMFF_EXPORT AVCC : public Box, public DisplayableObjectContainer {
   void SetLengthSizeMinusOne(uint8_t value);
   void SetNumOfSequenceParameterSets(uint8_t value);
   void SetNumOfPictureParameterSets(uint8_t value);
+  void SetHasHighProfileFields(bool value);
+  void SetChromaFormat(uint8_t value);
+  void SetBitDepthLumaMinus8(uint8_t value);
+  void SetBitDepthChromaMinus8(uint8_t value);
+  void SetNumOfSequenceParameterSetExt(uint8_t value);
 
   class ISOBMFF_EXPORT NALUnit : public DisplayableObject {
    public:
@@ -107,6 +124,10 @@ class ISOBMFF_EXPORT AVCC : public Box, public DisplayableObjectContainer {
 
   std::vector<std::shared_ptr<NALUnit> > GetPictureParameterSetNALUnits() const;
   void AddPictureParameterSetNALUnit(std::shared_ptr<NALUnit> nal_unit);
+
+  std::vector<std::shared_ptr<NALUnit> > GetSequenceParameterSetExtNALUnits()
+      const;
+  void AddSequenceParameterSetExtNALUnit(std::shared_ptr<NALUnit> nal_unit);
 
   ISOBMFF_EXPORT friend void swap(AVCC& o1, AVCC& o2);
 

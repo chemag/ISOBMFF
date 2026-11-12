@@ -48,6 +48,12 @@ class AVCC::IMPL {
   std::vector<std::shared_ptr<NALUnit> > _sequence_parameter_set_nal_units;
   uint8_t _numOfPictureParameterSets;
   std::vector<std::shared_ptr<NALUnit> > _picture_parameter_set_nal_units;
+  bool _hasHighProfileFields;
+  uint8_t _chromaFormat;
+  uint8_t _bitDepthLumaMinus8;
+  uint8_t _bitDepthChromaMinus8;
+  uint8_t _numOfSequenceParameterSetExt;
+  std::vector<std::shared_ptr<NALUnit> > _sequence_parameter_set_ext_nal_units;
 };
 
 AVCC::AVCC() : Box("avcC"), impl(std::make_unique<IMPL>()) {}
@@ -151,6 +157,55 @@ Error AVCC::ReadData(Parser& parser, BinaryStream& stream) {
     this->AddPictureParameterSetNALUnit(nal_unit);
   }
 
+  // ISO/IEC 14496-15:2022, section 5.3.2.1.2:
+  //   if( AVCProfileIndication != 66 && AVCProfileIndication != 77 &&
+  //       AVCProfileIndication != 88 )
+  //   {
+  //     bit(6) reserved = '111111'b;
+  //     unsigned int(2) chroma_format;
+  //     bit(5) reserved = '11111'b;
+  //     unsigned int(3) bit_depth_luma_minus8;
+  //     bit(5) reserved = '11111'b;
+  //     unsigned int(3) bit_depth_chroma_minus8;
+  //     unsigned int(8) numOfSequenceParameterSetExt;
+  //     for (i=0; i< numOfSequenceParameterSetExt; i++) {
+  //       unsigned int(16) sequenceParameterSetExtLength;
+  //       bit(8*sequenceParameterSetExtLength) sequenceParameterSetExtNALUnit;
+  //     }
+  //   }
+  // Some muxers write High profile avcC boxes that end after the PPSs, so
+  // these fields are optional: read them only when all 4 fixed bytes are
+  // there, and treat a box that ends earlier as not having them.
+  const uint8_t profile = this->GetAVCProfileIndication();
+  if (profile == 66 || profile == 77 || profile == 88) {
+    return Error();
+  }
+  uint8_t fields[4];
+  for (uint8_t& field : fields) {
+    if (stream.ReadUInt8(field)) {
+      return Error();
+    }
+  }
+  this->SetHasHighProfileFields(true);
+  this->SetChromaFormat(fields[0] & 0x03);
+  this->SetBitDepthLumaMinus8(fields[1] & 0x07);
+  this->SetBitDepthChromaMinus8(fields[2] & 0x07);
+  this->SetNumOfSequenceParameterSetExt(fields[3]);
+
+  count = this->GetNumOfSequenceParameterSetExt();
+  for (i = 0; i < count; i++) {
+    if (stream.HasBytesAvailable() == false) {
+      break;
+    }
+    // stop at the first NAL unit that consumes no data (a truncated one)
+    size_t start = stream.Tell();
+    auto nal_unit = std::make_shared<NALUnit>(stream);
+    if (stream.Tell() == start) {
+      break;
+    }
+    this->AddSequenceParameterSetExtNALUnit(nal_unit);
+  }
+
   return Error();
 }
 
@@ -168,6 +223,8 @@ std::vector<std::shared_ptr<DisplayableObject> > AVCC::GetDisplayableObjects()
   auto vpps =
       std::vector<std::shared_ptr<DisplayableObject> >(pps.begin(), pps.end());
   vsps.insert(vsps.end(), vpps.begin(), vpps.end());
+  auto spse(this->GetSequenceParameterSetExtNALUnits());
+  vsps.insert(vsps.end(), spse.begin(), spse.end());
   return vsps;
 }
 
@@ -194,6 +251,18 @@ AVCC::GetDisplayableProperties() const {
   props.push_back(
       {"PPS NAL Units",
        std::to_string(this->GetPictureParameterSetNALUnits().size())});
+  if (this->HasHighProfileFields()) {
+    props.push_back({"Chroma format", std::to_string(this->GetChromaFormat())});
+    props.push_back({"Bit depth luma minus 8",
+                     std::to_string(this->GetBitDepthLumaMinus8())});
+    props.push_back({"Bit depth chroma minus 8",
+                     std::to_string(this->GetBitDepthChromaMinus8())});
+    props.push_back({"Number of Sequence Parameter Set Extensions",
+                     std::to_string(this->GetNumOfSequenceParameterSetExt())});
+    props.push_back(
+        {"SPS Extension NAL Units",
+         std::to_string(this->GetSequenceParameterSetExtNALUnits().size())});
+  }
 
   return props;
 }
@@ -254,6 +323,42 @@ void AVCC::SetNumOfPictureParameterSets(uint8_t value) {
   this->impl->_numOfPictureParameterSets = value;
 }
 
+bool AVCC::HasHighProfileFields() const {
+  return this->impl->_hasHighProfileFields;
+}
+
+uint8_t AVCC::GetChromaFormat() const { return this->impl->_chromaFormat; }
+
+uint8_t AVCC::GetBitDepthLumaMinus8() const {
+  return this->impl->_bitDepthLumaMinus8;
+}
+
+uint8_t AVCC::GetBitDepthChromaMinus8() const {
+  return this->impl->_bitDepthChromaMinus8;
+}
+
+uint8_t AVCC::GetNumOfSequenceParameterSetExt() const {
+  return this->impl->_numOfSequenceParameterSetExt;
+}
+
+void AVCC::SetHasHighProfileFields(bool value) {
+  this->impl->_hasHighProfileFields = value;
+}
+
+void AVCC::SetChromaFormat(uint8_t value) { this->impl->_chromaFormat = value; }
+
+void AVCC::SetBitDepthLumaMinus8(uint8_t value) {
+  this->impl->_bitDepthLumaMinus8 = value;
+}
+
+void AVCC::SetBitDepthChromaMinus8(uint8_t value) {
+  this->impl->_bitDepthChromaMinus8 = value;
+}
+
+void AVCC::SetNumOfSequenceParameterSetExt(uint8_t value) {
+  this->impl->_numOfSequenceParameterSetExt = value;
+}
+
 std::vector<std::shared_ptr<AVCC::NALUnit> >
 AVCC::GetSequenceParameterSetNALUnits() const {
   return this->impl->_sequence_parameter_set_nal_units;
@@ -272,6 +377,16 @@ void AVCC::AddPictureParameterSetNALUnit(std::shared_ptr<NALUnit> nal_unit) {
   this->impl->_picture_parameter_set_nal_units.push_back(nal_unit);
 }
 
+std::vector<std::shared_ptr<AVCC::NALUnit> >
+AVCC::GetSequenceParameterSetExtNALUnits() const {
+  return this->impl->_sequence_parameter_set_ext_nal_units;
+}
+
+void AVCC::AddSequenceParameterSetExtNALUnit(
+    std::shared_ptr<NALUnit> nal_unit) {
+  this->impl->_sequence_parameter_set_ext_nal_units.push_back(nal_unit);
+}
+
 AVCC::IMPL::IMPL()
     : _configurationVersion(0),
       _AVCProfileIndication(0),
@@ -279,7 +394,12 @@ AVCC::IMPL::IMPL()
       _AVCLevelIndication(0),
       _lengthSizeMinusOne(0),
       _numOfSequenceParameterSets(0),
-      _numOfPictureParameterSets(0) {}
+      _numOfPictureParameterSets(0),
+      _hasHighProfileFields(false),
+      _chromaFormat(0),
+      _bitDepthLumaMinus8(0),
+      _bitDepthChromaMinus8(0),
+      _numOfSequenceParameterSetExt(0) {}
 
 AVCC::IMPL::IMPL(const IMPL& o)
     : _configurationVersion(o._configurationVersion),
@@ -290,7 +410,14 @@ AVCC::IMPL::IMPL(const IMPL& o)
       _numOfSequenceParameterSets(o._numOfSequenceParameterSets),
       _sequence_parameter_set_nal_units(o._sequence_parameter_set_nal_units),
       _numOfPictureParameterSets(o._numOfPictureParameterSets),
-      _picture_parameter_set_nal_units(o._picture_parameter_set_nal_units) {}
+      _picture_parameter_set_nal_units(o._picture_parameter_set_nal_units),
+      _hasHighProfileFields(o._hasHighProfileFields),
+      _chromaFormat(o._chromaFormat),
+      _bitDepthLumaMinus8(o._bitDepthLumaMinus8),
+      _bitDepthChromaMinus8(o._bitDepthChromaMinus8),
+      _numOfSequenceParameterSetExt(o._numOfSequenceParameterSetExt),
+      _sequence_parameter_set_ext_nal_units(
+          o._sequence_parameter_set_ext_nal_units) {}
 
 AVCC::IMPL::~IMPL() {}
 }  // namespace ISOBMFF
