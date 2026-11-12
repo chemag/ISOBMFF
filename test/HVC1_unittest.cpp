@@ -81,8 +81,11 @@ TEST_F(ISOBMFFHVC1Test, TestHVC1Parser) {
   EXPECT_EQ(hvc1->GetDataReferenceIndex(), 1);
   EXPECT_EQ(hvc1->GetWidth(), 1728);
   EXPECT_EQ(hvc1->GetHeight(), 2304);
-  EXPECT_EQ(hvc1->GetHorizResolution(), 0x00480000);
-  EXPECT_EQ(hvc1->GetVertResolution(), 0x00480000);
+  // 72 dpi, as 16.16 fixed point and as a double
+  EXPECT_EQ(hvc1->GetHorizResolutionRaw(), 0x00480000u);
+  EXPECT_DOUBLE_EQ(hvc1->GetHorizResolution(), 72.0);
+  EXPECT_EQ(hvc1->GetVertResolutionRaw(), 0x00480000u);
+  EXPECT_DOUBLE_EQ(hvc1->GetVertResolution(), 72.0);
   EXPECT_EQ(hvc1->GetFrameCount(), 1);
   EXPECT_EQ(hvc1->GetCompressorName(), "");
   EXPECT_EQ(hvc1->GetDepth(), 24);

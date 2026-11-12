@@ -81,8 +81,11 @@ TEST_F(ISOBMFFHEV1Test, TestHEV1Parser) {
   EXPECT_EQ(hev1->GetDataReferenceIndex(), 1);
   EXPECT_EQ(hev1->GetWidth(), 1728);
   EXPECT_EQ(hev1->GetHeight(), 2304);
-  EXPECT_EQ(hev1->GetHorizResolution(), 0x00480000);
-  EXPECT_EQ(hev1->GetVertResolution(), 0x00480000);
+  // 72 dpi, as 16.16 fixed point and as a double
+  EXPECT_EQ(hev1->GetHorizResolutionRaw(), 0x00480000u);
+  EXPECT_DOUBLE_EQ(hev1->GetHorizResolution(), 72.0);
+  EXPECT_EQ(hev1->GetVertResolutionRaw(), 0x00480000u);
+  EXPECT_DOUBLE_EQ(hev1->GetVertResolution(), 72.0);
   EXPECT_EQ(hev1->GetFrameCount(), 1);
   EXPECT_EQ(hev1->GetCompressorName(), "");
   EXPECT_EQ(hev1->GetDepth(), 24);

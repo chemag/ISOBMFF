@@ -72,6 +72,10 @@ TEST_F(ISOBMFFAV01Test, TestAV01Parser) {
   EXPECT_EQ(av01->GetDataReferenceIndex(), 1);
   EXPECT_EQ(av01->GetWidth(), 1920);
   EXPECT_EQ(av01->GetHeight(), 800);
+  EXPECT_EQ(av01->GetHorizResolutionRaw(), 0x00480000u);
+  EXPECT_DOUBLE_EQ(av01->GetHorizResolution(), 72.0);
+  EXPECT_EQ(av01->GetVertResolutionRaw(), 0x00480000u);
+  EXPECT_DOUBLE_EQ(av01->GetVertResolution(), 72.0);
   EXPECT_EQ(av01->GetFrameCount(), 1);
   EXPECT_EQ(av01->GetDepth(), 24);
 

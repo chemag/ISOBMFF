@@ -58,8 +58,12 @@ class ISOBMFF_EXPORT AVC1 : public FullBox, public Container {
   uint16_t GetDataReferenceIndex() const;
   uint16_t GetWidth() const;
   uint16_t GetHeight() const;
-  uint32_t GetHorizResolution() const;
-  uint32_t GetVertResolution() const;
+  // horizresolution and vertresolution (16.16 fixed point, typically 72.0):
+  // the resolution of the image, in pixels per inch
+  uint32_t GetHorizResolutionRaw() const;
+  double GetHorizResolution() const;
+  uint32_t GetVertResolutionRaw() const;
+  double GetVertResolution() const;
   uint16_t GetFrameCount() const;
   std::string GetCompressorName() const;
   uint16_t GetDepth() const;
@@ -67,8 +71,10 @@ class ISOBMFF_EXPORT AVC1 : public FullBox, public Container {
   void SetDataReferenceIndex(uint16_t value);
   void SetWidth(uint16_t value);
   void SetHeight(uint16_t value);
-  void SetHorizResolution(uint32_t value);
-  void SetVertResolution(uint32_t value);
+  void SetHorizResolutionRaw(uint32_t value);
+  void SetHorizResolution(double value);
+  void SetVertResolutionRaw(uint32_t value);
+  void SetVertResolution(double value);
   void SetFrameCount(uint16_t value);
   void SetCompressorName(std::string value);
   void SetDepth(uint16_t value);

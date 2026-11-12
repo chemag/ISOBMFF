@@ -30,6 +30,7 @@
 
 #include <AV2SampleEntry.hpp>
 #include <ContainerBox.hpp>
+#include <FixedPoint.hpp>
 
 namespace ISOBMFF {
 class AV2SampleEntry::IMPL {
@@ -123,11 +124,11 @@ Error AV2SampleEntry::ReadData(Parser& parser, BinaryStream& stream) {
 
   err = stream.ReadBigEndianUInt32(temp32);
   if (err) return err;
-  this->SetHorizResolution(temp32);
+  this->SetHorizResolutionRaw(temp32);
 
   err = stream.ReadBigEndianUInt32(temp32);
   if (err) return err;
-  this->SetVertResolution(temp32);
+  this->SetVertResolutionRaw(temp32);
 
   err = stream.ReadBigEndianUInt32(temp32);
   if (err) return err;
@@ -164,8 +165,12 @@ AV2SampleEntry::GetDisplayableProperties() const {
       {"Data Reference Index", std::to_string(this->GetDataReferenceIndex())});
   props.push_back({"Width", std::to_string(this->GetWidth())});
   props.push_back({"Height", std::to_string(this->GetHeight())});
+  props.push_back({"Horizontal Resolution (raw)",
+                   std::to_string(this->GetHorizResolutionRaw())});
   props.push_back(
       {"Horizontal Resolution", std::to_string(this->GetHorizResolution())});
+  props.push_back({"Vertical Resolution (raw)",
+                   std::to_string(this->GetVertResolutionRaw())});
   props.push_back(
       {"Vertical Resolution", std::to_string(this->GetVertResolution())});
   props.push_back({"Frame Count", std::to_string(this->GetFrameCount())});
@@ -189,11 +194,11 @@ uint16_t AV2SampleEntry::GetWidth() const { return this->impl->_width; }
 
 uint16_t AV2SampleEntry::GetHeight() const { return this->impl->_height; }
 
-uint32_t AV2SampleEntry::GetHorizResolution() const {
+uint32_t AV2SampleEntry::GetHorizResolutionRaw() const {
   return this->impl->_horizresolution;
 }
 
-uint32_t AV2SampleEntry::GetVertResolution() const {
+uint32_t AV2SampleEntry::GetVertResolutionRaw() const {
   return this->impl->_vertresolution;
 }
 
@@ -215,11 +220,11 @@ void AV2SampleEntry::SetWidth(uint16_t value) { this->impl->_width = value; }
 
 void AV2SampleEntry::SetHeight(uint16_t value) { this->impl->_height = value; }
 
-void AV2SampleEntry::SetHorizResolution(uint32_t value) {
+void AV2SampleEntry::SetHorizResolutionRaw(uint32_t value) {
   this->impl->_horizresolution = value;
 }
 
-void AV2SampleEntry::SetVertResolution(uint32_t value) {
+void AV2SampleEntry::SetVertResolutionRaw(uint32_t value) {
   this->impl->_vertresolution = value;
 }
 
@@ -241,6 +246,22 @@ void AV2SampleEntry::AddBox(std::shared_ptr<Box> box) {
 
 std::vector<std::shared_ptr<Box> > AV2SampleEntry::GetBoxes() const {
   return this->impl->_boxes;
+}
+
+double AV2SampleEntry::GetHorizResolution() const {
+  return FixedPoint::ToDouble(this->impl->_horizresolution, 16);
+}
+
+double AV2SampleEntry::GetVertResolution() const {
+  return FixedPoint::ToDouble(this->impl->_vertresolution, 16);
+}
+
+void AV2SampleEntry::SetHorizResolution(double value) {
+  this->impl->_horizresolution = FixedPoint::FromDouble<uint32_t>(value, 16);
+}
+
+void AV2SampleEntry::SetVertResolution(double value) {
+  this->impl->_vertresolution = FixedPoint::FromDouble<uint32_t>(value, 16);
 }
 
 AV2SampleEntry::IMPL::IMPL()

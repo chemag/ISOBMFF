@@ -80,8 +80,11 @@ TEST_F(ISOBMFFAVC1Test, TestAVC1Parser) {
   EXPECT_EQ(avc1->GetHeight(), 2304); // 0x0900
 
   // Validate horizontal and vertical resolution
-  EXPECT_EQ(avc1->GetHorizResolution(), 0x00480000); // 72 dpi in 16.16 fixed-point
-  EXPECT_EQ(avc1->GetVertResolution(), 0x00480000);  // 72 dpi in 16.16 fixed-point
+  // 72 dpi, as 16.16 fixed point and as a double
+  EXPECT_EQ(avc1->GetHorizResolutionRaw(), 0x00480000u);
+  EXPECT_DOUBLE_EQ(avc1->GetHorizResolution(), 72.0);
+  EXPECT_EQ(avc1->GetVertResolutionRaw(), 0x00480000u);
+  EXPECT_DOUBLE_EQ(avc1->GetVertResolution(), 72.0);
 
   // Validate frame count
   EXPECT_EQ(avc1->GetFrameCount(), 1);
@@ -91,5 +94,16 @@ TEST_F(ISOBMFFAVC1Test, TestAVC1Parser) {
 
   // Validate depth
   EXPECT_EQ(avc1->GetDepth(), 24);
+}
+
+// horizresolution and vertresolution are unsigned 16.16 fixed-point fields
+TEST_F(ISOBMFFAVC1Test, TestAVC1Resolution) {
+  ISOBMFF::AVC1 avc1;
+  avc1.SetHorizResolution(300.5);
+  EXPECT_EQ(avc1.GetHorizResolutionRaw(), 0x012c8000u);
+  avc1.SetVertResolutionRaw(0x00960000);  // 150 dpi
+  EXPECT_DOUBLE_EQ(avc1.GetVertResolution(), 150.0);
+  avc1.SetVertResolution(-72.0);  // negative values saturate to 0
+  EXPECT_EQ(avc1.GetVertResolutionRaw(), 0u);
 }
 } // namespace ISOBMFF

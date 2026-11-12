@@ -58,6 +58,10 @@ TEST_F(ISOBMFFAV2SampleEntryTest, TestAV2SampleEntryOutOfBand) {
   EXPECT_EQ(entry->GetDataReferenceIndex(), 1);
   EXPECT_EQ(entry->GetWidth(), 1920);
   EXPECT_EQ(entry->GetHeight(), 1080);
+  EXPECT_EQ(entry->GetHorizResolutionRaw(), 0x00480000u);
+  EXPECT_DOUBLE_EQ(entry->GetHorizResolution(), 72.0);
+  EXPECT_EQ(entry->GetVertResolutionRaw(), 0x00480000u);
+  EXPECT_DOUBLE_EQ(entry->GetVertResolution(), 72.0);
   EXPECT_EQ(entry->GetFrameCount(), 1);
   EXPECT_EQ(entry->GetDepth(), 24);
 

@@ -80,8 +80,11 @@ TEST_F(ISOBMFFAVC3Test, TestAVC3Parser) {
   EXPECT_EQ(avc3->GetHeight(), 2304); // 0x0900
 
   // Validate horizontal and vertical resolution
-  EXPECT_EQ(avc3->GetHorizResolution(), 0x00480000); // 72 dpi in 16.16 fixed-point
-  EXPECT_EQ(avc3->GetVertResolution(), 0x00480000);  // 72 dpi in 16.16 fixed-point
+  // 72 dpi, as 16.16 fixed point and as a double
+  EXPECT_EQ(avc3->GetHorizResolutionRaw(), 0x00480000u);
+  EXPECT_DOUBLE_EQ(avc3->GetHorizResolution(), 72.0);
+  EXPECT_EQ(avc3->GetVertResolutionRaw(), 0x00480000u);
+  EXPECT_DOUBLE_EQ(avc3->GetVertResolution(), 72.0);
 
   // Validate frame count
   EXPECT_EQ(avc3->GetFrameCount(), 1);

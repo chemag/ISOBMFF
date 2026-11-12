@@ -29,6 +29,7 @@
  */
 
 #include <ContainerBox.hpp>
+#include <FixedPoint.hpp>
 #include <HVC1.hpp>
 
 namespace ISOBMFF {
@@ -125,12 +126,12 @@ Error HVC1::ReadData(Parser& parser, BinaryStream& stream) {
   uint32_t horizResolution;
   err = stream.ReadBigEndianUInt32(horizResolution);
   if (err) return err;
-  this->SetHorizResolution(horizResolution);
+  this->SetHorizResolutionRaw(horizResolution);
 
   uint32_t vertResolution;
   err = stream.ReadBigEndianUInt32(vertResolution);
   if (err) return err;
-  this->SetVertResolution(vertResolution);
+  this->SetVertResolutionRaw(vertResolution);
 
   err = stream.ReadBigEndianUInt32(temp32);
   if (err) return err;
@@ -169,8 +170,12 @@ HVC1::GetDisplayableProperties() const {
       {"Data Reference Index", std::to_string(this->GetDataReferenceIndex())});
   props.push_back({"Width", std::to_string(this->GetWidth())});
   props.push_back({"Height", std::to_string(this->GetHeight())});
+  props.push_back({"Horizontal Resolution (raw)",
+                   std::to_string(this->GetHorizResolutionRaw())});
   props.push_back(
       {"Horizontal Resolution", std::to_string(this->GetHorizResolution())});
+  props.push_back({"Vertical Resolution (raw)",
+                   std::to_string(this->GetVertResolutionRaw())});
   props.push_back(
       {"Vertical Resolution", std::to_string(this->GetVertResolution())});
   props.push_back({"Frame Count", std::to_string(this->GetFrameCount())});
@@ -193,11 +198,13 @@ uint16_t HVC1::GetWidth() const { return this->impl->_width; }
 
 uint16_t HVC1::GetHeight() const { return this->impl->_height; }
 
-uint32_t HVC1::GetHorizResolution() const {
+uint32_t HVC1::GetHorizResolutionRaw() const {
   return this->impl->_horizresolution;
 }
 
-uint32_t HVC1::GetVertResolution() const { return this->impl->_vertresolution; }
+uint32_t HVC1::GetVertResolutionRaw() const {
+  return this->impl->_vertresolution;
+}
 
 uint16_t HVC1::GetFrameCount() const { return this->impl->_frame_count; }
 
@@ -215,11 +222,11 @@ void HVC1::SetWidth(uint16_t value) { this->impl->_width = value; }
 
 void HVC1::SetHeight(uint16_t value) { this->impl->_height = value; }
 
-void HVC1::SetHorizResolution(uint32_t value) {
+void HVC1::SetHorizResolutionRaw(uint32_t value) {
   this->impl->_horizresolution = value;
 }
 
-void HVC1::SetVertResolution(uint32_t value) {
+void HVC1::SetVertResolutionRaw(uint32_t value) {
   this->impl->_vertresolution = value;
 }
 
@@ -239,6 +246,22 @@ void HVC1::AddBox(std::shared_ptr<Box> box) {
 
 std::vector<std::shared_ptr<Box> > HVC1::GetBoxes() const {
   return this->impl->_boxes;
+}
+
+double HVC1::GetHorizResolution() const {
+  return FixedPoint::ToDouble(this->impl->_horizresolution, 16);
+}
+
+double HVC1::GetVertResolution() const {
+  return FixedPoint::ToDouble(this->impl->_vertresolution, 16);
+}
+
+void HVC1::SetHorizResolution(double value) {
+  this->impl->_horizresolution = FixedPoint::FromDouble<uint32_t>(value, 16);
+}
+
+void HVC1::SetVertResolution(double value) {
+  this->impl->_vertresolution = FixedPoint::FromDouble<uint32_t>(value, 16);
 }
 
 HVC1::IMPL::IMPL()
