@@ -37,8 +37,8 @@ class ISPE::IMPL {
   IMPL(const IMPL& o);
   ~IMPL();
 
-  uint32_t _displayWidth;
-  uint32_t _displayHeight;
+  uint32_t _imageWidth;
+  uint32_t _imageHeight;
 };
 
 ISPE::ISPE() : FullBox("ispe"), impl(std::make_unique<IMPL>()) {}
@@ -72,15 +72,15 @@ Error ISPE::ReadData(Parser& parser, BinaryStream& stream) {
   err = FullBox::ReadData(parser, stream);
   if (err) return err;
 
-  uint32_t displayWidth;
-  err = stream.ReadBigEndianUInt32(displayWidth);
+  uint32_t imageWidth;
+  err = stream.ReadBigEndianUInt32(imageWidth);
   if (err) return err;
-  this->SetDisplayWidth(displayWidth);
+  this->SetImageWidth(imageWidth);
 
-  uint32_t displayHeight;
-  err = stream.ReadBigEndianUInt32(displayHeight);
+  uint32_t imageHeight;
+  err = stream.ReadBigEndianUInt32(imageHeight);
   if (err) return err;
-  this->SetDisplayHeight(displayHeight);
+  this->SetImageHeight(imageHeight);
   return Error();
 }
 
@@ -88,28 +88,24 @@ std::vector<std::pair<std::string, std::string> >
 ISPE::GetDisplayableProperties() const {
   auto props(FullBox::GetDisplayableProperties());
 
-  props.push_back({"Display width", std::to_string(this->GetDisplayWidth())});
-  props.push_back({"Display height", std::to_string(this->GetDisplayHeight())});
+  props.push_back({"Image width", std::to_string(this->GetImageWidth())});
+  props.push_back({"Image height", std::to_string(this->GetImageHeight())});
 
   return props;
 }
 
-uint32_t ISPE::GetDisplayWidth() const { return this->impl->_displayWidth; }
+uint32_t ISPE::GetImageWidth() const { return this->impl->_imageWidth; }
 
-uint32_t ISPE::GetDisplayHeight() const { return this->impl->_displayHeight; }
+uint32_t ISPE::GetImageHeight() const { return this->impl->_imageHeight; }
 
-void ISPE::SetDisplayWidth(uint32_t value) {
-  this->impl->_displayWidth = value;
-}
+void ISPE::SetImageWidth(uint32_t value) { this->impl->_imageWidth = value; }
 
-void ISPE::SetDisplayHeight(uint32_t value) {
-  this->impl->_displayHeight = value;
-}
+void ISPE::SetImageHeight(uint32_t value) { this->impl->_imageHeight = value; }
 
-ISPE::IMPL::IMPL() : _displayWidth(0), _displayHeight(0) {}
+ISPE::IMPL::IMPL() : _imageWidth(0), _imageHeight(0) {}
 
 ISPE::IMPL::IMPL(const IMPL& o)
-    : _displayWidth(o._displayWidth), _displayHeight(o._displayHeight) {}
+    : _imageWidth(o._imageWidth), _imageHeight(o._imageHeight) {}
 
 ISPE::IMPL::~IMPL() {}
 }  // namespace ISOBMFF

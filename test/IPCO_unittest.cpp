@@ -52,7 +52,7 @@ TEST_F(ISOBMFFIPCOTest, TestIPCOParser) {
   auto ispe =
       std::dynamic_pointer_cast<ISOBMFF::ISPE>(ipco->GetPropertyAtIndex(0));
   ASSERT_NE(ispe, nullptr);
-  EXPECT_EQ(ispe->GetDisplayWidth(), 512u);
+  EXPECT_EQ(ispe->GetImageWidth(), 512u);
   auto irot =
       std::dynamic_pointer_cast<ISOBMFF::IROT>(ipco->GetPropertyAtIndex(1));
   ASSERT_NE(irot, nullptr);

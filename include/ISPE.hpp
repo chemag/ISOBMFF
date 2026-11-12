@@ -38,6 +38,9 @@
 #include <memory>
 
 namespace ISOBMFF {
+// ImageSpatialExtentsProperty ("ispe", ISO/IEC 23008-12): image_width and
+// image_height, the width and height of the reconstructed image of the
+// associated image item, in pixels.
 class ISOBMFF_EXPORT ISPE : public FullBox {
  public:
   ISPE();
@@ -51,11 +54,11 @@ class ISOBMFF_EXPORT ISPE : public FullBox {
   std::vector<std::pair<std::string, std::string> > GetDisplayableProperties()
       const override;
 
-  uint32_t GetDisplayWidth() const;
-  uint32_t GetDisplayHeight() const;
+  uint32_t GetImageWidth() const;
+  uint32_t GetImageHeight() const;
 
-  void SetDisplayWidth(uint32_t value);
-  void SetDisplayHeight(uint32_t value);
+  void SetImageWidth(uint32_t value);
+  void SetImageHeight(uint32_t value);
 
   ISOBMFF_EXPORT friend void swap(ISPE& o1, ISPE& o2);
 

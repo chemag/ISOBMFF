@@ -45,8 +45,8 @@ TEST_F(ISOBMFFISPETest, TestISPEParser) {
 
   auto ispe = std::dynamic_pointer_cast<ISOBMFF::ISPE>(box);
   ASSERT_NE(ispe, nullptr) << "Failed to cast to ISPE";
-  EXPECT_EQ(ispe->GetDisplayWidth(), 4032u);
-  EXPECT_EQ(ispe->GetDisplayHeight(), 3024u);
+  EXPECT_EQ(ispe->GetImageWidth(), 4032u);
+  EXPECT_EQ(ispe->GetImageHeight(), 3024u);
 }
 
 // A truncated ispe (no image_height).
