@@ -15,8 +15,7 @@ This document tracks known gaps in the isobmff fork.
 | Section | Item                                             | Status       |
 |---------|--------------------------------------------------|--------------|
 | 2       | URN does not parse name and location             | actionable   |
-| 3       | Apply Google style to the whole tree             | actionable   |
-| 4       | Resolved                                         | for reference|
+| 3       | Resolved                                         | for reference|
 
 
 # 2. URN does not parse name and location
@@ -29,21 +28,7 @@ so a file that references its media through a URN loses that reference.
 `test/URN_unittest.cpp` documents the current behavior.
 
 
-# 3. Apply Google style to the whole tree
-
-Status: actionable, small.
-
-The fork is too far from upstream (DigiDNA/ISOBMFF) to keep its original
-formatting for easier merges. New and changed code is formatted with
-`clang-format -style=google`, but much of the tree is not: around v0.19,
-26 of the 192 files under src/, include/, test/ and tools/ change when
-reformatted. Make a one-off commit that runs `clang-format -i
--style=google` over the whole tree (and adds a `.clang-format` with
-`BasedOnStyle: Google`), with no other change, so that later diffs only
-show real changes.
-
-
-# 4. Resolved
+# 3. Resolved
 
 * unit tests and fuzzers for every registered box. When this list was
   started, 22 of the 47 registered boxes lacked a unit test, a fuzzer, or
@@ -75,3 +60,8 @@ show real changes.
   used to drop. CTTS still reads `sample_offset` as signed in both
   versions, although version 0 declares it unsigned, because Apple MOV
   files announce version 0 with negative offsets (decided, no change).
+* Google style: the whole tree (src/, include/, test/ and tools/) is
+  formatted with `clang-format -style=google`, and `.clang-format` sets
+  `BasedOnStyle: Google`. The fork is too far from upstream for its
+  original formatting to matter. The generated fuzzers (fuzz/) are not
+  formatted: they are converter.py output.
