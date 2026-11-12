@@ -175,7 +175,9 @@ Requires clang (with libfuzzer) for the fuzzers.
 # 6. Other
 
 The [fuzz](fuzz/README.md) directory contains information on fuzzing the
-parser. The fuzzers are generated from the unit tests.
+parser. The fuzzers are generated from the unit tests. The fuzzing corpus
+lives in the [isobmff-fuzzcorpus](https://github.com/chemag/isobmff-fuzzcorpus)
+repo, as the `fuzz/corpus` submodule (not checked out by default).
 
 The [TODO](TODO.md) file tracks known gaps.
 
