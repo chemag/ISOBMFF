@@ -83,6 +83,7 @@
 #include <cstring>
 #include <map>
 #include <stdexcept>
+#include <utility>
 
 namespace ISOBMFF {
 class Parser::IMPL {
@@ -94,15 +95,49 @@ class Parser::IMPL {
   Error RegisterBox(const std::string& type,
                     const std::function<std::shared_ptr<Box>()>& createBox);
   Error RegisterContainerBox(const std::string& type);
-  void RegisterDefaultBoxes();
 
   std::shared_ptr<File> _file;
   std::string _path;
+  // The boxes registered on this parser (RegisterBox()), which win over
+  // the default ones (DefaultBoxes()).
   std::map<std::string, std::function<std::shared_ptr<Box>()> > _types;
   Parser::StringType _stringType;
   uint64_t _options;
   std::map<std::string, void*> _info;
 };
+
+namespace {
+using BoxFactory = std::function<std::shared_ptr<Box>()>;
+using BoxFactories = std::map<std::string, BoxFactory>;
+
+// Collects the default box factories, for DefaultBoxes().
+class DefaultBoxTable {
+ public:
+  void RegisterBox(const std::string& type, const BoxFactory& createBox) {
+    this->_types[type] = createBox;
+  }
+  void RegisterContainerBox(const std::string& type) {
+    this->RegisterBox(type, [type]() -> std::shared_ptr<Box> {
+      return std::make_shared<ContainerBox>(type);
+    });
+  }
+
+  BoxFactories _types;
+};
+
+const BoxFactories* BuildDefaultBoxes();
+
+// The default box factories, shared by every Parser. They used to be
+// registered again in every Parser (a map of about 70 entries, built and
+// freed with each one), which dominated the cost of creating a Parser.
+// The table is built once, on the first call (thread-safe since C++11),
+// and never destroyed, so that a Parser used from the destructor of a
+// static object at exit still finds it.
+const BoxFactories& DefaultBoxes() {
+  static const BoxFactories* const defaults = BuildDefaultBoxes();
+  return *defaults;
+}
+}  // namespace
 
 Parser::Parser() : impl(std::make_unique<IMPL>()) {}
 
@@ -150,10 +185,21 @@ Error Parser::RegisterBox(
 }
 
 std::shared_ptr<Box> Parser::CreateBox(const std::string& type) const {
-  for (const auto& p : this->impl->_types) {
-    if (p.first == type && p.second != nullptr) {
-      return p.second();
+  // A box registered on this parser wins over the default one. A null
+  // factory registered on this parser turns the default off: the box is
+  // read as a generic Box.
+  const auto own = this->impl->_types.find(type);
+  if (own != this->impl->_types.end()) {
+    if (own->second == nullptr) {
+      return std::make_shared<Box>(type);
     }
+    return own->second();
+  }
+
+  const BoxFactories& defaults = DefaultBoxes();
+  const auto def = defaults.find(type);
+  if (def != defaults.end()) {
+    return def->second();
   }
 
   return std::make_shared<Box>(type);
@@ -249,9 +295,7 @@ void Parser::SetInfo(const std::string& key, void* value) {
 }
 
 Parser::IMPL::IMPL()
-    : _stringType(Parser::StringType::NULLTerminated), _options(0) {
-  this->RegisterDefaultBoxes();
-}
+    : _stringType(Parser::StringType::NULLTerminated), _options(0) {}
 
 Parser::IMPL::IMPL(const IMPL& o)
     : _file(o._file),
@@ -259,9 +303,7 @@ Parser::IMPL::IMPL(const IMPL& o)
       _types(o._types),
       _stringType(o._stringType),
       _options(o._options),
-      _info(o._info) {
-  this->RegisterDefaultBoxes();
-}
+      _info(o._info) {}
 
 Parser::IMPL::~IMPL() {}
 
@@ -283,175 +325,181 @@ Error Parser::IMPL::RegisterContainerBox(const std::string& type) {
   });
 }
 
-void Parser::IMPL::RegisterDefaultBoxes() {
-  this->RegisterContainerBox("moov");
-  this->RegisterContainerBox("trak");
-  this->RegisterContainerBox("edts");
-  this->RegisterContainerBox("mdia");
-  this->RegisterContainerBox("minf");
-  this->RegisterContainerBox("stbl");
-  this->RegisterContainerBox("mvex");
-  this->RegisterContainerBox("moof");
-  this->RegisterContainerBox("traf");
-  this->RegisterContainerBox("mfra");
-  this->RegisterContainerBox("meco");
-  this->RegisterContainerBox("mere");
-  this->RegisterContainerBox("dinf");
-  this->RegisterContainerBox("ipro");
-  this->RegisterContainerBox("sinf");
-  this->RegisterContainerBox("iprp");
-  this->RegisterContainerBox("fiin");
-  this->RegisterContainerBox("paen");
-  this->RegisterContainerBox("strk");
-  this->RegisterContainerBox("tapt");
-  this->RegisterContainerBox("schi");
+namespace {
+const BoxFactories* BuildDefaultBoxes() {
+  DefaultBoxTable table;
 
-  this->RegisterBox("ftyp", [=]() -> std::shared_ptr<Box> {
+  table.RegisterContainerBox("moov");
+  table.RegisterContainerBox("trak");
+  table.RegisterContainerBox("edts");
+  table.RegisterContainerBox("mdia");
+  table.RegisterContainerBox("minf");
+  table.RegisterContainerBox("stbl");
+  table.RegisterContainerBox("mvex");
+  table.RegisterContainerBox("moof");
+  table.RegisterContainerBox("traf");
+  table.RegisterContainerBox("mfra");
+  table.RegisterContainerBox("meco");
+  table.RegisterContainerBox("mere");
+  table.RegisterContainerBox("dinf");
+  table.RegisterContainerBox("ipro");
+  table.RegisterContainerBox("sinf");
+  table.RegisterContainerBox("iprp");
+  table.RegisterContainerBox("fiin");
+  table.RegisterContainerBox("paen");
+  table.RegisterContainerBox("strk");
+  table.RegisterContainerBox("tapt");
+  table.RegisterContainerBox("schi");
+
+  table.RegisterBox("ftyp", [=]() -> std::shared_ptr<Box> {
     return std::make_shared<FTYP>();
   });
-  this->RegisterBox("mvhd", [=]() -> std::shared_ptr<Box> {
+  table.RegisterBox("mvhd", [=]() -> std::shared_ptr<Box> {
     return std::make_shared<MVHD>();
   });
-  this->RegisterBox("tkhd", [=]() -> std::shared_ptr<Box> {
+  table.RegisterBox("tkhd", [=]() -> std::shared_ptr<Box> {
     return std::make_shared<TKHD>();
   });
-  this->RegisterBox("meta", [=]() -> std::shared_ptr<Box> {
+  table.RegisterBox("meta", [=]() -> std::shared_ptr<Box> {
     return std::make_shared<META>();
   });
-  this->RegisterBox("hdlr", [=]() -> std::shared_ptr<Box> {
+  table.RegisterBox("hdlr", [=]() -> std::shared_ptr<Box> {
     return std::make_shared<HDLR>();
   });
-  this->RegisterBox("mdhd", [=]() -> std::shared_ptr<Box> {
+  table.RegisterBox("mdhd", [=]() -> std::shared_ptr<Box> {
     return std::make_shared<MDHD>();
   });
-  this->RegisterBox("pitm", [=]() -> std::shared_ptr<Box> {
+  table.RegisterBox("pitm", [=]() -> std::shared_ptr<Box> {
     return std::make_shared<PITM>();
   });
-  this->RegisterBox("iinf", [=]() -> std::shared_ptr<Box> {
+  table.RegisterBox("iinf", [=]() -> std::shared_ptr<Box> {
     return std::make_shared<IINF>();
   });
-  this->RegisterBox("dref", [=]() -> std::shared_ptr<Box> {
+  table.RegisterBox("dref", [=]() -> std::shared_ptr<Box> {
     return std::make_shared<DREF>();
   });
-  this->RegisterBox("elst", [=]() -> std::shared_ptr<Box> {
+  table.RegisterBox("elst", [=]() -> std::shared_ptr<Box> {
     return std::make_shared<ELST>();
   });
-  this->RegisterBox("url ", [=]() -> std::shared_ptr<Box> {
+  table.RegisterBox("url ", [=]() -> std::shared_ptr<Box> {
     return std::make_shared<URL>();
   });
-  this->RegisterBox("urn ", [=]() -> std::shared_ptr<Box> {
+  table.RegisterBox("urn ", [=]() -> std::shared_ptr<Box> {
     return std::make_shared<URN>();
   });
-  this->RegisterBox("iloc", [=]() -> std::shared_ptr<Box> {
+  table.RegisterBox("iloc", [=]() -> std::shared_ptr<Box> {
     return std::make_shared<ILOC>();
   });
-  this->RegisterBox("iref", [=]() -> std::shared_ptr<Box> {
+  table.RegisterBox("iref", [=]() -> std::shared_ptr<Box> {
     return std::make_shared<IREF>();
   });
-  this->RegisterBox("infe", [=]() -> std::shared_ptr<Box> {
+  table.RegisterBox("infe", [=]() -> std::shared_ptr<Box> {
     return std::make_shared<INFE>();
   });
-  this->RegisterBox("irot", [=]() -> std::shared_ptr<Box> {
+  table.RegisterBox("irot", [=]() -> std::shared_ptr<Box> {
     return std::make_shared<IROT>();
   });
-  this->RegisterBox("hvcC", [=]() -> std::shared_ptr<Box> {
+  table.RegisterBox("hvcC", [=]() -> std::shared_ptr<Box> {
     return std::make_shared<HVCC>();
   });
-  this->RegisterBox("avcC", [=]() -> std::shared_ptr<Box> {
+  table.RegisterBox("avcC", [=]() -> std::shared_ptr<Box> {
     return std::make_shared<AVCC>();
   });
-  this->RegisterBox("dimg", [=]() -> std::shared_ptr<Box> {
+  table.RegisterBox("dimg", [=]() -> std::shared_ptr<Box> {
     return std::make_shared<DIMG>();
   });
-  this->RegisterBox("thmb", [=]() -> std::shared_ptr<Box> {
+  table.RegisterBox("thmb", [=]() -> std::shared_ptr<Box> {
     return std::make_shared<THMB>();
   });
-  this->RegisterBox("cdsc", [=]() -> std::shared_ptr<Box> {
+  table.RegisterBox("cdsc", [=]() -> std::shared_ptr<Box> {
     return std::make_shared<CDSC>();
   });
-  this->RegisterBox("colr", [=]() -> std::shared_ptr<Box> {
+  table.RegisterBox("colr", [=]() -> std::shared_ptr<Box> {
     return std::make_shared<COLR>();
   });
-  this->RegisterBox("ispe", [=]() -> std::shared_ptr<Box> {
+  table.RegisterBox("ispe", [=]() -> std::shared_ptr<Box> {
     return std::make_shared<ISPE>();
   });
-  this->RegisterBox("ipma", [=]() -> std::shared_ptr<Box> {
+  table.RegisterBox("ipma", [=]() -> std::shared_ptr<Box> {
     return std::make_shared<IPMA>();
   });
-  this->RegisterBox("pixi", [=]() -> std::shared_ptr<Box> {
+  table.RegisterBox("pixi", [=]() -> std::shared_ptr<Box> {
     return std::make_shared<PIXI>();
   });
-  this->RegisterBox("ipco", [=]() -> std::shared_ptr<Box> {
+  table.RegisterBox("ipco", [=]() -> std::shared_ptr<Box> {
     return std::make_shared<IPCO>();
   });
-  this->RegisterBox("stsd", [=]() -> std::shared_ptr<Box> {
+  table.RegisterBox("stsd", [=]() -> std::shared_ptr<Box> {
     return std::make_shared<STSD>();
   });
-  this->RegisterBox("stss", [=]() -> std::shared_ptr<Box> {
+  table.RegisterBox("stss", [=]() -> std::shared_ptr<Box> {
     return std::make_shared<STSS>();
   });
-  this->RegisterBox("stsz", [=]() -> std::shared_ptr<Box> {
+  table.RegisterBox("stsz", [=]() -> std::shared_ptr<Box> {
     return std::make_shared<STSZ>();
   });
-  this->RegisterBox("stz2", [=]() -> std::shared_ptr<Box> {
+  table.RegisterBox("stz2", [=]() -> std::shared_ptr<Box> {
     return std::make_shared<STZ2>();
   });
-  this->RegisterBox("stts", [=]() -> std::shared_ptr<Box> {
+  table.RegisterBox("stts", [=]() -> std::shared_ptr<Box> {
     return std::make_shared<STTS>();
   });
-  this->RegisterBox("ctts", [=]() -> std::shared_ptr<Box> {
+  table.RegisterBox("ctts", [=]() -> std::shared_ptr<Box> {
     return std::make_shared<CTTS>();
   });
-  this->RegisterBox("frma", [=]() -> std::shared_ptr<Box> {
+  table.RegisterBox("frma", [=]() -> std::shared_ptr<Box> {
     return std::make_shared<FRMA>();
   });
-  this->RegisterBox("schm", [=]() -> std::shared_ptr<Box> {
+  table.RegisterBox("schm", [=]() -> std::shared_ptr<Box> {
     return std::make_shared<SCHM>();
   });
-  this->RegisterBox("hvc1", [=]() -> std::shared_ptr<Box> {
+  table.RegisterBox("hvc1", [=]() -> std::shared_ptr<Box> {
     return std::make_shared<HVC1>();
   });
-  this->RegisterBox("hev1", [=]() -> std::shared_ptr<Box> {
+  table.RegisterBox("hev1", [=]() -> std::shared_ptr<Box> {
     return std::make_shared<HEV1>();
   });
-  this->RegisterBox("avc1", [=]() -> std::shared_ptr<Box> {
+  table.RegisterBox("avc1", [=]() -> std::shared_ptr<Box> {
     return std::make_shared<AVC1>();
   });
-  this->RegisterBox("avc3", [=]() -> std::shared_ptr<Box> {
+  table.RegisterBox("avc3", [=]() -> std::shared_ptr<Box> {
     return std::make_shared<AVC3>();
   });
-  this->RegisterBox("av01", [=]() -> std::shared_ptr<Box> {
+  table.RegisterBox("av01", [=]() -> std::shared_ptr<Box> {
     return std::make_shared<AV01>();
   });
-  this->RegisterBox("av1C", [=]() -> std::shared_ptr<Box> {
+  table.RegisterBox("av1C", [=]() -> std::shared_ptr<Box> {
     return std::make_shared<AV1C>();
   });
-  this->RegisterBox("av2E", [=]() -> std::shared_ptr<Box> {
+  table.RegisterBox("av2E", [=]() -> std::shared_ptr<Box> {
     return std::make_shared<AV2SampleEntry>("av2E");
   });
-  this->RegisterBox("av2e", [=]() -> std::shared_ptr<Box> {
+  table.RegisterBox("av2e", [=]() -> std::shared_ptr<Box> {
     return std::make_shared<AV2SampleEntry>("av2e");
   });
-  this->RegisterBox("av2C", [=]() -> std::shared_ptr<Box> {
+  table.RegisterBox("av2C", [=]() -> std::shared_ptr<Box> {
     return std::make_shared<AV2COutOfBand>();
   });
-  this->RegisterBox("av2c", [=]() -> std::shared_ptr<Box> {
+  table.RegisterBox("av2c", [=]() -> std::shared_ptr<Box> {
     return std::make_shared<AV2CInBand>();
   });
-  this->RegisterBox("ec-3", [=]() -> std::shared_ptr<Box> {
+  table.RegisterBox("ec-3", [=]() -> std::shared_ptr<Box> {
     return std::make_shared<EC3>();
   });
-  this->RegisterBox("dec3", [=]() -> std::shared_ptr<Box> {
+  table.RegisterBox("dec3", [=]() -> std::shared_ptr<Box> {
     return std::make_shared<DEC3>();
   });
-  this->RegisterBox("mp4a", [=]() -> std::shared_ptr<Box> {
+  table.RegisterBox("mp4a", [=]() -> std::shared_ptr<Box> {
     return std::make_shared<MP4A>();
   });
-  this->RegisterBox("Opus", [=]() -> std::shared_ptr<Box> {
+  table.RegisterBox("Opus", [=]() -> std::shared_ptr<Box> {
     return std::make_shared<OPUS>();
   });
-  this->RegisterBox("dOps", [=]() -> std::shared_ptr<Box> {
+  table.RegisterBox("dOps", [=]() -> std::shared_ptr<Box> {
     return std::make_shared<DOPS>();
   });
+
+  return new BoxFactories(std::move(table._types));
 }
+}  // namespace
 }  // namespace ISOBMFF

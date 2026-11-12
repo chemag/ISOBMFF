@@ -513,4 +513,54 @@ TEST_F(ISOBMFFParserTest, TestSampleVideo) {
   }
 }
 
+// The default boxes are shared by every Parser. RegisterBox() overrides a
+// default type on that parser only (and on its copies), and a null factory
+// turns the default off: the box is read as a generic Box.
+TEST_F(ISOBMFFParserTest, TestRegisterBoxOverridesDefault) {
+  ISOBMFF::Parser parser;
+  ISOBMFF::Parser other;
+  EXPECT_NE(std::dynamic_pointer_cast<ISOBMFF::MVHD>(parser.CreateBox("mvhd")),
+            nullptr);
+
+  // override a default type
+  ISOBMFF::Error error =
+      parser.RegisterBox("mvhd", []() -> std::shared_ptr<ISOBMFF::Box> {
+        return std::make_shared<ISOBMFF::FTYP>();
+      });
+  EXPECT_FALSE(error);
+  EXPECT_NE(std::dynamic_pointer_cast<ISOBMFF::FTYP>(parser.CreateBox("mvhd")),
+            nullptr);
+  // other parsers keep the default
+  EXPECT_NE(std::dynamic_pointer_cast<ISOBMFF::MVHD>(other.CreateBox("mvhd")),
+            nullptr);
+  // a copy keeps the override
+  ISOBMFF::Parser copy(parser);
+  EXPECT_NE(std::dynamic_pointer_cast<ISOBMFF::FTYP>(copy.CreateBox("mvhd")),
+            nullptr);
+
+  // a null factory turns the default off
+  error = parser.RegisterBox("tkhd", nullptr);
+  EXPECT_FALSE(error);
+  std::shared_ptr<ISOBMFF::Box> box = parser.CreateBox("tkhd");
+  ASSERT_NE(box, nullptr);
+  EXPECT_EQ(std::dynamic_pointer_cast<ISOBMFF::TKHD>(box), nullptr);
+  EXPECT_EQ(box->GetName(), "tkhd");
+  EXPECT_NE(std::dynamic_pointer_cast<ISOBMFF::TKHD>(other.CreateBox("tkhd")),
+            nullptr);
+
+  // a new type
+  error = parser.RegisterContainerBox("abcd");
+  EXPECT_FALSE(error);
+  EXPECT_NE(std::dynamic_pointer_cast<ISOBMFF::ContainerBox>(
+                parser.CreateBox("abcd")),
+            nullptr);
+  // unknown types are generic boxes
+  box = other.CreateBox("abcd");
+  ASSERT_NE(box, nullptr);
+  EXPECT_EQ(std::dynamic_pointer_cast<ISOBMFF::ContainerBox>(box), nullptr);
+  EXPECT_EQ(box->GetName(), "abcd");
+
+  // type names must be 4 characters long
+  EXPECT_TRUE(parser.RegisterContainerBox("abc"));
+}
 }  // namespace ISOBMFF
