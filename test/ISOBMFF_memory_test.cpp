@@ -66,8 +66,8 @@ class IsobmffMemoryTest : public ::testing::Test {
 #elif defined(__linux__)
     // Linux: Read RSS from /proc/self/statm
     long rss = 0L;
-    FILE* fp = nullptr;
-    if ((fp = fopen("/proc/self/statm", "r")) == nullptr) {
+    FILE* fp = fopen("/proc/self/statm", "r");
+    if (fp == nullptr) {
       return 0;
     }
     if (fscanf(fp, "%*s%ld", &rss) != 1) {

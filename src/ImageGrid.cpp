@@ -52,46 +52,70 @@ ImageGrid::ImageGrid(BinaryStream& stream) : impl(std::make_unique<IMPL>()) {
   uint8_t temp8;
 
   Error err = stream.ReadUInt8(temp8);
-  if (!err) this->SetVersion(temp8);
+  if (!err) {
+    this->SetVersion(temp8);
+  }
 
   err = stream.ReadUInt8(temp8);
-  if (!err) this->SetFlags(temp8);
+  if (!err) {
+    this->SetFlags(temp8);
+  }
 
   err = stream.ReadUInt8(temp8);
-  if (!err) this->SetRowsMinusOne(temp8);
+  if (!err) {
+    this->SetRowsMinusOne(temp8);
+  }
 
   err = stream.ReadUInt8(temp8);
-  if (!err) this->SetColumnsMinusOne(temp8);
+  if (!err) {
+    this->SetColumnsMinusOne(temp8);
+  }
 
   s = ((this->GetFlags() & 1) + 1) * 2;
 
   if (s == 1) {
     err = stream.ReadUInt8(temp8);
-    if (!err) this->SetOutputWidth(temp8);
+    if (!err) {
+      this->SetOutputWidth(temp8);
+    }
 
     err = stream.ReadUInt8(temp8);
-    if (!err) this->SetOutputHeight(temp8);
+    if (!err) {
+      this->SetOutputHeight(temp8);
+    }
   } else if (s == 2) {
     uint16_t temp16;
     err = stream.ReadBigEndianUInt16(temp16);
-    if (!err) this->SetOutputWidth(temp16);
+    if (!err) {
+      this->SetOutputWidth(temp16);
+    }
 
     err = stream.ReadBigEndianUInt16(temp16);
-    if (!err) this->SetOutputHeight(temp16);
+    if (!err) {
+      this->SetOutputHeight(temp16);
+    }
   } else if (s == 4) {
     uint32_t temp32;
     err = stream.ReadBigEndianUInt32(temp32);
-    if (!err) this->SetOutputWidth(temp32);
+    if (!err) {
+      this->SetOutputWidth(temp32);
+    }
 
     err = stream.ReadBigEndianUInt32(temp32);
-    if (!err) this->SetOutputHeight(temp32);
+    if (!err) {
+      this->SetOutputHeight(temp32);
+    }
   } else if (s == 8) {
     uint64_t temp64;
     err = stream.ReadBigEndianUInt64(temp64);
-    if (!err) this->SetOutputWidth(temp64);
+    if (!err) {
+      this->SetOutputWidth(temp64);
+    }
 
     err = stream.ReadBigEndianUInt64(temp64);
-    if (!err) this->SetOutputHeight(temp64);
+    if (!err) {
+      this->SetOutputHeight(temp64);
+    }
   }
 }
 

@@ -51,44 +51,62 @@ ILOC::Item::Extent::Extent(BinaryStream& stream, const ILOC& iloc)
     if (iloc.GetIndexSize() == 2) {
       uint16_t temp;
       Error err = stream.ReadBigEndianUInt16(temp);
-      if (!err) this->SetIndex(temp);
+      if (!err) {
+        this->SetIndex(temp);
+      }
     } else if (iloc.GetIndexSize() == 4) {
       uint32_t temp;
       Error err = stream.ReadBigEndianUInt32(temp);
-      if (!err) this->SetIndex(temp);
+      if (!err) {
+        this->SetIndex(temp);
+      }
     } else if (iloc.GetIndexSize() == 8) {
       uint64_t temp;
       Error err = stream.ReadBigEndianUInt64(temp);
-      if (!err) this->SetIndex(temp);
+      if (!err) {
+        this->SetIndex(temp);
+      }
     }
   }
 
   if (iloc.GetOffsetSize() == 2) {
     uint16_t temp;
     Error err = stream.ReadBigEndianUInt16(temp);
-    if (!err) this->SetOffset(temp);
+    if (!err) {
+      this->SetOffset(temp);
+    }
   } else if (iloc.GetOffsetSize() == 4) {
     uint32_t temp;
     Error err = stream.ReadBigEndianUInt32(temp);
-    if (!err) this->SetOffset(temp);
+    if (!err) {
+      this->SetOffset(temp);
+    }
   } else if (iloc.GetOffsetSize() == 8) {
     uint64_t temp;
     Error err = stream.ReadBigEndianUInt64(temp);
-    if (!err) this->SetOffset(temp);
+    if (!err) {
+      this->SetOffset(temp);
+    }
   }
 
   if (iloc.GetLengthSize() == 2) {
     uint16_t temp;
     Error err = stream.ReadBigEndianUInt16(temp);
-    if (!err) this->SetLength(temp);
+    if (!err) {
+      this->SetLength(temp);
+    }
   } else if (iloc.GetLengthSize() == 4) {
     uint32_t temp;
     Error err = stream.ReadBigEndianUInt32(temp);
-    if (!err) this->SetLength(temp);
+    if (!err) {
+      this->SetLength(temp);
+    }
   } else if (iloc.GetLengthSize() == 8) {
     uint64_t temp;
     Error err = stream.ReadBigEndianUInt64(temp);
-    if (!err) this->SetLength(temp);
+    if (!err) {
+      this->SetLength(temp);
+    }
   }
 }
 

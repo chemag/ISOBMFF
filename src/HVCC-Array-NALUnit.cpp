@@ -67,7 +67,9 @@ HVCC::Array::NALUnit::NALUnit(BinaryStream& stream)
   if (size > 0) {
     data = std::vector<uint8_t>(size);
     err = stream.Read(&(data[0]), size);
-    if (err) data.clear();
+    if (err) {
+      data.clear();
+    }
   }
 
   this->SetData(data);

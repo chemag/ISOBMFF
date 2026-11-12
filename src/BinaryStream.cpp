@@ -96,19 +96,25 @@ Error BinaryStream::ReadAllData(std::vector<uint8_t>& data) {
 
 Error BinaryStream::ReadUInt8(uint8_t& value) {
   Error err = this->Read(reinterpret_cast<uint8_t*>(&value), 1);
-  if (err) value = 0;
+  if (err) {
+    value = 0;
+  }
   return err;
 }
 
 Error BinaryStream::ReadInt8(int8_t& value) {
   Error err = this->Read(reinterpret_cast<uint8_t*>(&value), 1);
-  if (err) value = 0;
+  if (err) {
+    value = 0;
+  }
   return err;
 }
 
 Error BinaryStream::ReadUInt16(uint16_t& value) {
   Error err = this->Read(reinterpret_cast<uint8_t*>(&value), 2);
-  if (err) value = 0;
+  if (err) {
+    value = 0;
+  }
   return err;
 }
 
@@ -156,7 +162,9 @@ Error BinaryStream::ReadLittleEndianUInt16(uint16_t& value) {
 
 Error BinaryStream::ReadUInt32(uint32_t& value) {
   Error err = this->Read(reinterpret_cast<uint8_t*>(&value), 4);
-  if (err) value = 0;
+  if (err) {
+    value = 0;
+  }
   return err;
 }
 
@@ -232,7 +240,9 @@ Error BinaryStream::ReadLittleEndianUInt32(uint32_t& value) {
 
 Error BinaryStream::ReadUInt64(uint64_t& value) {
   Error err = this->Read(reinterpret_cast<uint8_t*>(&value), 8);
-  if (err) value = 0;
+  if (err) {
+    value = 0;
+  }
   return err;
 }
 
@@ -460,15 +470,24 @@ Error BinaryStream::ReadMatrix(Matrix& value) {
   uint32_t a, b, c, d, tx, ty, u, v, w;
   Error err;
 
-  if ((err = this->ReadBigEndianUInt32(a))) return err;
-  if ((err = this->ReadBigEndianUInt32(b))) return err;
-  if ((err = this->ReadBigEndianUInt32(u))) return err;
-  if ((err = this->ReadBigEndianUInt32(c))) return err;
-  if ((err = this->ReadBigEndianUInt32(d))) return err;
-  if ((err = this->ReadBigEndianUInt32(v))) return err;
-  if ((err = this->ReadBigEndianUInt32(tx))) return err;
-  if ((err = this->ReadBigEndianUInt32(ty))) return err;
-  if ((err = this->ReadBigEndianUInt32(w))) return err;
+  err = this->ReadBigEndianUInt32(a);
+  if (err) return err;
+  err = this->ReadBigEndianUInt32(b);
+  if (err) return err;
+  err = this->ReadBigEndianUInt32(u);
+  if (err) return err;
+  err = this->ReadBigEndianUInt32(c);
+  if (err) return err;
+  err = this->ReadBigEndianUInt32(d);
+  if (err) return err;
+  err = this->ReadBigEndianUInt32(v);
+  if (err) return err;
+  err = this->ReadBigEndianUInt32(tx);
+  if (err) return err;
+  err = this->ReadBigEndianUInt32(ty);
+  if (err) return err;
+  err = this->ReadBigEndianUInt32(w);
+  if (err) return err;
 
   value = Matrix(static_cast<int32_t>(a), static_cast<int32_t>(b),
                  static_cast<int32_t>(u), static_cast<int32_t>(c),

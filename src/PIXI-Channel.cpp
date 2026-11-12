@@ -46,7 +46,9 @@ PIXI::Channel::Channel(BinaryStream& stream) : impl(std::make_unique<IMPL>()) {
   uint8_t temp;
   Error err = stream.ReadUInt8(temp);
   // Note: Constructor cannot return error, silently continue on error
-  if (!err) this->SetBitsPerChannel(temp);
+  if (!err) {
+    this->SetBitsPerChannel(temp);
+  }
 }
 
 PIXI::Channel::Channel(const Channel& o)

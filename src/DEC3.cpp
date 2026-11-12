@@ -93,10 +93,14 @@ uint16_t DEC3::IndependentSubstream::GetChannelCount() const {
   const uint16_t base[] = {2, 1, 2, 3, 3, 4, 4, 5};
   const uint16_t extra[] = {2, 2, 1, 1, 2, 2, 2, 1, 1};
   uint16_t count = acmod < 8 ? base[acmod] : 0;
-  if (lfeon) ++count;
+  if (lfeon) {
+    ++count;
+  }
   if (num_dep_sub != 0) {
     for (unsigned int i = 0; i < 9; ++i) {
-      if ((chan_loc & (1u << i)) != 0) count += extra[i];
+      if ((chan_loc & (1u << i)) != 0) {
+        count += extra[i];
+      }
     }
   }
   return count;

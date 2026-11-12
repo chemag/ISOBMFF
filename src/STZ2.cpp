@@ -89,13 +89,17 @@ Error STZ2::ReadData(Parser& parser, BinaryStream& stream) {
     if (this->impl->_field_size == 16) {
       uint16_t entry_size;
       err = stream.ReadBigEndianUInt16(entry_size);
-      if (err) break;
+      if (err) {
+        break;
+      }
       this->impl->_entry_size.push_back(entry_size);
       i++;
     } else {
       uint8_t byte;
       err = stream.ReadUInt8(byte);
-      if (err) break;
+      if (err) {
+        break;
+      }
       if (this->impl->_field_size == 8) {
         this->impl->_entry_size.push_back(byte);
         i++;

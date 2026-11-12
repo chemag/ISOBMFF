@@ -51,15 +51,21 @@ IPMA::Entry::Entry(BinaryStream& stream, const IPMA& ipma)
   if (ipma.GetVersion() < 1) {
     uint16_t temp;
     Error err = stream.ReadBigEndianUInt16(temp);
-    if (!err) this->SetItemID(temp);
+    if (!err) {
+      this->SetItemID(temp);
+    }
   } else {
     uint32_t temp;
     Error err = stream.ReadBigEndianUInt32(temp);
-    if (!err) this->SetItemID(temp);
+    if (!err) {
+      this->SetItemID(temp);
+    }
   }
 
   Error err = stream.ReadUInt8(count);
-  if (err) count = 0;
+  if (err) {
+    count = 0;
+  }
 
   for (i = 0; i < count; i++) {
     // Association cannot report read errors: stop at the first association

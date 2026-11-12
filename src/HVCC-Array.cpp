@@ -57,7 +57,9 @@ HVCC::Array::Array(BinaryStream& stream) : impl(std::make_unique<IMPL>()) {
   }
 
   err = stream.ReadBigEndianUInt16(count);
-  if (err) count = 0;
+  if (err) {
+    count = 0;
+  }
 
   for (i = 0; i < count; i++) {
     // NALUnit cannot report read errors. The NAL unit count comes from the

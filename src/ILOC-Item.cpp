@@ -54,41 +54,57 @@ ILOC::Item::Item(BinaryStream& stream, const ILOC& iloc)
   if (iloc.GetVersion() < 2) {
     uint16_t temp;
     Error err = stream.ReadBigEndianUInt16(temp);
-    if (!err) this->SetItemID(temp);
+    if (!err) {
+      this->SetItemID(temp);
+    }
   } else if (iloc.GetVersion() == 2) {
     uint32_t temp;
     Error err = stream.ReadBigEndianUInt32(temp);
-    if (!err) this->SetItemID(temp);
+    if (!err) {
+      this->SetItemID(temp);
+    }
   }
 
   if (iloc.GetVersion() == 1 || iloc.GetVersion() == 2) {
     uint16_t temp;
     Error err = stream.ReadBigEndianUInt16(temp);
-    if (!err) this->SetConstructionMethod(static_cast<uint8_t>(temp & 0xF));
+    if (!err) {
+      this->SetConstructionMethod(static_cast<uint8_t>(temp & 0xF));
+    }
   }
 
   {
     uint16_t temp;
     Error err = stream.ReadBigEndianUInt16(temp);
-    if (!err) this->SetDataReferenceIndex(temp);
+    if (!err) {
+      this->SetDataReferenceIndex(temp);
+    }
   }
 
   if (iloc.GetBaseOffsetSize() == 2) {
     uint16_t temp;
     Error err = stream.ReadBigEndianUInt16(temp);
-    if (!err) this->SetBaseOffset(temp);
+    if (!err) {
+      this->SetBaseOffset(temp);
+    }
   } else if (iloc.GetBaseOffsetSize() == 4) {
     uint32_t temp;
     Error err = stream.ReadBigEndianUInt32(temp);
-    if (!err) this->SetBaseOffset(temp);
+    if (!err) {
+      this->SetBaseOffset(temp);
+    }
   } else if (iloc.GetBaseOffsetSize() == 8) {
     uint64_t temp;
     Error err = stream.ReadBigEndianUInt64(temp);
-    if (!err) this->SetBaseOffset(temp);
+    if (!err) {
+      this->SetBaseOffset(temp);
+    }
   }
 
   Error err = stream.ReadBigEndianUInt16(count);
-  if (err) count = 0;
+  if (err) {
+    count = 0;
+  }
 
   this->impl->_extents.clear();
 

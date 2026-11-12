@@ -21,7 +21,9 @@ std::vector<uint8_t> Config(
   unsigned int used = 0;
   auto bits = [&](unsigned int value, unsigned int width) {
     for (unsigned int i = width; i > 0; --i) {
-      if (used % 8 == 0) data.push_back(0);
+      if (used % 8 == 0) {
+        data.push_back(0);
+      }
       data.back() |=
           static_cast<uint8_t>(((value >> (i - 1)) & 1u) << (7 - used % 8));
       ++used;
@@ -39,10 +41,11 @@ std::vector<uint8_t> Config(
     bits(s.lfeon ? 1 : 0, 1);
     bits(0, 3);
     bits(s.num_dep_sub, 4);
-    if (s.num_dep_sub)
+    if (s.num_dep_sub) {
       bits(s.chan_loc, 9);
-    else
+    } else {
       bits(0, 1);
+    }
   }
   return data;
 }
