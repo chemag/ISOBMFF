@@ -10,25 +10,15 @@ date: "2026-11-10"
 
 # 1. Overview
 
-This document tracks known gaps in the isobmff fork.
+This document tracks known gaps in the isobmff fork. There are none open
+right now.
 
 | Section | Item                                             | Status       |
 |---------|--------------------------------------------------|--------------|
-| 2       | URN does not parse name and location             | actionable   |
-| 3       | Resolved                                         | for reference|
+| 2       | Resolved                                         | for reference|
 
 
-# 2. URN does not parse name and location
-
-Status: actionable, small.
-
-`URN` (DataEntryUrnBox, "urn ") only parses the FullBox fields. Its `name`
-and `location` strings are not kept, and the class has no getters for them,
-so a file that references its media through a URN loses that reference.
-`test/URN_unittest.cpp` documents the current behavior.
-
-
-# 3. Resolved
+# 2. Resolved
 
 * unit tests and fuzzers for every registered box. When this list was
   started, 22 of the 47 registered boxes lacked a unit test, a fuzzer, or
@@ -65,3 +55,7 @@ so a file that references its media through a URN loses that reference.
   `BasedOnStyle: Google`. The fork is too far from upstream for its
   original formatting to matter. The generated fuzzers (fuzz/) are not
   formatted: they are converter.py output.
+* URN and URL strings: URN (DataEntryUrnBox) keeps its `name` and
+  `location` (`GetURNName()`, since `GetName()` is the box type, and
+  `GetLocation()`), and URL (DataEntryUrlBox) its `location`. Both only
+  parsed the FullBox fields.
