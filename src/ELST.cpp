@@ -40,7 +40,7 @@ class ELST::IMPL {
   IMPL(const IMPL& o);
   ~IMPL();
 
-  std::vector<uint64_t> _segment_duration;
+  std::vector<uint64_t> _edit_duration;
   std::vector<int64_t> _media_time;
   std::vector<int16_t> _media_rate_integer;
   std::vector<int16_t> _media_rate_fraction;
@@ -83,10 +83,10 @@ Error ELST::ReadData(Parser& parser, BinaryStream& stream) {
 
   for (uint32_t i = 0; i < entry_count; i++) {
     if (this->GetVersion() == 1) {
-      uint64_t segment_duration;
-      err = stream.ReadBigEndianUInt64(segment_duration);
+      uint64_t edit_duration;
+      err = stream.ReadBigEndianUInt64(edit_duration);
       if (err) return err;
-      this->impl->_segment_duration.push_back(segment_duration);
+      this->impl->_edit_duration.push_back(edit_duration);
 
       uint64_t media_time_unsigned;
       err = stream.ReadBigEndianUInt64(media_time_unsigned);
@@ -94,10 +94,10 @@ Error ELST::ReadData(Parser& parser, BinaryStream& stream) {
       this->impl->_media_time.push_back(
           static_cast<int64_t>(media_time_unsigned));
     } else {
-      uint32_t segment_duration;
-      err = stream.ReadBigEndianUInt32(segment_duration);
+      uint32_t edit_duration;
+      err = stream.ReadBigEndianUInt32(edit_duration);
       if (err) return err;
-      this->impl->_segment_duration.push_back(segment_duration);
+      this->impl->_edit_duration.push_back(edit_duration);
 
       uint32_t media_time_unsigned;
       err = stream.ReadBigEndianUInt32(media_time_unsigned);
@@ -129,7 +129,7 @@ ELST::GetDisplayableProperties() const {
 
   for (size_t index = 0; index < this->GetEntryCount(); index++) {
     props.push_back(
-        {"Segment Duration", std::to_string(this->GetSegmentDuration(index))});
+        {"Edit Duration", std::to_string(this->GetEditDuration(index))});
     props.push_back({"Media Time", std::to_string(this->GetMediaTime(index))});
     props.push_back({"Media Rate Integer",
                      std::to_string(this->GetMediaRateInteger(index))});
@@ -140,12 +140,10 @@ ELST::GetDisplayableProperties() const {
   return props;
 }
 
-size_t ELST::GetEntryCount() const {
-  return this->impl->_segment_duration.size();
-}
+size_t ELST::GetEntryCount() const { return this->impl->_edit_duration.size(); }
 
-uint64_t ELST::GetSegmentDuration(size_t index) const {
-  return this->impl->_segment_duration[index];
+uint64_t ELST::GetEditDuration(size_t index) const {
+  return this->impl->_edit_duration[index];
 }
 
 int64_t ELST::GetMediaTime(size_t index) const {
@@ -163,7 +161,7 @@ int16_t ELST::GetMediaRateFraction(size_t index) const {
 ELST::IMPL::IMPL() {}
 
 ELST::IMPL::IMPL(const IMPL& o) {
-  this->_segment_duration = o._segment_duration;
+  this->_edit_duration = o._edit_duration;
   this->_media_time = o._media_time;
   this->_media_rate_integer = o._media_rate_integer;
   this->_media_rate_fraction = o._media_rate_fraction;

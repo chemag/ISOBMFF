@@ -30,7 +30,7 @@ TEST_F(ISOBMFFELSTTest, TestELSTParserVersion0) {
       0x00, 0x00, 0x00, 0x00,
       // entry_count (4 bytes) = 1
       0x00, 0x00, 0x00, 0x01,
-      // segment_duration (4 bytes) = 6344 (0x18c8)
+      // edit_duration (4 bytes) = 6344 (0x18c8)
       0x00, 0x00, 0x18, 0xc8,
       // media_time (4 bytes) = 0
       0x00, 0x00, 0x00, 0x00,
@@ -65,7 +65,7 @@ TEST_F(ISOBMFFELSTTest, TestELSTParserVersion0) {
   EXPECT_EQ(elst->GetEntryCount(), 1u);
 
   // Validate entry values
-  EXPECT_EQ(elst->GetSegmentDuration(0), 6344u);
+  EXPECT_EQ(elst->GetEditDuration(0), 6344u);
   EXPECT_EQ(elst->GetMediaTime(0), 0);
   EXPECT_EQ(elst->GetMediaRateInteger(0), 1);
   EXPECT_EQ(elst->GetMediaRateFraction(0), 0);
@@ -78,7 +78,7 @@ TEST_F(ISOBMFFELSTTest, TestELSTParserVersion0) {
   EXPECT_EQ(displayableProperties[1].second, "0x00000000");
   EXPECT_EQ(displayableProperties[2].first, "Entry count");
   EXPECT_EQ(displayableProperties[2].second, "1");
-  EXPECT_EQ(displayableProperties[3].first, "Segment Duration");
+  EXPECT_EQ(displayableProperties[3].first, "Edit Duration");
   EXPECT_EQ(displayableProperties[3].second, "6344");
   EXPECT_EQ(displayableProperties[4].first, "Media Time");
   EXPECT_EQ(displayableProperties[4].second, "0");
@@ -97,7 +97,7 @@ TEST_F(ISOBMFFELSTTest, TestELSTParserVersion0MultipleEntries) {
       // entry_count (4 bytes) = 2
       0x00, 0x00, 0x00, 0x02,
       // Entry 1:
-      // segment_duration (4 bytes) = 1000
+      // edit_duration (4 bytes) = 1000
       0x00, 0x00, 0x03, 0xe8,
       // media_time (4 bytes) = -1 (empty edit)
       0xff, 0xff, 0xff, 0xff,
@@ -106,7 +106,7 @@ TEST_F(ISOBMFFELSTTest, TestELSTParserVersion0MultipleEntries) {
       // media_rate_fraction (2 bytes) = 0
       0x00, 0x00,
       // Entry 2:
-      // segment_duration (4 bytes) = 5000
+      // edit_duration (4 bytes) = 5000
       0x00, 0x00, 0x13, 0x88,
       // media_time (4 bytes) = 500
       0x00, 0x00, 0x01, 0xf4,
@@ -137,13 +137,13 @@ TEST_F(ISOBMFFELSTTest, TestELSTParserVersion0MultipleEntries) {
   EXPECT_EQ(elst->GetEntryCount(), 2u);
 
   // Validate entry 1 (empty edit with media_time = -1)
-  EXPECT_EQ(elst->GetSegmentDuration(0), 1000u);
+  EXPECT_EQ(elst->GetEditDuration(0), 1000u);
   EXPECT_EQ(elst->GetMediaTime(0), -1);
   EXPECT_EQ(elst->GetMediaRateInteger(0), 1);
   EXPECT_EQ(elst->GetMediaRateFraction(0), 0);
 
   // Validate entry 2
-  EXPECT_EQ(elst->GetSegmentDuration(1), 5000u);
+  EXPECT_EQ(elst->GetEditDuration(1), 5000u);
   EXPECT_EQ(elst->GetMediaTime(1), 500);
   EXPECT_EQ(elst->GetMediaRateInteger(1), 2);
   // 0x8000 as signed int16 is -32768
@@ -158,7 +158,7 @@ TEST_F(ISOBMFFELSTTest, TestELSTParserVersion1) {
       0x01, 0x00, 0x00, 0x00,
       // entry_count (4 bytes) = 1
       0x00, 0x00, 0x00, 0x01,
-      // segment_duration (8 bytes) = 0x0000000100000000 (4294967296)
+      // edit_duration (8 bytes) = 0x0000000100000000 (4294967296)
       0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00,
       // media_time (8 bytes) = 1000
       0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0xe8,
@@ -192,7 +192,7 @@ TEST_F(ISOBMFFELSTTest, TestELSTParserVersion1) {
   EXPECT_EQ(elst->GetEntryCount(), 1u);
 
   // Validate entry values (64-bit)
-  EXPECT_EQ(elst->GetSegmentDuration(0), 0x0000000100000000ULL);
+  EXPECT_EQ(elst->GetEditDuration(0), 0x0000000100000000ULL);
   EXPECT_EQ(elst->GetMediaTime(0), 1000);
   EXPECT_EQ(elst->GetMediaRateInteger(0), 1);
   EXPECT_EQ(elst->GetMediaRateFraction(0), 0);
@@ -209,7 +209,7 @@ TEST_F(ISOBMFFELSTTest, TestELSTParserTestMp4) {
       // entry_count (4 bytes) = 2
       0x00, 0x00, 0x00, 0x02,
       // Entry 1: empty edit
-      // segment_duration (4 bytes) = 4320 (0x10e0)
+      // edit_duration (4 bytes) = 4320 (0x10e0)
       0x00, 0x00, 0x10, 0xe0,
       // media_time (4 bytes) = -1 (0xffffffff)
       0xff, 0xff, 0xff, 0xff,
@@ -218,7 +218,7 @@ TEST_F(ISOBMFFELSTTest, TestELSTParserTestMp4) {
       // media_rate_fraction (2 bytes) = 0
       0x00, 0x00,
       // Entry 2: actual media
-      // segment_duration (4 bytes) = 155336 (0x25ec8)
+      // edit_duration (4 bytes) = 155336 (0x25ec8)
       0x00, 0x02, 0x5e, 0xc8,
       // media_time (4 bytes) = 0
       0x00, 0x00, 0x00, 0x00,
@@ -247,13 +247,13 @@ TEST_F(ISOBMFFELSTTest, TestELSTParserTestMp4) {
   EXPECT_EQ(elst->GetEntryCount(), 2u);
 
   // Validate entry 1 (empty edit)
-  EXPECT_EQ(elst->GetSegmentDuration(0), 4320u);
+  EXPECT_EQ(elst->GetEditDuration(0), 4320u);
   EXPECT_EQ(elst->GetMediaTime(0), -1);
   EXPECT_EQ(elst->GetMediaRateInteger(0), 1);
   EXPECT_EQ(elst->GetMediaRateFraction(0), 0);
 
   // Validate entry 2
-  EXPECT_EQ(elst->GetSegmentDuration(1), 155336u);
+  EXPECT_EQ(elst->GetEditDuration(1), 155336u);
   EXPECT_EQ(elst->GetMediaTime(1), 0);
   EXPECT_EQ(elst->GetMediaRateInteger(1), 1);
   EXPECT_EQ(elst->GetMediaRateFraction(1), 0);
@@ -269,7 +269,7 @@ TEST_F(ISOBMFFELSTTest, TestELSTParserStackedMp4Track1) {
       0x00, 0x00, 0x00, 0x00,
       // entry_count (4 bytes) = 1
       0x00, 0x00, 0x00, 0x01,
-      // segment_duration (4 bytes) = 15934 (0x3e3e)
+      // edit_duration (4 bytes) = 15934 (0x3e3e)
       0x00, 0x00, 0x3e, 0x3e,
       // media_time (4 bytes) = 0
       0x00, 0x00, 0x00, 0x00,
@@ -298,7 +298,7 @@ TEST_F(ISOBMFFELSTTest, TestELSTParserStackedMp4Track1) {
   EXPECT_EQ(elst->GetEntryCount(), 1u);
 
   // Validate entry
-  EXPECT_EQ(elst->GetSegmentDuration(0), 15934u);
+  EXPECT_EQ(elst->GetEditDuration(0), 15934u);
   EXPECT_EQ(elst->GetMediaTime(0), 0);
   EXPECT_EQ(elst->GetMediaRateInteger(0), 1);
   EXPECT_EQ(elst->GetMediaRateFraction(0), 0);
@@ -315,7 +315,7 @@ TEST_F(ISOBMFFELSTTest, TestELSTParserStackedMp4Track2) {
       // entry_count (4 bytes) = 2
       0x00, 0x00, 0x00, 0x02,
       // Entry 1: empty edit
-      // segment_duration (4 bytes) = 432 (0x1b0)
+      // edit_duration (4 bytes) = 432 (0x1b0)
       0x00, 0x00, 0x01, 0xb0,
       // media_time (4 bytes) = -1 (0xffffffff)
       0xff, 0xff, 0xff, 0xff,
@@ -324,7 +324,7 @@ TEST_F(ISOBMFFELSTTest, TestELSTParserStackedMp4Track2) {
       // media_rate_fraction (2 bytes) = 0
       0x00, 0x00,
       // Entry 2: actual media
-      // segment_duration (4 bytes) = 15534 (0x3cae)
+      // edit_duration (4 bytes) = 15534 (0x3cae)
       0x00, 0x00, 0x3c, 0xae,
       // media_time (4 bytes) = 0
       0x00, 0x00, 0x00, 0x00,
@@ -353,13 +353,13 @@ TEST_F(ISOBMFFELSTTest, TestELSTParserStackedMp4Track2) {
   EXPECT_EQ(elst->GetEntryCount(), 2u);
 
   // Validate entry 1 (empty edit)
-  EXPECT_EQ(elst->GetSegmentDuration(0), 432u);
+  EXPECT_EQ(elst->GetEditDuration(0), 432u);
   EXPECT_EQ(elst->GetMediaTime(0), -1);
   EXPECT_EQ(elst->GetMediaRateInteger(0), 1);
   EXPECT_EQ(elst->GetMediaRateFraction(0), 0);
 
   // Validate entry 2
-  EXPECT_EQ(elst->GetSegmentDuration(1), 15534u);
+  EXPECT_EQ(elst->GetEditDuration(1), 15534u);
   EXPECT_EQ(elst->GetMediaTime(1), 0);
   EXPECT_EQ(elst->GetMediaRateInteger(1), 1);
   EXPECT_EQ(elst->GetMediaRateFraction(1), 0);

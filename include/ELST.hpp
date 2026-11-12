@@ -53,7 +53,7 @@ class ISOBMFF_EXPORT ELST : public FullBox {
       const override;
 
   size_t GetEntryCount() const;
-  uint64_t GetSegmentDuration(size_t index) const;
+  uint64_t GetEditDuration(size_t index) const;
   int64_t GetMediaTime(size_t index) const;
   int16_t GetMediaRateInteger(size_t index) const;
   int16_t GetMediaRateFraction(size_t index) const;
