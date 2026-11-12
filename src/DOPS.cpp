@@ -7,6 +7,7 @@
  */
 
 #include <DOPS.hpp>
+#include <FixedPoint.hpp>
 #include <Parser.hpp>
 
 namespace ISOBMFF {
@@ -83,7 +84,7 @@ Error DOPS::ReadData(Parser& parser, BinaryStream& stream) {
   uint16_t outputGain;
   err = stream.ReadBigEndianUInt16(outputGain);
   if (err) return err;
-  SetOutputGain(static_cast<int16_t>(outputGain));
+  SetOutputGainRaw(static_cast<int16_t>(outputGain));
 
   // unsigned int(8) ChannelMappingFamily;
   uint8_t channelMappingFamily;
@@ -129,6 +130,8 @@ DOPS::GetDisplayableProperties() const {
   props.push_back({"Pre Skip", std::to_string(this->GetPreSkip())});
   props.push_back(
       {"Input Sample Rate", std::to_string(this->GetInputSampleRate())});
+  props.push_back(
+      {"Output Gain (raw)", std::to_string(this->GetOutputGainRaw())});
   props.push_back({"Output Gain", std::to_string(this->GetOutputGain())});
   props.push_back({"Channel Mapping Family",
                    std::to_string(this->GetChannelMappingFamily())});
@@ -160,7 +163,13 @@ uint32_t DOPS::GetInputSampleRate() const {
   return this->impl->_inputsamplerate;
 }
 
-int16_t DOPS::GetOutputGain() const { return this->impl->_outputgain; }
+int16_t DOPS::GetOutputGainRaw() const { return this->impl->_outputgain; }
+
+double DOPS::GetOutputGain() const {
+  // OutputGain is the Ogg Opus ID header output gain (RFC 7845, section
+  // 5.1): "a Q7.8 fixed-point number" in dB (the raw value / 256)
+  return FixedPoint::ToDouble(this->impl->_outputgain, 8);
+}
 
 uint8_t DOPS::GetChannelMappingFamily() const {
   return this->impl->_channelmappingfamily;
@@ -186,7 +195,11 @@ void DOPS::SetInputSampleRate(uint32_t value) {
   this->impl->_inputsamplerate = value;
 }
 
-void DOPS::SetOutputGain(int16_t value) { this->impl->_outputgain = value; }
+void DOPS::SetOutputGainRaw(int16_t value) { this->impl->_outputgain = value; }
+
+void DOPS::SetOutputGain(double value) {
+  this->impl->_outputgain = FixedPoint::FromDouble<int16_t>(value, 8);
+}
 
 void DOPS::SetChannelMappingFamily(uint8_t value) {
   this->impl->_channelmappingfamily = value;

@@ -37,7 +37,9 @@ class ISOBMFF_EXPORT DOPS : public Box {
   uint8_t GetOutputChannelCount() const;
   uint16_t GetPreSkip() const;
   uint32_t GetInputSampleRate() const;
-  int16_t GetOutputGain() const;
+  // OutputGain (Q7.8 fixed point): the gain to apply when decoding, in dB
+  int16_t GetOutputGainRaw() const;
+  double GetOutputGain() const;
   uint8_t GetChannelMappingFamily() const;
   uint8_t GetStreamCount() const;
   uint8_t GetCoupledCount() const;
@@ -47,7 +49,8 @@ class ISOBMFF_EXPORT DOPS : public Box {
   void SetOutputChannelCount(uint8_t value);
   void SetPreSkip(uint16_t value);
   void SetInputSampleRate(uint32_t value);
-  void SetOutputGain(int16_t value);
+  void SetOutputGainRaw(int16_t value);
+  void SetOutputGain(double value);
   void SetChannelMappingFamily(uint8_t value);
   void SetStreamCount(uint8_t value);
   void SetCoupledCount(uint8_t value);

@@ -57,7 +57,8 @@ TEST_F(ISOBMFFDOPSTest, TestDOPSParserFamily0) {
   EXPECT_EQ(dops->GetOutputChannelCount(), 2);
   EXPECT_EQ(dops->GetPreSkip(), 312);
   EXPECT_EQ(dops->GetInputSampleRate(), 48000u);
-  EXPECT_EQ(dops->GetOutputGain(), 0);
+  EXPECT_EQ(dops->GetOutputGainRaw(), 0);
+  EXPECT_DOUBLE_EQ(dops->GetOutputGain(), 0.0);
   EXPECT_EQ(dops->GetChannelMappingFamily(), 0);
   EXPECT_EQ(dops->GetStreamCount(), 0);
   EXPECT_EQ(dops->GetCoupledCount(), 0);
@@ -106,7 +107,8 @@ TEST_F(ISOBMFFDOPSTest, TestDOPSParserFamily1) {
   EXPECT_EQ(dops->GetOutputChannelCount(), 6);
   EXPECT_EQ(dops->GetPreSkip(), 312);
   EXPECT_EQ(dops->GetInputSampleRate(), 44100u);
-  EXPECT_EQ(dops->GetOutputGain(), -256);
+  EXPECT_EQ(dops->GetOutputGainRaw(), -256);
+  EXPECT_DOUBLE_EQ(dops->GetOutputGain(), -1.0);
   EXPECT_EQ(dops->GetChannelMappingFamily(), 1);
   EXPECT_EQ(dops->GetStreamCount(), 4);
   EXPECT_EQ(dops->GetCoupledCount(), 2);
@@ -141,5 +143,17 @@ TEST_F(ISOBMFFDOPSTest, TestDOPSParserTruncatedMapping) {
   // fuzzer::conv: end
 
   EXPECT_TRUE(error);
+}
+
+// OutputGain is a signed Q7.8 fixed-point field, in dB
+TEST_F(ISOBMFFDOPSTest, TestDOPSOutputGain) {
+  ISOBMFF::DOPS dops;
+  dops.SetOutputGainRaw(0x0180);  // +1.5 dB
+  EXPECT_DOUBLE_EQ(dops.GetOutputGain(), 1.5);
+  dops.SetOutputGain(-6.0);
+  EXPECT_EQ(dops.GetOutputGainRaw(), -0x0600);
+  // the Q7.8 range is [-128, 128) dB: larger gains saturate
+  dops.SetOutputGain(200.0);
+  EXPECT_EQ(dops.GetOutputGainRaw(), INT16_MAX);
 }
 }  // namespace ISOBMFF

@@ -79,7 +79,8 @@ TEST_F(ISOBMFFOPUSTest, TestOPUSParser) {
   EXPECT_EQ(dops->GetOutputChannelCount(), 2);
   EXPECT_EQ(dops->GetPreSkip(), 312);
   EXPECT_EQ(dops->GetInputSampleRate(), 48000u);
-  EXPECT_EQ(dops->GetOutputGain(), 0);
+  EXPECT_EQ(dops->GetOutputGainRaw(), 0);
+  EXPECT_DOUBLE_EQ(dops->GetOutputGain(), 0.0);
   EXPECT_EQ(dops->GetChannelMappingFamily(), 0);
 }
 }  // namespace ISOBMFF
