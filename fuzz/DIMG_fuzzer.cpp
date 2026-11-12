@@ -47,18 +47,5 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
     fprintf(stderr, "Parse error: %s\n", error.GetMessage().c_str());
   }
   }
-  {
-  ISOBMFF::BinaryDataStream stream(buffer_vector);
-  ISOBMFF::Parser parser;
-  // the item IDs are 16-bit or 32-bit depending on the parent iref version
-  ISOBMFF::IREF iref;
-  parser.SetInfo("iref", &iref);
-  std::shared_ptr<ISOBMFF::Box> box = parser.CreateBox("dimg");
-  ISOBMFF::Error error;
-  if (box != nullptr) {
-    error = box->ReadData(parser, stream);
-  }
-  parser.SetInfo("iref", nullptr);
-  }
   return 0;
 }

@@ -107,7 +107,7 @@ def read_input(infile, debug):
 def parse_input(lines, debug):
     lines_include = []
     lines_data = []
-    lines_code = []
+    blocks_code = []
     output = {}
 
     # extract the includes, data, and code
@@ -133,17 +133,16 @@ def parse_input(lines, debug):
             # begin code mode
             data_mode = False
             code_mode = True
-            lines_code.append("  {\n")
+            blocks_code.append([])
             continue
         elif "fuzzer::conv: end" in line:
             # end code mode
             code_mode = False
-            lines_code.append("  }\n")
             continue
         if data_mode:
             lines_data[-1].append(line)
         if code_mode:
-            lines_code.append(line)
+            blocks_code[-1].append(line)
 
     # clean the includes
     output["include"] = ""
@@ -160,13 +159,44 @@ def parse_input(lines, debug):
         output["data"].append(bytes.fromhex("".join(b[2:] for b in data_bytes)))
 
     # clean the code
-    output["code"] = ""
-    for line in lines_code:
-        # add namespace if needed
-        if "ISOBMFF::" not in line and "ISOBMFF " not in line:
-            line = line.replace("Parser", "ISOBMFF::Parser")
-        line = line.replace("buffer", "buffer_vector")
-        output["code"] += line
+    #
+    # Substitute first, then drop duplicate blocks. A unit test that
+    # differs from another only in the bytes it feeds the parser becomes
+    # an identical block once its buffer is replaced by the fuzzer input,
+    # and a target that parses the same input several times per run is
+    # that many times slower for no extra coverage. The inputs are not
+    # lost: they are written out as corpus seeds either way. Blocks that
+    # differ in more than their data stay distinct and are kept.
+    seen = set()
+    unique = []
+    for block in blocks_code:
+        code = ""
+        for line in block:
+            # add namespace if needed
+            if "ISOBMFF::" not in line and "ISOBMFF " not in line:
+                line = line.replace("Parser", "ISOBMFF::Parser")
+            line = line.replace("buffer", "buffer_vector")
+            code += line
+        # compare on whitespace-collapsed text, so that two blocks the
+        # formatter happened to wrap differently still count as one, and
+        # ignore the error report: a block that only adds or drops the
+        # "if (error) fprintf(...)" lines parses the input the same way
+        key = re.sub(
+            r"if \(error\) \{\s*fprintf\(stderr,[^;]*;\s*\}", "", code
+        )
+        key = re.sub(r"\s+", " ", key).strip()
+        if key in seen:
+            continue
+        seen.add(key)
+        unique.append(code)
+
+    if debug > 0 and len(unique) < len(blocks_code):
+        print(
+            "dropped %i duplicate block(s) of %i"
+            % (len(blocks_code) - len(unique), len(blocks_code))
+        )
+
+    output["code"] = "".join("  {\n%s  }\n" % code for code in unique)
     output["code"] = output["code"].strip("\n")
 
     # Add buffer_vector definition
