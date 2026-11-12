@@ -53,7 +53,7 @@ class ISOBMFF_EXPORT STTS : public FullBox {
 
   size_t GetEntryCount() const;
   uint32_t GetSampleCount(size_t index) const;
-  uint32_t GetSampleOffset(size_t index) const;
+  uint32_t GetSampleDelta(size_t index) const;
 
   ISOBMFF_EXPORT friend void swap(STTS& o1, STTS& o2);
 

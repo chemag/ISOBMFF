@@ -41,7 +41,7 @@ class STTS::IMPL {
   ~IMPL();
 
   std::vector<uint32_t> _sample_count;
-  std::vector<uint32_t> _sample_offset;
+  std::vector<uint32_t> _sample_delta;
 };
 
 STTS::STTS() : FullBox("stts"), impl(std::make_unique<IMPL>()) {}
@@ -75,19 +75,24 @@ Error STTS::ReadData(Parser& parser, BinaryStream& stream) {
   err = FullBox::ReadData(parser, stream);
   if (err) return err;
 
+  // unsigned int(32) entry_count;
   uint32_t entry_count;
   err = stream.ReadBigEndianUInt32(entry_count);
   if (err) return err;
 
+  // Run-length encoded: each entry says that the next sample_count samples
+  // all have the same decode-time delta, in the media timescale.
   for (uint32_t i = 0; i < entry_count; i++) {
     uint32_t temp;
+    // unsigned int(32) sample_count;
     err = stream.ReadBigEndianUInt32(temp);
     if (err) return err;
     this->impl->_sample_count.push_back(temp);
 
+    // unsigned int(32) sample_delta;
     err = stream.ReadBigEndianUInt32(temp);
     if (err) return err;
-    this->impl->_sample_offset.push_back(temp);
+    this->impl->_sample_delta.push_back(temp);
   }
   return Error();
 }
@@ -100,7 +105,7 @@ STTS::GetDisplayableProperties() const {
     props.push_back(
         {"Sample Count", std::to_string(this->GetSampleCount(index))});
     props.push_back(
-        {"Sample Offset", std::to_string(this->GetSampleOffset(index))});
+        {"Sample Delta", std::to_string(this->GetSampleDelta(index))});
   }
 
   return props;
@@ -112,15 +117,15 @@ uint32_t STTS::GetSampleCount(size_t index) const {
   return this->impl->_sample_count[index];
 }
 
-uint32_t STTS::GetSampleOffset(size_t index) const {
-  return this->impl->_sample_offset[index];
+uint32_t STTS::GetSampleDelta(size_t index) const {
+  return this->impl->_sample_delta[index];
 }
 
 STTS::IMPL::IMPL() {}
 
 STTS::IMPL::IMPL(const IMPL& o) {
   this->_sample_count = o._sample_count;
-  this->_sample_offset = o._sample_offset;
+  this->_sample_delta = o._sample_delta;
 }
 
 STTS::IMPL::~IMPL() {}

@@ -59,24 +59,24 @@ TEST_F(ISOBMFFSTTSTest, TestSTTSParser) {
   // Validate entry count
   EXPECT_EQ(stts->GetEntryCount(), 9);
   
-  // Validate sample counts and offsets
+  // Validate sample counts and deltas
   EXPECT_EQ(stts->GetSampleCount(0), 8);
-  EXPECT_EQ(stts->GetSampleOffset(0), 3000);
+  EXPECT_EQ(stts->GetSampleDelta(0), 3000);
   EXPECT_EQ(stts->GetSampleCount(1), 1);
-  EXPECT_EQ(stts->GetSampleOffset(1), 3746);
+  EXPECT_EQ(stts->GetSampleDelta(1), 3746);
   EXPECT_EQ(stts->GetSampleCount(2), 20);
-  EXPECT_EQ(stts->GetSampleOffset(2), 3000);
+  EXPECT_EQ(stts->GetSampleDelta(2), 3000);
   EXPECT_EQ(stts->GetSampleCount(3), 2);
-  EXPECT_EQ(stts->GetSampleOffset(3), 2991);
+  EXPECT_EQ(stts->GetSampleDelta(3), 2991);
   EXPECT_EQ(stts->GetSampleCount(4), 2);
-  EXPECT_EQ(stts->GetSampleOffset(4), 3008);
+  EXPECT_EQ(stts->GetSampleDelta(4), 3008);
   EXPECT_EQ(stts->GetSampleCount(5), 2);
-  EXPECT_EQ(stts->GetSampleOffset(5), 2992);
+  EXPECT_EQ(stts->GetSampleDelta(5), 2992);
   EXPECT_EQ(stts->GetSampleCount(6), 2);
-  EXPECT_EQ(stts->GetSampleOffset(6), 3007);
+  EXPECT_EQ(stts->GetSampleDelta(6), 3007);
   EXPECT_EQ(stts->GetSampleCount(7), 2);
-  EXPECT_EQ(stts->GetSampleOffset(7), 2992);
+  EXPECT_EQ(stts->GetSampleDelta(7), 2992);
   EXPECT_EQ(stts->GetSampleCount(8), 3);
-  EXPECT_EQ(stts->GetSampleOffset(8), 3007);
+  EXPECT_EQ(stts->GetSampleDelta(8), 3007);
 }
 } // namespace ISOBMFF
