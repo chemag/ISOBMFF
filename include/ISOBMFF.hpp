@@ -88,6 +88,7 @@
 #include <STSS.hpp>
 #include <STSZ.hpp>
 #include <STTS.hpp>
+#include <STZ2.hpp>
 #include <SingleItemTypeReferenceBox.hpp>
 #include <THMB.hpp>
 #include <TKHD.hpp>

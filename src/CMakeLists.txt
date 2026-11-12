@@ -68,6 +68,7 @@ add_library(isobmff
     STSS.cpp
     STSZ.cpp
     STTS.cpp
+    STZ2.cpp
     THMB.cpp
     TKHD.cpp
     URL.cpp
