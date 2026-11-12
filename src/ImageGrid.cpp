@@ -39,8 +39,8 @@ class ImageGrid::IMPL {
 
   uint8_t _version;
   uint8_t _flags;
-  uint8_t _rows;
-  uint8_t _columns;
+  uint8_t _rowsMinusOne;
+  uint8_t _columnsMinusOne;
   uint64_t _outputWidth;
   uint64_t _outputHeight;
 };
@@ -58,10 +58,10 @@ ImageGrid::ImageGrid(BinaryStream& stream) : impl(std::make_unique<IMPL>()) {
   if (!err) this->SetFlags(temp8);
 
   err = stream.ReadUInt8(temp8);
-  if (!err) this->SetRows(temp8);
+  if (!err) this->SetRowsMinusOne(temp8);
 
   err = stream.ReadUInt8(temp8);
-  if (!err) this->SetColumns(temp8);
+  if (!err) this->SetColumnsMinusOne(temp8);
 
   s = ((this->GetFlags() & 1) + 1) * 2;
 
@@ -122,9 +122,11 @@ uint8_t ImageGrid::GetVersion() const { return this->impl->_version; }
 
 uint8_t ImageGrid::GetFlags() const { return this->impl->_flags; }
 
-uint8_t ImageGrid::GetRows() const { return this->impl->_rows; }
+uint8_t ImageGrid::GetRowsMinusOne() const { return this->impl->_rowsMinusOne; }
 
-uint8_t ImageGrid::GetColumns() const { return this->impl->_columns; }
+uint8_t ImageGrid::GetColumnsMinusOne() const {
+  return this->impl->_columnsMinusOne;
+}
 
 uint64_t ImageGrid::GetOutputWidth() const { return this->impl->_outputWidth; }
 
@@ -136,9 +138,13 @@ void ImageGrid::SetVersion(uint8_t value) { this->impl->_version = value; }
 
 void ImageGrid::SetFlags(uint8_t value) { this->impl->_flags = value; }
 
-void ImageGrid::SetRows(uint8_t value) { this->impl->_rows = value; }
+void ImageGrid::SetRowsMinusOne(uint8_t value) {
+  this->impl->_rowsMinusOne = value;
+}
 
-void ImageGrid::SetColumns(uint8_t value) { this->impl->_columns = value; }
+void ImageGrid::SetColumnsMinusOne(uint8_t value) {
+  this->impl->_columnsMinusOne = value;
+}
 
 void ImageGrid::SetOutputWidth(uint64_t value) {
   this->impl->_outputWidth = value;
@@ -153,8 +159,8 @@ ImageGrid::GetDisplayableProperties() const {
   return {
       {"Version", std::to_string(this->GetVersion())},
       {"Flags", std::to_string(this->GetFlags())},
-      {"Rows", std::to_string(this->GetRows())},
-      {"Columns", std::to_string(this->GetColumns())},
+      {"Rows minus one", std::to_string(this->GetRowsMinusOne())},
+      {"Columns minus one", std::to_string(this->GetColumnsMinusOne())},
       {"Output width", std::to_string(this->GetOutputWidth())},
       {"Output height", std::to_string(this->GetOutputHeight())},
   };
@@ -163,16 +169,16 @@ ImageGrid::GetDisplayableProperties() const {
 ImageGrid::IMPL::IMPL()
     : _version(0),
       _flags(0),
-      _rows(0),
-      _columns(0),
+      _rowsMinusOne(0),
+      _columnsMinusOne(0),
       _outputWidth(0),
       _outputHeight(0) {}
 
 ImageGrid::IMPL::IMPL(const IMPL& o)
     : _version(o._version),
       _flags(o._flags),
-      _rows(o._rows),
-      _columns(o._columns),
+      _rowsMinusOne(o._rowsMinusOne),
+      _columnsMinusOne(o._columnsMinusOne),
       _outputWidth(o._outputWidth),
       _outputHeight(o._outputHeight) {}
 

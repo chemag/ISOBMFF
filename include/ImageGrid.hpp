@@ -40,6 +40,10 @@
 #include <ostream>
 
 namespace ISOBMFF {
+// ImageGrid, the data of a "grid" derived image item (ISO/IEC 23008-12:2017,
+// section 6.6.2.3). rows_minus_one and columns_minus_one are stored as in
+// the file: the grid has rows_minus_one + 1 rows and columns_minus_one + 1
+// columns.
 class ISOBMFF_EXPORT ImageGrid : public DisplayableObject {
  public:
   ImageGrid();
@@ -54,15 +58,15 @@ class ISOBMFF_EXPORT ImageGrid : public DisplayableObject {
 
   uint8_t GetVersion() const;
   uint8_t GetFlags() const;
-  uint8_t GetRows() const;
-  uint8_t GetColumns() const;
+  uint8_t GetRowsMinusOne() const;
+  uint8_t GetColumnsMinusOne() const;
   uint64_t GetOutputWidth() const;
   uint64_t GetOutputHeight() const;
 
   void SetVersion(uint8_t value);
   void SetFlags(uint8_t value);
-  void SetRows(uint8_t value);
-  void SetColumns(uint8_t value);
+  void SetRowsMinusOne(uint8_t value);
+  void SetColumnsMinusOne(uint8_t value);
   void SetOutputWidth(uint64_t value);
   void SetOutputHeight(uint64_t value);
 
