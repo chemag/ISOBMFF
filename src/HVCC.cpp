@@ -28,6 +28,7 @@
  * @author      Jean-David Gadina - www.digidna.net
  */
 
+#include <FixedPoint.hpp>
 #include <HVCC.hpp>
 #include <Parser.hpp>
 #include <Utils.hpp>
@@ -148,7 +149,7 @@ Error HVCC::ReadData(Parser& parser, BinaryStream& stream) {
 
   err = stream.ReadBigEndianUInt16(u16);
   if (err) return err;
-  this->SetAvgFrameRate(u16);
+  this->SetAvgFrameRateRaw(u16);
 
   err = stream.ReadUInt8(u8);
   if (err) return err;
@@ -214,6 +215,8 @@ HVCC::GetDisplayableProperties() const {
                    std::to_string(this->GetBitDepthLumaMinus8())});
   props.push_back({"Bit depth chroma minus 8",
                    std::to_string(this->GetBitDepthChromaMinus8())});
+  props.push_back(
+      {"Avg frame rate (raw)", std::to_string(this->GetAvgFrameRateRaw())});
   props.push_back({"Avg frame rate", std::to_string(this->GetAvgFrameRate())});
   props.push_back(
       {"Constant frame rate", std::to_string(this->GetConstantFrameRate())});
@@ -276,7 +279,15 @@ uint8_t HVCC::GetBitDepthChromaMinus8() const {
   return this->impl->_bitDepthChromaMinus8;
 }
 
-uint16_t HVCC::GetAvgFrameRate() const { return this->impl->_avgFrameRate; }
+uint16_t HVCC::GetAvgFrameRateRaw() const { return this->impl->_avgFrameRate; }
+
+double HVCC::GetAvgFrameRate() const {
+  // ISO/IEC 14496-15:2022, section 8.3.2.1.3: "avgFrameRate gives the average
+  // frame rate in units of frames/(256 seconds), for the stream to which this
+  // configuration record applies. Value 0 indicates an unspecified average
+  // frame rate."
+  return FixedPoint::ToDouble(this->impl->_avgFrameRate, 8);
+}
 
 uint8_t HVCC::GetConstantFrameRate() const {
   return this->impl->_constantFrameRate;
@@ -342,8 +353,12 @@ void HVCC::SetBitDepthChromaMinus8(uint8_t value) {
   this->impl->_bitDepthChromaMinus8 = value;
 }
 
-void HVCC::SetAvgFrameRate(uint16_t value) {
+void HVCC::SetAvgFrameRateRaw(uint16_t value) {
   this->impl->_avgFrameRate = value;
+}
+
+void HVCC::SetAvgFrameRate(double value) {
+  this->impl->_avgFrameRate = FixedPoint::FromDouble<uint16_t>(value, 8);
 }
 
 void HVCC::SetConstantFrameRate(uint8_t value) {

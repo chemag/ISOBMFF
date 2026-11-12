@@ -75,7 +75,9 @@ TEST_F(ISOBMFFHVCCTest, TestHVCCParser) {
   EXPECT_EQ(hvcc->GetChromaFormatIDC(), 1);
   EXPECT_EQ(hvcc->GetBitDepthLumaMinus8(), 0);
   EXPECT_EQ(hvcc->GetBitDepthChromaMinus8(), 0);
-  EXPECT_EQ(hvcc->GetAvgFrameRate(), 0);
+  // 0: unspecified
+  EXPECT_EQ(hvcc->GetAvgFrameRateRaw(), 0);
+  EXPECT_DOUBLE_EQ(hvcc->GetAvgFrameRate(), 0.0);
   EXPECT_EQ(hvcc->GetConstantFrameRate(), 0);
   EXPECT_EQ(hvcc->GetNumTemporalLayers(), 0);
   EXPECT_EQ(hvcc->GetTemporalIdNested(), 0);
@@ -182,5 +184,20 @@ TEST_F(ISOBMFFHVCCTest, TestHVCCNALUnitCountExceedsData) {
   ASSERT_EQ(arrays.size(), 1);
   ASSERT_EQ(arrays[0]->GetNALUnits().size(), 1);
   EXPECT_EQ(arrays[0]->GetNALUnits()[0]->GetData().size(), 4);
+}
+
+// avgFrameRate is in frames per 256 seconds
+TEST_F(ISOBMFFHVCCTest, TestHVCCAvgFrameRate) {
+  ISOBMFF::HVCC hvcc;
+  hvcc.SetAvgFrameRateRaw(30 * 256);
+  EXPECT_DOUBLE_EQ(hvcc.GetAvgFrameRate(), 30.0);
+  // 29.97 fps rounds to the nearest 1/256 frames per second
+  hvcc.SetAvgFrameRate(30000.0 / 1001.0);
+  EXPECT_EQ(hvcc.GetAvgFrameRateRaw(), 7672);
+  hvcc.SetAvgFrameRate(240.0);
+  EXPECT_EQ(hvcc.GetAvgFrameRateRaw(), 61440);
+  // the largest representable rate is just under 256 fps
+  hvcc.SetAvgFrameRate(480.0);
+  EXPECT_EQ(hvcc.GetAvgFrameRateRaw(), UINT16_MAX);
 }
 } // namespace ISOBMFF

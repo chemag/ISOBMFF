@@ -71,7 +71,10 @@ class ISOBMFF_EXPORT HVCC : public Box, public DisplayableObjectContainer {
   uint8_t GetChromaFormatIDC() const;
   uint8_t GetBitDepthLumaMinus8() const;
   uint8_t GetBitDepthChromaMinus8() const;
-  uint16_t GetAvgFrameRate() const;
+  // avgFrameRate (in frames per 256 seconds; 0 is unspecified): the average
+  // frame rate, in frames per second
+  uint16_t GetAvgFrameRateRaw() const;
+  double GetAvgFrameRate() const;
   uint8_t GetConstantFrameRate() const;
   uint8_t GetNumTemporalLayers() const;
   uint8_t GetTemporalIdNested() const;
@@ -89,7 +92,8 @@ class ISOBMFF_EXPORT HVCC : public Box, public DisplayableObjectContainer {
   void SetChromaFormatIDC(uint8_t value);
   void SetBitDepthLumaMinus8(uint8_t value);
   void SetBitDepthChromaMinus8(uint8_t value);
-  void SetAvgFrameRate(uint16_t value);
+  void SetAvgFrameRateRaw(uint16_t value);
+  void SetAvgFrameRate(double value);
   void SetConstantFrameRate(uint8_t value);
   void SetNumTemporalLayers(uint8_t value);
   void SetTemporalIdNested(uint8_t value);
