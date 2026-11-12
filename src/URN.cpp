@@ -29,6 +29,8 @@
  */
 
 #include <URN.hpp>
+#include <string>
+#include <vector>
 
 namespace ISOBMFF {
 class URN::IMPL {
@@ -36,7 +38,28 @@ class URN::IMPL {
   IMPL();
   IMPL(const IMPL& o);
   ~IMPL();
+
+  std::string _name;
+  std::string _location;
 };
+
+namespace {
+// Reads the utf8string fields left in the box: each one ends at a NUL byte
+// or at the end of the box. Some writers leave out the last NUL, so a
+// string that runs into the end of the box is kept rather than rejected.
+std::vector<std::string> ReadStrings(BinaryStream& stream, size_t count) {
+  std::vector<std::string> strings;
+  while (strings.size() < count && stream.HasBytesAvailable()) {
+    std::string value;
+    uint8_t c = 0;
+    while (stream.HasBytesAvailable() && !stream.ReadUInt8(c) && c != 0) {
+      value.append(1, static_cast<char>(c));
+    }
+    strings.push_back(value);
+  }
+  return strings;
+}
+}  // namespace
 
 URN::URN() : FullBox("urn "), impl(std::make_unique<IMPL>()) {}
 
@@ -62,9 +85,43 @@ void swap(URN& o1, URN& o2) {
   swap(o1.impl, o2.impl);
 }
 
+Error URN::ReadData(Parser& parser, BinaryStream& stream) {
+  Error err = FullBox::ReadData(parser, stream);
+  if (err) return err;
+
+  // ISO/IEC 14496-12:2026, section 8.7.2.3: "name is a URN, and is
+  // required in a URN entry", and location "is required in a URL entry and
+  // optional in a URN entry". A missing string is left empty.
+  std::vector<std::string> strings = ReadStrings(stream, 2);
+  this->SetURNName(strings.size() > 0 ? strings[0] : "");
+  this->SetLocation(strings.size() > 1 ? strings[1] : "");
+
+  return Error();
+}
+
+std::vector<std::pair<std::string, std::string> >
+URN::GetDisplayableProperties() const {
+  auto props(FullBox::GetDisplayableProperties());
+
+  props.push_back({"Name", this->GetURNName()});
+  props.push_back({"Location", this->GetLocation()});
+
+  return props;
+}
+
+std::string URN::GetURNName() const { return this->impl->_name; }
+
+std::string URN::GetLocation() const { return this->impl->_location; }
+
+void URN::SetURNName(const std::string& value) { this->impl->_name = value; }
+
+void URN::SetLocation(const std::string& value) {
+  this->impl->_location = value;
+}
+
 URN::IMPL::IMPL() {}
 
-URN::IMPL::IMPL(const IMPL& o) { (void)o; }
+URN::IMPL::IMPL(const IMPL& o) : _name(o._name), _location(o._location) {}
 
 URN::IMPL::~IMPL() {}
 }  // namespace ISOBMFF

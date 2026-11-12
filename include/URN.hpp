@@ -35,8 +35,15 @@
 #include <Macros.hpp>
 #include <algorithm>
 #include <memory>
+#include <string>
+#include <utility>
+#include <vector>
 
 namespace ISOBMFF {
+// DataEntryUrnBox ("urn ", ISO/IEC 14496-12:2026, section 8.7.2):
+//   utf8string name;      // a URN, required
+//   utf8string location;  // a URL where the named resource can be found,
+//                         // optional
 class ISOBMFF_EXPORT URN : public FullBox {
  public:
   URN();
@@ -45,6 +52,18 @@ class ISOBMFF_EXPORT URN : public FullBox {
   virtual ~URN() override;
 
   URN& operator=(URN o);
+
+  Error ReadData(Parser& parser, BinaryStream& stream) override;
+  std::vector<std::pair<std::string, std::string> > GetDisplayableProperties()
+      const override;
+
+  // the name field. It is not called GetName(), which is the box type
+  // ("urn "), inherited from Box.
+  std::string GetURNName() const;
+  std::string GetLocation() const;
+
+  void SetURNName(const std::string& value);
+  void SetLocation(const std::string& value);
 
   ISOBMFF_EXPORT friend void swap(URN& o1, URN& o2);
 
