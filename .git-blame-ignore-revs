@@ -1,0 +1,8 @@
+# Commits that only change formatting, for git blame to skip: blame shows
+# the commit before them for the lines they touched.
+#
+# GitHub's blame view reads this file. To use it locally, run once:
+#   git config blame.ignoreRevsFile .git-blame-ignore-revs
+
+# isobmff: apply Google style (clang-format) to the whole tree
+38409cde52dff734e9bf5290ba46edfca78b51ab
