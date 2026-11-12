@@ -15,8 +15,9 @@ This document tracks known gaps in the isobmff fork.
 | Section | Item                                             | Status       |
 |---------|--------------------------------------------------|--------------|
 | 2       | URN does not parse name and location             | actionable   |
-| 3       | Field names that do not match the specification  | actionable   |
-| 4       | Resolved                                         | for reference|
+| 3       | Field semantics that do not match the spec       | actionable   |
+| 4       | Apply Google style to the whole tree             | actionable   |
+| 5       | Resolved                                         | for reference|
 
 
 # 2. URN does not parse name and location
@@ -29,30 +30,41 @@ so a file that references its media through a URN loses that reference.
 `test/URN_unittest.cpp` documents the current behavior.
 
 
-# 3. Field names that do not match the specification
+# 3. Field semantics that do not match the spec
 
-Status: actionable, not started.
+Status: actionable, two items left.
 
-STTS called its per-entry `sample_delta` field `sample_offset`
-(`GetSampleOffset()`), which is the name of the CTTS field (the composition
-offset, PTS - DTS). That made stts read like it held offsets, and it was
-fixed in d0985ed (`GetSampleDelta()`). Look for other boxes with the same
-kind of problem.
+The field names now match the specifications, and the fixed-point fields
+have raw and derived getters (see "Resolved"). Left:
 
-Steps:
+* `IROT::GetAngle()` returns the raw 2-bit `angle` field (0..3), which
+  means angle * 90 degrees anti-clockwise. The value is right; document it
+  in the header (or add a derived getter in degrees).
+* `AVCC` does not parse the AVCDecoderConfigurationRecord fields that
+  follow the PPSs for profiles other than 66, 77 and 88 (`chroma_format`,
+  `bit_depth_luma_minus8`, `bit_depth_chroma_minus8`, and the SPS
+  extension NAL units). They are missing, not misnamed.
 
-* compare each box's getters, setters, members and dump labels with the
-  field names in its ISO/IEC 14496-12 (or codec binding) syntax.
-* check the semantics too, not just the names: signedness that changes
-  with the box version (CTTS's sample_offset is signed in version 1),
-  units (media vs movie timescale), and fixed-point values exposed raw
-  (e.g. 16.16 or 2.30).
-* rename to the specification's names. A rename changes the public API,
-  so update liblcvm, the one known user, in the same change as the
-  submodule bump that brings it in.
+Decided, no change: `CTTS` reads `sample_offset` as signed in both
+versions, although version 0 declares it unsigned, because Apple MOV
+files announce version 0 with negative offsets.
 
 
-# 4. Resolved
+# 4. Apply Google style to the whole tree
+
+Status: actionable, small.
+
+The fork is too far from upstream (DigiDNA/ISOBMFF) to keep its original
+formatting for easier merges. New and changed code is formatted with
+`clang-format -style=google`, but much of the tree is not: around v0.19,
+26 of the 192 files under src/, include/, test/ and tools/ change when
+reformatted. Make a one-off commit that runs `clang-format -i
+-style=google` over the whole tree (and adds a `.clang-format` with
+`BasedOnStyle: Google`), with no other change, so that later diffs only
+show real changes.
+
+
+# 5. Resolved
 
 * unit tests and fuzzers for every registered box. When this list was
   started, 22 of the 47 registered boxes lacked a unit test, a fuzzer, or
@@ -63,3 +75,17 @@ Steps:
   no unit test or fuzzer creating it. Writing the tests found a parser bug:
   infe version 2/3 did not read `item_name`, and required the optional
   `content_encoding`.
+* field names that did not match the specifications (and fixed-point
+  fields exposed raw). STTS called `sample_delta` `sample_offset` (the
+  ctts field name). Renamed to the specification names: ImageGrid
+  `rows_minus_one`/`columns_minus_one` (GetRows() returned rows minus
+  one), ISPE `image_width`/`image_height` (was "display" width and
+  height), HVCC `chroma_format_idc`, and ELST `edit_duration` (renamed
+  from `segment_duration` in ISO/IEC 14496-12:2022). Fixed-point fields
+  now have a `Get<Field>Raw()` getter with the spec's type and
+  signedness, and a `Get<Field>()` getter returning a double: MVHD rate
+  and volume, TKHD volume, width and height, ELST media rate, visual
+  sample entry horizresolution and vertresolution, audio sample entry
+  samplerate, DOPS OutputGain and HVCC avgFrameRate. Matrix values are
+  doubles (16.16, and 2.30 for u, v and w); they used to read negative
+  values (rotations) as large unsigned numbers.
