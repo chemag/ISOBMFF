@@ -73,6 +73,7 @@
 #include <SCHM.hpp>
 #include <STSD.hpp>
 #include <STSS.hpp>
+#include <STSZ.hpp>
 #include <STTS.hpp>
 #include <THMB.hpp>
 #include <TKHD.hpp>
@@ -387,6 +388,9 @@ void Parser::IMPL::RegisterDefaultBoxes() {
   });
   this->RegisterBox("stss", [=]() -> std::shared_ptr<Box> {
     return std::make_shared<STSS>();
+  });
+  this->RegisterBox("stsz", [=]() -> std::shared_ptr<Box> {
+    return std::make_shared<STSZ>();
   });
   this->RegisterBox("stts", [=]() -> std::shared_ptr<Box> {
     return std::make_shared<STTS>();

@@ -66,6 +66,7 @@ add_library(isobmff
     SingleItemTypeReferenceBox.cpp
     STSD.cpp
     STSS.cpp
+    STSZ.cpp
     STTS.cpp
     THMB.cpp
     TKHD.cpp

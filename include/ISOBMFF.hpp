@@ -86,6 +86,7 @@
 #include <SCHM.hpp>
 #include <STSD.hpp>
 #include <STSS.hpp>
+#include <STSZ.hpp>
 #include <STTS.hpp>
 #include <SingleItemTypeReferenceBox.hpp>
 #include <THMB.hpp>
