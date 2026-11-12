@@ -52,5 +52,42 @@ TEST_F(ISOBMFFURLTest, TestURLParser) {
   // Validate version and flags
   EXPECT_EQ(url->GetVersion(), 0);
   EXPECT_EQ(url->GetFlags(), 0x00000001);
+  // self-contained: no location string
+  EXPECT_EQ(url->GetLocation(), "");
+}
+
+// A url box that points to another file: its location is kept.
+TEST_F(ISOBMFFURLTest, TestURLParserLocation) {
+  // fuzzer::conv: data
+  const std::vector<uint8_t>& buffer = {
+      // clang-format off
+      // version = 0, flags = 0 (media data in another file)
+      0x00, 0x00, 0x00, 0x00,
+      // location = "file:a.mp4"
+      0x66, 0x69, 0x6c, 0x65, 0x3a, 0x61, 0x2e, 0x6d,
+      0x70, 0x34, 0x00
+      // clang-format on
+  };
+
+  // fuzzer::conv: begin
+  ISOBMFF::BinaryDataStream stream(buffer);
+  ISOBMFF::Parser parser;
+  std::shared_ptr<ISOBMFF::Box> box = parser.CreateBox("url ");
+
+  ISOBMFF::Error error;
+  if (box != nullptr) {
+    error = box->ReadData(parser, stream);
+  }
+  if (error) {
+    fprintf(stderr, "Parse error: %s\n", error.GetMessage().c_str());
+  }
+  // fuzzer::conv: end
+
+  EXPECT_FALSE(error);
+
+  auto url = std::dynamic_pointer_cast<ISOBMFF::URL>(box);
+  ASSERT_NE(url, nullptr) << "Failed to cast to URL";
+  EXPECT_EQ(url->GetFlags(), 0u);
+  EXPECT_EQ(url->GetLocation(), "file:a.mp4");
 }
 }  // namespace ISOBMFF

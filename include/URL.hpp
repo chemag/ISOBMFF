@@ -35,8 +35,14 @@
 #include <Macros.hpp>
 #include <algorithm>
 #include <memory>
+#include <string>
+#include <utility>
+#include <vector>
 
 namespace ISOBMFF {
+// DataEntryUrlBox ("url ", ISO/IEC 14496-12:2026, section 8.7.2):
+//   utf8string location;  // a URL, absent when flags & 1 (the media data is
+//                         // in this file)
 class ISOBMFF_EXPORT URL : public FullBox {
  public:
   URL();
@@ -45,6 +51,14 @@ class ISOBMFF_EXPORT URL : public FullBox {
   virtual ~URL() override;
 
   URL& operator=(URL o);
+
+  Error ReadData(Parser& parser, BinaryStream& stream) override;
+  std::vector<std::pair<std::string, std::string> > GetDisplayableProperties()
+      const override;
+
+  std::string GetLocation() const;
+
+  void SetLocation(const std::string& value);
 
   ISOBMFF_EXPORT friend void swap(URL& o1, URL& o2);
 
