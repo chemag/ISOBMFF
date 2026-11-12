@@ -28,32 +28,33 @@
  * @author      Jean-David Gadina - www.digidna.net
  */
 
+#include <FixedPoint.hpp>
 #include <Matrix.hpp>
 
 namespace ISOBMFF {
 class Matrix::IMPL {
  public:
   IMPL();
-  IMPL(uint32_t a, uint32_t b, uint32_t u, uint32_t c, uint32_t d, uint32_t v,
-       uint32_t x, uint32_t y, uint32_t w);
+  IMPL(int32_t a, int32_t b, int32_t u, int32_t c, int32_t d, int32_t v,
+       int32_t x, int32_t y, int32_t w);
   IMPL(const IMPL& o);
   ~IMPL();
 
-  uint32_t _a;
-  uint32_t _b;
-  uint32_t _u;
-  uint32_t _c;
-  uint32_t _d;
-  uint32_t _v;
-  uint32_t _x;
-  uint32_t _y;
-  uint32_t _w;
+  int32_t _a;
+  int32_t _b;
+  int32_t _u;
+  int32_t _c;
+  int32_t _d;
+  int32_t _v;
+  int32_t _x;
+  int32_t _y;
+  int32_t _w;
 };
 
 Matrix::Matrix() : impl(std::make_unique<IMPL>()) {}
 
-Matrix::Matrix(uint32_t a, uint32_t b, uint32_t u, uint32_t c, uint32_t d,
-               uint32_t v, uint32_t x, uint32_t y, uint32_t w)
+Matrix::Matrix(int32_t a, int32_t b, int32_t u, int32_t c, int32_t d, int32_t v,
+               int32_t x, int32_t y, int32_t w)
     : impl(std::make_unique<IMPL>(a, b, u, c, d, v, x, y, w)) {}
 
 Matrix::Matrix(const Matrix& o) : impl(std::make_unique<IMPL>(*(o.impl))) {}
@@ -78,41 +79,59 @@ void swap(Matrix& o1, Matrix& o2) {
 
 std::string Matrix::GetName() const { return "Matrix"; }
 
-uint32_t Matrix::GetA() const { return this->impl->_a; }
+double Matrix::GetA() const { return FixedPoint::ToDouble(this->impl->_a, 16); }
 
-uint32_t Matrix::GetB() const { return this->impl->_b; }
+double Matrix::GetB() const { return FixedPoint::ToDouble(this->impl->_b, 16); }
 
-uint32_t Matrix::GetU() const { return this->impl->_u; }
+double Matrix::GetU() const { return FixedPoint::ToDouble(this->impl->_u, 30); }
 
-uint32_t Matrix::GetC() const { return this->impl->_c; }
+double Matrix::GetC() const { return FixedPoint::ToDouble(this->impl->_c, 16); }
 
-uint32_t Matrix::GetD() const { return this->impl->_d; }
+double Matrix::GetD() const { return FixedPoint::ToDouble(this->impl->_d, 16); }
 
-uint32_t Matrix::GetV() const { return this->impl->_v; }
+double Matrix::GetV() const { return FixedPoint::ToDouble(this->impl->_v, 30); }
 
-uint32_t Matrix::GetX() const { return this->impl->_x; }
+double Matrix::GetX() const { return FixedPoint::ToDouble(this->impl->_x, 16); }
 
-uint32_t Matrix::GetY() const { return this->impl->_y; }
+double Matrix::GetY() const { return FixedPoint::ToDouble(this->impl->_y, 16); }
 
-uint32_t Matrix::GetW() const { return this->impl->_w; }
+double Matrix::GetW() const { return FixedPoint::ToDouble(this->impl->_w, 30); }
 
-void Matrix::SetA(uint32_t value) { this->impl->_a = value; }
+void Matrix::SetA(double value) {
+  this->impl->_a = FixedPoint::FromDouble<int32_t>(value, 16);
+}
 
-void Matrix::SetB(uint32_t value) { this->impl->_b = value; }
+void Matrix::SetB(double value) {
+  this->impl->_b = FixedPoint::FromDouble<int32_t>(value, 16);
+}
 
-void Matrix::SetU(uint32_t value) { this->impl->_u = value; }
+void Matrix::SetU(double value) {
+  this->impl->_u = FixedPoint::FromDouble<int32_t>(value, 30);
+}
 
-void Matrix::SetC(uint32_t value) { this->impl->_c = value; }
+void Matrix::SetC(double value) {
+  this->impl->_c = FixedPoint::FromDouble<int32_t>(value, 16);
+}
 
-void Matrix::SetD(uint32_t value) { this->impl->_d = value; }
+void Matrix::SetD(double value) {
+  this->impl->_d = FixedPoint::FromDouble<int32_t>(value, 16);
+}
 
-void Matrix::SetV(uint32_t value) { this->impl->_v = value; }
+void Matrix::SetV(double value) {
+  this->impl->_v = FixedPoint::FromDouble<int32_t>(value, 30);
+}
 
-void Matrix::SetX(uint32_t value) { this->impl->_x = value; }
+void Matrix::SetX(double value) {
+  this->impl->_x = FixedPoint::FromDouble<int32_t>(value, 16);
+}
 
-void Matrix::SetY(uint32_t value) { this->impl->_y = value; }
+void Matrix::SetY(double value) {
+  this->impl->_y = FixedPoint::FromDouble<int32_t>(value, 16);
+}
 
-void Matrix::SetW(uint32_t value) { this->impl->_w = value; }
+void Matrix::SetW(double value) {
+  this->impl->_w = FixedPoint::FromDouble<int32_t>(value, 30);
+}
 
 void Matrix::WriteDescription(std::ostream& os, std::size_t indentLevel) const {
   std::string i(indentLevel * 4, ' ');
@@ -137,8 +156,8 @@ Matrix::GetDisplayableProperties() const {
 
 Matrix::IMPL::IMPL() : IMPL(0, 0, 0, 0, 0, 0, 0, 0, 0) {}
 
-Matrix::IMPL::IMPL(uint32_t a, uint32_t b, uint32_t u, uint32_t c, uint32_t d,
-                   uint32_t v, uint32_t x, uint32_t y, uint32_t w)
+Matrix::IMPL::IMPL(int32_t a, int32_t b, int32_t u, int32_t c, int32_t d,
+                   int32_t v, int32_t x, int32_t y, int32_t w)
     : _a(a), _b(b), _u(u), _c(c), _d(d), _v(v), _x(x), _y(y), _w(w) {}
 
 Matrix::IMPL::IMPL(const IMPL& o)

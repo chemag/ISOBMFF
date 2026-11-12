@@ -41,6 +41,11 @@ namespace ISOBMFF {
 /*!
  * @class       Matrix
  * @abstract    Represents a transformation of video images for presentation.
+ * @discussion  ISO/IEC 14496-12:2026, section 7.3.2: "All the values in a
+ *              matrix are stored as 16.16 fixed-point values, except for u, v
+ *              and w, which are stored as 2.30 fixed-point values." The
+ *              getters and setters take the values as doubles, which hold
+ *              every stored value exactly.
  */
 class ISOBMFF_EXPORT Matrix : public DisplayableObject {
  public:
@@ -52,19 +57,22 @@ class ISOBMFF_EXPORT Matrix : public DisplayableObject {
 
   /*!
    * @function    Matrix
-   * @abstract    Creates a Matrix object.
-   * @param       a   The matrix A coordinate.
-   * @param       b   The matrix B coordinate.
-   * @param       u   The matrix U coordinate.
-   * @param       c   The matrix C coordinate.
-   * @param       d   The matrix D coordinate.
-   * @param       v   The matrix V coordinate.
-   * @param       x   The matrix X coordinate.
-   * @param       y   The matrix Y coordinate.
-   * @param       w   The matrix W coordinate.
+   * @abstract    Creates a Matrix object from the values stored in the file
+   *              (template int(32) matrix[9], in the order {a,b,u, c,d,v,
+   *              x,y,w}): a, b, c, d, x and y as 16.16 fixed point, and u, v
+   *              and w as 2.30 fixed point.
+   * @param       a   The matrix A coordinate (16.16).
+   * @param       b   The matrix B coordinate (16.16).
+   * @param       u   The matrix U coordinate (2.30).
+   * @param       c   The matrix C coordinate (16.16).
+   * @param       d   The matrix D coordinate (16.16).
+   * @param       v   The matrix V coordinate (2.30).
+   * @param       x   The matrix X coordinate (16.16).
+   * @param       y   The matrix Y coordinate (16.16).
+   * @param       w   The matrix W coordinate (2.30).
    */
-  Matrix(uint32_t a, uint32_t b, uint32_t u, uint32_t c, uint32_t d, uint32_t v,
-         uint32_t x, uint32_t y, uint32_t w);
+  Matrix(int32_t a, int32_t b, int32_t u, int32_t c, int32_t d, int32_t v,
+         int32_t x, int32_t y, int32_t w);
 
   /*!
    * @function    Matrix
@@ -104,128 +112,137 @@ class ISOBMFF_EXPORT Matrix : public DisplayableObject {
   /*!
    * @function    GetA
    * @abstract    Gets the matrix A coordinate.
-   * @result      The matrix A coordinate.
+   * @result      The matrix A coordinate (stored as 16.16 fixed point).
    */
-  uint32_t GetA() const;
+  double GetA() const;
 
   /*!
    * @function    GetB
    * @abstract    Gets the matrix B coordinate.
-   * @result      The matrix B coordinate.
+   * @result      The matrix B coordinate (stored as 16.16 fixed point).
    */
-  uint32_t GetB() const;
+  double GetB() const;
 
   /*!
    * @function    GetU
    * @abstract    Gets the matrix U coordinate.
-   * @result      The matrix U coordinate.
+   * @result      The matrix U coordinate (stored as 2.30 fixed point).
    */
-  uint32_t GetU() const;
+  double GetU() const;
 
   /*!
    * @function    GetC
    * @abstract    Gets the matrix C coordinate.
-   * @result      The matrix C coordinate.
+   * @result      The matrix C coordinate (stored as 16.16 fixed point).
    */
-  uint32_t GetC() const;
+  double GetC() const;
 
   /*!
    * @function    GetD
    * @abstract    Gets the matrix D coordinate.
-   * @result      The matrix D coordinate.
+   * @result      The matrix D coordinate (stored as 16.16 fixed point).
    */
-  uint32_t GetD() const;
+  double GetD() const;
 
   /*!
    * @function    GetV
    * @abstract    Gets the matrix V coordinate.
-   * @result      The matrix V coordinate.
+   * @result      The matrix V coordinate (stored as 2.30 fixed point).
    */
-  uint32_t GetV() const;
+  double GetV() const;
 
   /*!
    * @function    GetX
    * @abstract    Gets the matrix X coordinate.
-   * @result      The matrix X coordinate.
+   * @result      The matrix X coordinate (stored as 16.16 fixed point).
    */
-  uint32_t GetX() const;
+  double GetX() const;
 
   /*!
    * @function    GetY
    * @abstract    Gets the matrix Y coordinate.
-   * @result      The matrix Y coordinate.
+   * @result      The matrix Y coordinate (stored as 16.16 fixed point).
    */
-  uint32_t GetY() const;
+  double GetY() const;
 
   /*!
    * @function    GetW
    * @abstract    Gets the matrix W coordinate.
-   * @result      The matrix W coordinate.
+   * @result      The matrix W coordinate (stored as 2.30 fixed point).
    */
-  uint32_t GetW() const;
+  double GetW() const;
 
   /*!
    * @function    SetA
    * @abstract    Sets the matrix A coordinate.
-   * @param       value   The matrix A coordinate to set.
+   * @param       value   The matrix A coordinate to set (stored as 16.16
+   *                      fixed point, rounded and saturated).
    */
-  void SetA(uint32_t value);
+  void SetA(double value);
 
   /*!
-   * @function    SetWB
+   * @function    SetB
    * @abstract    Sets the matrix B coordinate.
-   * @param       value   The matrix B coordinate to set.
+   * @param       value   The matrix B coordinate to set (stored as 16.16
+   *                      fixed point, rounded and saturated).
    */
-  void SetB(uint32_t value);
+  void SetB(double value);
 
   /*!
    * @function    SetU
    * @abstract    Sets the matrix U coordinate.
-   * @param       value   The matrix U coordinate to set.
+   * @param       value   The matrix U coordinate to set (stored as 2.30
+   *                      fixed point, rounded and saturated).
    */
-  void SetU(uint32_t value);
+  void SetU(double value);
 
   /*!
    * @function    SetC
    * @abstract    Sets the matrix C coordinate.
-   * @param       value   The matrix C coordinate to set.
+   * @param       value   The matrix C coordinate to set (stored as 16.16
+   *                      fixed point, rounded and saturated).
    */
-  void SetC(uint32_t value);
+  void SetC(double value);
 
   /*!
    * @function    SetD
    * @abstract    Sets the matrix D coordinate.
-   * @param       value   The matrix D coordinate to set.
+   * @param       value   The matrix D coordinate to set (stored as 16.16
+   *                      fixed point, rounded and saturated).
    */
-  void SetD(uint32_t value);
+  void SetD(double value);
 
   /*!
    * @function    SetV
    * @abstract    Sets the matrix V coordinate.
-   * @param       value   The matrix V coordinate to set.
+   * @param       value   The matrix V coordinate to set (stored as 2.30
+   *                      fixed point, rounded and saturated).
    */
-  void SetV(uint32_t value);
+  void SetV(double value);
 
   /*!
    * @function    SetX
    * @abstract    Sets the matrix X coordinate.
-   * @param       value   The matrix X coordinate to set.
+   * @param       value   The matrix X coordinate to set (stored as 16.16
+   *                      fixed point, rounded and saturated).
    */
-  void SetX(uint32_t value);
+  void SetX(double value);
 
   /*!
    * @function    SetY
    * @abstract    Sets the matrix Y coordinate.
-   * @param       value   The matrix Y coordinate to set.
+   * @param       value   The matrix Y coordinate to set (stored as 16.16
+   *                      fixed point, rounded and saturated).
    */
-  void SetY(uint32_t value);
+  void SetY(double value);
 
   /*!
    * @function    SetW
    * @abstract    Sets the matrix W coordinate.
-   * @param       value   The matrix W coordinate to set.
+   * @param       value   The matrix W coordinate to set (stored as 2.30
+   *                      fixed point, rounded and saturated).
    */
-  void SetW(uint32_t value);
+  void SetW(double value);
 
   /*!
    * @function    WriteDescription

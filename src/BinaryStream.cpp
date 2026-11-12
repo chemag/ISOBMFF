@@ -470,7 +470,11 @@ Error BinaryStream::ReadMatrix(Matrix& value) {
   if ((err = this->ReadBigEndianUInt32(ty))) return err;
   if ((err = this->ReadBigEndianUInt32(w))) return err;
 
-  value = Matrix(a, b, u, c, d, v, tx, ty, w);
+  value = Matrix(static_cast<int32_t>(a), static_cast<int32_t>(b),
+                 static_cast<int32_t>(u), static_cast<int32_t>(c),
+                 static_cast<int32_t>(d), static_cast<int32_t>(v),
+                 static_cast<int32_t>(tx), static_cast<int32_t>(ty),
+                 static_cast<int32_t>(w));
   return Error();
 }
 }  // namespace ISOBMFF
