@@ -15,9 +15,8 @@ This document tracks known gaps in the isobmff fork.
 | Section | Item                                             | Status       |
 |---------|--------------------------------------------------|--------------|
 | 2       | URN does not parse name and location             | actionable   |
-| 3       | Field semantics that do not match the spec       | actionable   |
-| 4       | Apply Google style to the whole tree             | actionable   |
-| 5       | Resolved                                         | for reference|
+| 3       | Apply Google style to the whole tree             | actionable   |
+| 4       | Resolved                                         | for reference|
 
 
 # 2. URN does not parse name and location
@@ -30,27 +29,7 @@ so a file that references its media through a URN loses that reference.
 `test/URN_unittest.cpp` documents the current behavior.
 
 
-# 3. Field semantics that do not match the spec
-
-Status: actionable, two items left.
-
-The field names now match the specifications, and the fixed-point fields
-have raw and derived getters (see "Resolved"). Left:
-
-* `IROT::GetAngle()` returns the raw 2-bit `angle` field (0..3), which
-  means angle * 90 degrees anti-clockwise. The value is right; document it
-  in the header (or add a derived getter in degrees).
-* `AVCC` does not parse the AVCDecoderConfigurationRecord fields that
-  follow the PPSs for profiles other than 66, 77 and 88 (`chroma_format`,
-  `bit_depth_luma_minus8`, `bit_depth_chroma_minus8`, and the SPS
-  extension NAL units). They are missing, not misnamed.
-
-Decided, no change: `CTTS` reads `sample_offset` as signed in both
-versions, although version 0 declares it unsigned, because Apple MOV
-files announce version 0 with negative offsets.
-
-
-# 4. Apply Google style to the whole tree
+# 3. Apply Google style to the whole tree
 
 Status: actionable, small.
 
@@ -64,7 +43,7 @@ reformatted. Make a one-off commit that runs `clang-format -i
 show real changes.
 
 
-# 5. Resolved
+# 4. Resolved
 
 * unit tests and fuzzers for every registered box. When this list was
   started, 22 of the 47 registered boxes lacked a unit test, a fuzzer, or
@@ -89,3 +68,10 @@ show real changes.
   samplerate, DOPS OutputGain and HVCC avgFrameRate. Matrix values are
   doubles (16.16, and 2.30 for u, v and w); they used to read negative
   values (rotations) as large unsigned numbers.
+* field semantics: IROT has `GetAngleRaw()` (the 2-bit field, 0..3) and
+  `GetAngle()` in degrees, and AVCC parses the optional High profile
+  fields (`chroma_format`, `bit_depth_luma_minus8`,
+  `bit_depth_chroma_minus8`, and the SPS extension NAL units), which it
+  used to drop. CTTS still reads `sample_offset` as signed in both
+  versions, although version 0 declares it unsigned, because Apple MOV
+  files announce version 0 with negative offsets (decided, no change).
